@@ -29,7 +29,7 @@ Restart your terminal after installation.
 ### 2. Clone This Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/nix-darwin.git ~/.config/nix-darwin
+git clone https://github.com/mattrobenolt/nix-darwin.git ~/.config/nix-darwin
 cd ~/.config/nix-darwin
 ```
 
