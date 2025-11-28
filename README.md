@@ -1,18 +1,38 @@
-# Matt's nix-darwin Configuration
+# Matt's Multi-Platform Nix Configuration
 
-Declarative macOS system configuration using [nix-darwin](https://github.com/LnL7/nix-darwin) and [home-manager](https://github.com/nix-community/home-manager).
+Declarative system configuration for macOS (via [nix-darwin](https://github.com/LnL7/nix-darwin)) and Linux (via [NixOS](https://nixos.org/)), with user environment management via [home-manager](https://github.com/nix-community/home-manager).
+
+## Repository Structure
+
+```
+~/.config/nix-darwin/
+├── flake.nix                    # Main flake file, defines all machines
+├── common.nix                   # Shared config across all machines
+├── home.nix                     # Shared home-manager config
+├── hosts/
+│   ├── darwin/                  # macOS-specific hosts
+│   │   └── work.nix            # Work MacBook Pro
+│   └── nixos/                   # Linux-specific hosts
+│       └── example.nix         # NixOS template
+└── README.md
+```
 
 ## What's Configured
 
-### System (nix-darwin)
-- **macOS System Settings**: Dock, Finder, trackpad, keyboard preferences
-- **System Packages**: Development tools and CLI utilities
-- **Homebrew Integration**: GUI apps and special packages
-- **DNS Management**: Local coredns with automatic enforcement
-- **Security**: Touch ID for sudo, extended sudo timeout (24 hours)
-- **Networking**: Hostname, DNS servers, search domains
+### Shared Config (common.nix)
+- **Core CLI Tools**: git, neovim, bat, eza, ripgrep, fd, etc.
+- **Shell Tools**: zsh, starship, atuin, direnv, fzf, zoxide
+- **Development**: Go, Node.js, Python, Nix tooling
+- **Utilities**: tmux, zellij, btop, htop, network tools
 
-### User (home-manager)
+### macOS Specific (hosts/darwin/work.nix)
+- **macOS System Settings**: Dock, Finder, trackpad, keyboard
+- **Work Packages**: kubectl, terraform, argocd, cloud tools
+- **Homebrew Integration**: GUI apps and macOS-specific tools
+- **DNS Management**: Local coredns with automatic enforcement
+- **Security**: Touch ID for sudo, 24-hour sudo timeout
+
+### User Config (home-manager)
 - Shell configuration (zsh)
 - User dotfiles (gradually migrating)
 
@@ -64,6 +84,73 @@ Enter your password when prompted.
 ### 6. Restart Terminal
 
 Quit and reopen your terminal for all changes to take effect.
+
+---
+
+## Adding New Machines
+
+### Adding a macOS Machine
+
+1. Copy an existing host config:
+   ```bash
+   cp hosts/darwin/work.nix hosts/darwin/personal.nix
+   ```
+
+2. Edit the new config with machine-specific settings:
+   - Change `networking.hostName` and `networking.computerName`
+   - Adjust packages, Homebrew casks, system settings
+   - Modify DNS/networking as needed
+
+3. Add the new configuration to `flake.nix`:
+   ```nix
+   darwinConfigurations."Matts-Personal" = nix-darwin.lib.darwinSystem {
+     modules = [
+       ./common.nix
+       ./hosts/darwin/personal.nix
+       { system.configurationRevision = self.rev or self.dirtyRev or null; }
+       home-manager.darwinModules.home-manager
+       { home-manager.users.matt = import ./home.nix; }
+     ];
+   };
+   ```
+
+4. Apply on the new machine:
+   ```bash
+   darwin-rebuild switch --flake ~/.config/nix-darwin#Matts-Personal
+   ```
+
+### Adding a NixOS Machine
+
+1. Install NixOS and generate hardware config:
+   ```bash
+   nixos-generate-config --root /mnt
+   # Copy /mnt/etc/nixos/hardware-configuration.nix to your repo
+   ```
+
+2. Create your host config:
+   ```bash
+   cp hosts/nixos/example.nix hosts/nixos/myserver.nix
+   # Edit with your settings
+   ```
+
+3. Add to `flake.nix`:
+   ```nix
+   nixosConfigurations."myserver" = nixpkgs.lib.nixosSystem {
+     system = "x86_64-linux";
+     modules = [
+       ./common.nix
+       ./hosts/nixos/myserver.nix
+       ./hosts/nixos/myserver-hardware.nix
+       home-manager.nixosModules.home-manager
+       { home-manager.users.matt = import ./home.nix; }
+     ];
+   };
+   ```
+
+4. Apply:
+   ```bash
+   sudo nixos-rebuild switch --flake ~/.config/nix-darwin#myserver
+   ```
 
 ---
 
