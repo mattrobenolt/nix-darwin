@@ -273,9 +273,9 @@
             Defaults timestamp_timeout=1440
           '';
 
-          # Enable fish shell integration
-          # This sets up PATH and nix-darwin environment in fish
-          programs.fish.enable = true;
+          # Enable zsh shell integration
+          # This sets up PATH and nix-darwin environment in zsh
+          programs.zsh.enable = true;
 
           # Set Git commit hash for darwin-version.
           system.configurationRevision = self.rev or self.dirtyRev or null;
