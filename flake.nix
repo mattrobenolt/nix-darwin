@@ -12,7 +12,6 @@
   outputs =
     {
       self,
-      nixpkgs,
       nix-darwin,
       home-manager,
       ...
@@ -40,9 +39,11 @@
             # home-manager integration
             home-manager.darwinModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.matt = import ./home.nix;
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.matt = import ./home.nix;
+              };
             }
           ];
         };

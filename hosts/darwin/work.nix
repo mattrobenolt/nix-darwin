@@ -3,7 +3,6 @@
 {
   # Work MacBook Pro specific configuration
 
-  # System packages (original list from flake.nix)
   environment.systemPackages = with pkgs; [
     _1password-cli
     aerc
@@ -128,9 +127,6 @@
     zsh
   ];
 
-  # Set the primary user for user-specific options like Homebrew
-  system.primaryUser = "matt";
-
   # Homebrew integration (macOS GUI apps)
   homebrew = {
     enable = true;
@@ -146,50 +142,43 @@
       "sst/tap"
     ];
 
-    # Work-specific CLI tools (not in nixpkgs or need specific versions)
     brews = [
       "sst/tap/opencode"
-      "coredns"      # Local DNS resolver
-      "syncthing"    # File sync
-      "tailscale"    # VPN/mesh network
+      "coredns"
+      "syncthing"
+      "tailscale"
     ];
 
-    # GUI applications (better macOS integration via Homebrew)
     casks = [
-      # AI tools
       "chatgpt"
       "claude"
-
-      # Fonts
       "font-hack"
       "font-hack-nerd-font"
       "font-inter"
       "font-jetbrains-mono-nerd-font"
       "font-symbols-only-nerd-font"
-
-      # Cloud tools
       "gcloud-cli"
-      "session-manager-plugin"
-
-      # Productivity
-      "raycast"
       "istat-menus"
-      "vanilla"
-
-      # Communication
       "messenger"
-
-      # Development
-      "orbstack"      # Docker/container alternative
-      "vibetunnel"
-
-      # Media
+      "orbstack"
       "plexamp"
+      "raycast"
+      "session-manager-plugin"
+      "vanilla"
+      "vibetunnel"
     ];
   };
 
-  # macOS System Settings
-  system.defaults = {
+  # System configuration
+  system = {
+    # Set the primary user for user-specific options like Homebrew
+    primaryUser = "matt";
+
+    # System metadata
+    stateVersion = 6;
+
+    # macOS System Settings
+    defaults = {
     dock = {
       autohide = true;
       orientation = "bottom";
@@ -201,7 +190,7 @@
       AppleShowAllExtensions = true;
       ShowPathbar = true;
       ShowStatusBar = false;
-      FXPreferredViewStyle = "clmv";  # Column view
+      FXPreferredViewStyle = "clmv"; # Column view
     };
 
     NSGlobalDomain = {
@@ -212,11 +201,12 @@
     };
 
     trackpad = {
-      Clicking = false;              # Tap to click disabled
+      Clicking = false; # Tap to click disabled
       TrackpadRightClick = true;
       TrackpadThreeFingerDrag = false;
     };
-  };
+  }; # end system.defaults
+  }; # end system
 
   # Networking configuration
   networking = {
@@ -245,7 +235,7 @@
     '';
     serviceConfig = {
       RunAtLoad = true;
-      StartInterval = 3600;  # Check every hour
+      StartInterval = 3600; # Check every hour
     };
   };
 
@@ -254,9 +244,6 @@
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=1440
   '';
-
-  # System metadata
-  system.stateVersion = 6;
 
   # Platform
   nixpkgs.hostPlatform = "aarch64-darwin";

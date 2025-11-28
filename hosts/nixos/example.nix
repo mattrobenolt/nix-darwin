@@ -1,23 +1,26 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   # Example NixOS configuration
   # Copy this file and customize for each NixOS machine
 
   # Enable nix flakes and command
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nix.enable = true;  # Override common.nix's false setting
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+  nix.enable = true; # Override common.nix's false setting
 
   # Bootloader (customize based on your system)
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Networking
-  networking.hostName = "nixos-example";  # Change this
+  networking.hostName = "nixos-example"; # Change this
   networking.networkmanager.enable = true;
 
   # Time zone
-  time.timeZone = "America/New_York";  # Change this
+  time.timeZone = "America/New_York"; # Change this
 
   # Internationalisation
   i18n.defaultLocale = "en_US.UTF-8";
@@ -37,12 +40,16 @@
   users.users.matt = {
     isNormalUser = true;
     description = "Matt";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+    ];
     shell = pkgs.zsh;
   };
 
   # Enable sudo with Touch ID equivalent (if supported hardware)
-  security.sudo.wheelNeedsPassword = false;  # or configure as needed
+  security.sudo.wheelNeedsPassword = false; # or configure as needed
 
   # Services
   services.openssh.enable = true;
@@ -59,5 +66,5 @@
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It's perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
-  system.stateVersion = "24.05";  # Did you read the comment?
+  system.stateVersion = "24.05"; # Did you read the comment?
 }

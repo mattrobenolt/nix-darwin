@@ -11,7 +11,7 @@
 
   # Nix configuration
   # Disable for Determinate Nix on macOS, enable for standard Nix/NixOS
-  nix.enable = false;  # Override this in NixOS hosts
+  nix.enable = false; # Override this in NixOS hosts
 
   # Allow unfree packages (VS Code, etc.)
   nixpkgs.config.allowUnfree = true;
