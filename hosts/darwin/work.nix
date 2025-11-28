@@ -14,43 +14,32 @@
     audacity
     automake
     awscli
-    bat
     bats
     btop
     buf
     bun
-    chafa
-    cilium-cli
     claude-code
     codex
     cowsay
     deadnix
     delta
     difftastic
-    direnv
     discord
     dust
     ec2-instance-selector
     entr
     etcd
-    eza
-    fastfetch
-    fd
     fish
-    foreman
     fortune
     fzf
     gh
-    git
     glow
     gnutar
     go
     golangci-lint
     graphviz
     grpcurl
-    helix
     hexyl
-    htop
     hwatch
     hyperfine
     image_optim
@@ -58,7 +47,6 @@
     jaq
     jinja2-cli
     jo
-    jq
     just
     kustomize
     lazygit
@@ -69,62 +57,48 @@
     mkcert
     mtr
     mycli
-    neovim
     nghttp2
     nil
-    nix-direnv
     nixd
     nixfmt-rfc-style
     nodejs
     nomad
-    nushell
     obsidian
     packer
     pandoc
     pgbouncer
     pgcli
-    pkg-config
     postgresql
     pscale
-    pstree
     pyright
     python3
-    ripgrep
     ruff
     scc
     scdoc
     sentry-cli
     shellcheck
     socat
-    starship
     statix
     swift-format
     tcping-rs
     telegram-desktop
-    terminal-notifier
     terraform
     terragrunt
     timg
-    tmux
-    upx
     utm
     uv
     vault
     vector
-    vim
     w3m
     watch
     watchexec
     weechat
-    wget
     wrk
     yazi
     yj
     yq
-    zellij
     zig
     zoxide
-    zsh
   ];
 
   # Homebrew integration (macOS GUI apps)
@@ -144,7 +118,7 @@
 
     brews = [
       "sst/tap/opencode"
-      "coredns"
+      "coredns" # nixpkgs version currently broken, keeping in Homebrew
       "syncthing"
       "tailscale"
     ];
@@ -179,33 +153,33 @@
 
     # macOS System Settings
     defaults = {
-    dock = {
-      autohide = true;
-      orientation = "bottom";
-      show-recents = false;
-      tilesize = 67;
-    };
+      dock = {
+        autohide = true;
+        orientation = "bottom";
+        show-recents = false;
+        tilesize = 67;
+      };
 
-    finder = {
-      AppleShowAllExtensions = true;
-      ShowPathbar = true;
-      ShowStatusBar = false;
-      FXPreferredViewStyle = "clmv"; # Column view
-    };
+      finder = {
+        AppleShowAllExtensions = true;
+        ShowPathbar = true;
+        ShowStatusBar = false;
+        FXPreferredViewStyle = "clmv"; # Column view
+      };
 
-    NSGlobalDomain = {
-      AppleInterfaceStyle = "Dark";
-      AppleShowAllExtensions = true;
-      InitialKeyRepeat = 15;
-      KeyRepeat = 1;
-    };
+      NSGlobalDomain = {
+        AppleInterfaceStyle = "Dark";
+        AppleShowAllExtensions = true;
+        InitialKeyRepeat = 15;
+        KeyRepeat = 1;
+      };
 
-    trackpad = {
-      Clicking = false; # Tap to click disabled
-      TrackpadRightClick = true;
-      TrackpadThreeFingerDrag = false;
-    };
-  }; # end system.defaults
+      trackpad = {
+        Clicking = false; # Tap to click disabled
+        TrackpadRightClick = true;
+        TrackpadThreeFingerDrag = false;
+      };
+    }; # end system.defaults
   }; # end system
 
   # Networking configuration
@@ -239,10 +213,18 @@
     };
   };
 
+  # CoreDNS configuration
+  # NOTE: coredns package in nixpkgs-unstable is currently broken
+  # Keeping it in Homebrew but version-controlling the Corefile here
+  # Corefile is in files/Corefile and symlinked to /opt/homebrew/etc/coredns/Corefile
+  # To update: edit files/Corefile, then run:
+  #   ln -sf ~/.config/nix-darwin/files/Corefile /opt/homebrew/etc/coredns/Corefile
+  #   brew services restart coredns
+
   # Security configuration
   security.pam.services.sudo_local.touchIdAuth = true;
   security.sudo.extraConfig = ''
-    Defaults timestamp_timeout=1440
+    Defaults timestamp_timeout=86400
   '';
 
   # Platform

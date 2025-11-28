@@ -1,0 +1,53 @@
+.:53 {
+  bind 127.0.0.1
+
+  forward . 192.168.2.100 tls://1.1.1.1 tls://1.0.0.1 {
+    tls_servername one.one.one.one
+    health_check 60s
+  }
+
+  #forward . tls://45.90.30.0 tls://45.90.28.0 {
+  #  tls_servername coredns-a9ac2c.dns.nextdns.io
+  #  health_check 60s
+  #}
+
+  hosts {
+    ttl 30
+    fallthrough
+  }
+
+  template ANY AAAA {
+    rcode NOERROR
+  }
+
+  cache
+  local
+  loadbalance
+  log . "{proto} {name} {type} {rcode} {duration}"
+}
+
+ts.net.:53 {
+  bind 127.0.0.1
+  forward . 100.100.100.100:53
+
+  hosts {
+    ttl 30
+    fallthrough
+  }
+
+  cache 30
+  log . "{proto} {name} {type} {rcode} {duration}"
+}
+
+svc.cluster.local.:53 {
+  bind 127.0.0.1
+
+  forward . 192.168.194.138:53 {
+    force_tcp
+    health_check 60s
+  }
+
+  cache
+  loadbalance
+  log . "{proto} {name} {type} {rcode} {duration}"
+}
