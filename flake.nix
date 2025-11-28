@@ -42,6 +42,7 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
+                backupFileExtension = "backup";
                 users.matt = import ./home.nix;
               };
             }

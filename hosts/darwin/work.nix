@@ -18,7 +18,6 @@
     _1password-cli
     aerc
     age
-    coredns
     appcleaner
     argocd
     asciinema
@@ -32,6 +31,7 @@
     bun
     claude-code
     codex
+    coredns
     cowsay
     deadnix
     delta
@@ -71,6 +71,7 @@
     nil
     nixd
     nixfmt-rfc-style
+    nixfmt-tree
     nodejs
     nomad
     obsidian

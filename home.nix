@@ -1,8 +1,13 @@
 { lib, ... }:
 
 {
-  # This is your home-manager configuration
-  # Start small and add more as you migrate your dotfiles
+  # Base home-manager configuration
+  # This file sets up the basic home-manager settings and imports machine-specific configs
+
+  imports = [
+    ./home-common.nix # Shared across all machines
+    ./hosts/darwin/home.nix # Darwin-specific config
+  ];
 
   # Home Manager needs a bit of information about you and the paths it should manage
   home = {
@@ -21,37 +26,4 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
-  # Starter configurations - these won't break your existing setup
-  # Uncomment and customize as you migrate
-
-  # programs.git = {
-  #   enable = true;
-  #   userName = "Matt";
-  #   userEmail = "your-email@example.com";
-  #   aliases = {
-  #     st = "status";
-  #     co = "checkout";
-  #     br = "branch";
-  #   };
-  #   extraConfig = {
-  #     init.defaultBranch = "main";
-  #     pull.rebase = true;
-  #   };
-  # };
-
-  # programs.fish = {
-  #   enable = true;
-  #   shellAliases = {
-  #     ll = "eza -la";
-  #     g = "git";
-  #   };
-  # };
-
-  # programs.starship = {
-  #   enable = true;
-  #   settings = {
-  #     # Your starship config here
-  #   };
-  # };
 }

@@ -36,4 +36,7 @@
 
   # Shell integration
   programs.zsh.enable = true;
+
+  # Default shell for user
+  users.users.matt.shell = pkgs.zsh;
 }

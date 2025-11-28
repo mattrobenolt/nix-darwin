@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Format all nix files using nixfmt-rfc-style
+# Format all nix files
 
 set -e
 
 cd "$(dirname "$0")/.."
 
 echo "Formatting nix files..."
-find . -name "*.nix" -type f -exec nixfmt {} \;
+treefmt .
 
 echo "✓ Formatting complete"

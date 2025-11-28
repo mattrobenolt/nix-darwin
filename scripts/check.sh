@@ -17,4 +17,4 @@ echo "=== Building ==="
 darwin-rebuild build --flake .
 
 echo ""
-echo "✓ All checks passed! Ready to commit."
+echo "✓ All checks passed!"

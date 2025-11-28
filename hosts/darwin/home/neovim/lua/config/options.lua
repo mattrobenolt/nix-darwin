@@ -1,0 +1,42 @@
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
+
+local opt = vim.opt
+
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+opt.autoindent = true
+opt.autowrite = true
+opt.backspace = "2"
+opt.clipboard = "unnamedplus"
+opt.encoding = "utf-8"
+opt.expandtab = true
+opt.fileformat = "unix"
+opt.grepformat = "%f:%l:%c:%m"
+opt.grepprg = "rg --vimgrep"
+opt.hlsearch = true
+opt.ignorecase = true
+opt.incsearch = true
+opt.list = true
+opt.listchars = "tab:> ,trail:-,space:·"
+opt.mouse = "a"
+opt.mousemoveevent = true
+opt.colorcolumn = "+1"
+opt.number = true
+opt.pumblend = 10
+opt.relativenumber = true
+opt.shiftwidth = 4
+opt.showmode = false
+opt.signcolumn = "yes"
+opt.smartcase = true
+opt.smoothscroll = true
+opt.splitbelow = true
+opt.splitright = true
+opt.tabstop = 4
+opt.termguicolors = true
+opt.textwidth = 100
+opt.title = true
+opt.undofile = true
+opt.undolevels = 10000
+opt.wrap = true
