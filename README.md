@@ -161,16 +161,31 @@ Quit and reopen your terminal for all changes to take effect.
 1. Edit configuration files:
    - `flake.nix` - System configuration
    - `home.nix` - User/home-manager configuration
+   - `common.nix` - Shared packages/settings
+   - `hosts/darwin/work.nix` - Host-specific config
 
-2. Commit your changes:
+2. Format and check your changes:
    ```bash
    cd ~/.config/nix-darwin
+
+   # Format all nix files
+   ./scripts/format.sh
+
+   # Lint and check for issues
+   ./scripts/lint.sh
+
+   # Run everything (format, lint, build)
+   ./scripts/check.sh
+   ```
+
+3. Commit your changes:
+   ```bash
    git add .
    git commit -m "Description of changes"
    git push
    ```
 
-3. Apply changes:
+4. Apply changes:
    ```bash
    darwin-rebuild switch
    ```
