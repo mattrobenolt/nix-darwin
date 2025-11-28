@@ -6,7 +6,25 @@
   # Common packages across all machines
   # Currently empty - move packages here from host configs as you identify what's truly shared
   environment.systemPackages = with pkgs; [
-    # Add shared packages here
+    bat
+    curl
+    direnv
+    eza
+    fastfetch
+    fd
+    git
+    htop
+    jq
+    neovim
+    nix-direnv
+    pkg-config
+    ripgrep
+    starship
+    tmux
+    vim
+    wget
+    zellij
+    zsh
   ];
 
   # Nix configuration

@@ -3,10 +3,22 @@
 {
   # Work MacBook Pro specific configuration
 
+  # Package overrides
+  nixpkgs.overlays = [
+    (_final: prev: {
+      # coredns build is broken in nixpkgs-unstable (bad patches), skip patches and tests
+      coredns = prev.coredns.overrideAttrs (_oldAttrs: {
+        postPatch = ""; # Skip broken patches
+        doCheck = false; # Skip tests
+      });
+    })
+  ];
+
   environment.systemPackages = with pkgs; [
     _1password-cli
     aerc
     age
+    coredns
     appcleaner
     argocd
     asciinema
@@ -42,8 +54,6 @@
     hexyl
     hwatch
     hyperfine
-    image_optim
-    imagemagick
     jaq
     jinja2-cli
     jo
@@ -74,7 +84,6 @@
     python3
     ruff
     scc
-    scdoc
     sentry-cli
     shellcheck
     socat
@@ -118,7 +127,6 @@
 
     brews = [
       "sst/tap/opencode"
-      "coredns" # nixpkgs version currently broken, keeping in Homebrew
       "syncthing"
       "tailscale"
     ];
@@ -140,6 +148,7 @@
       "session-manager-plugin"
       "vanilla"
       "vibetunnel"
+      "imageoptim"
     ];
   };
 
@@ -214,12 +223,24 @@
   };
 
   # CoreDNS configuration
-  # NOTE: coredns package in nixpkgs-unstable is currently broken
-  # Keeping it in Homebrew but version-controlling the Corefile here
-  # Corefile is in files/Corefile and symlinked to /opt/homebrew/etc/coredns/Corefile
-  # To update: edit files/Corefile, then run:
-  #   ln -sf ~/.config/nix-darwin/files/Corefile /opt/homebrew/etc/coredns/Corefile
-  #   brew services restart coredns
+  # Place Corefile in /etc
+  environment.etc."coredns/Corefile".source = ./files/Corefile;
+
+  # Run coredns as a system daemon
+  launchd.daemons.coredns = {
+    script = ''
+      exec ${pkgs.coredns}/bin/coredns -conf /etc/coredns/Corefile
+    '';
+    serviceConfig = {
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "/var/log/coredns.log";
+      StandardErrorPath = "/var/log/coredns.log";
+      EnvironmentVariables = {
+        "GOMAXPROCS" = "2";
+      };
+    };
+  };
 
   # Security configuration
   security.pam.services.sudo_local.touchIdAuth = true;
