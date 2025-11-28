@@ -3,96 +3,129 @@
 {
   # Work MacBook Pro specific configuration
 
-  # Work-specific packages
+  # System packages (original list from flake.nix)
   environment.systemPackages = with pkgs; [
-    # Work development tools
-    argocd
-    cilium-cli
-    kubectl
-    kustomize
-    terraform
-    terragrunt
-    packer
-    nomad
-    vault
-    vector
-    etcd
-
-    # Cloud tools
-    awscli
-    ec2-instance-selector
-
-    # Databases
-    postgresql
-    pgbouncer
-    pgcli
-    mariadb.client
-    mycli
-    pscale
-
-    # Build/deploy tools
-    foreman
-    buf
-    sentry-cli
-    upx
-
-    # Work-specific languages/tools
-    golangci-lint
-    swift-format
-    pyright
-    ruff
-    luarocks
-    uv
-    zig
-
-    # Container/VM tools (via nix)
-    utm
-
-    # Work editors/IDEs
-    helix
-    claude-code
-
-    # Documentation/notes
-    pandoc
-    scdoc
-    glow
-    obsidian
-
-    # Media tools (for work presentations, etc.)
-    imagemagick
-    image_optim
-    chafa
-    timg
-
-    # Other work utilities
     _1password-cli
-    age
-    mkcert
-    pstree
-    scc
-    tcping-rs
-    codex
-    appcleaner
     aerc
+    age
+    appcleaner
+    argocd
     asciinema
+    atuin
     audacity
     automake
+    awscli
+    bat
     bats
+    btop
+    buf
+    bun
+    chafa
+    cilium-cli
+    claude-code
+    codex
+    cowsay
+    deadnix
+    delta
+    difftastic
+    direnv
     discord
+    dust
+    ec2-instance-selector
+    entr
+    etcd
+    eza
+    fastfetch
+    fd
+    fish
+    foreman
+    fortune
+    fzf
+    gh
+    git
+    glow
     gnutar
+    go
+    golangci-lint
     graphviz
+    grpcurl
+    helix
+    hexyl
+    htop
+    hwatch
+    hyperfine
+    image_optim
+    imagemagick
+    jaq
     jinja2-cli
     jo
+    jq
+    just
+    kustomize
+    lazygit
     libffi
+    lolcat
+    luarocks
+    mariadb.client
+    mkcert
+    mtr
+    mycli
+    neovim
     nghttp2
+    nil
+    nix-direnv
+    nixd
+    nixfmt-rfc-style
+    nodejs
+    nomad
     nushell
+    obsidian
+    packer
+    pandoc
+    pgbouncer
+    pgcli
     pkg-config
+    postgresql
+    pscale
+    pstree
+    pyright
+    python3
+    ripgrep
+    ruff
+    scc
+    scdoc
+    sentry-cli
     shellcheck
+    socat
+    starship
+    statix
+    swift-format
+    tcping-rs
     telegram-desktop
+    terminal-notifier
+    terraform
+    terragrunt
+    timg
+    tmux
+    upx
+    utm
+    uv
+    vault
+    vector
     vim
     w3m
+    watch
+    watchexec
     weechat
+    wget
+    wrk
     yazi
+    yj
+    yq
+    zellij
+    zig
+    zoxide
+    zsh
   ];
 
   # Set the primary user for user-specific options like Homebrew
