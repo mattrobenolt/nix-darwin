@@ -89,6 +89,7 @@
     shellcheck
     socat
     statix
+    swift
     swift-format
     tcping-rs
     telegram-desktop
@@ -168,6 +169,16 @@
         orientation = "bottom";
         show-recents = false;
         tilesize = 67;
+        # Behavior improvements
+        mru-spaces = false; # Don't auto-rearrange spaces
+        show-process-indicators = true; # Show dots under running apps
+        minimize-to-application = false; # Minimize into app icon
+        # Animation disabling
+        autohide-delay = 0.0; # No delay before dock appears
+        autohide-time-modifier = 0.0; # Instant dock show/hide
+        expose-animation-duration = 0.0; # Instant mission control
+        launchanim = false; # Disable app launch bouncing
+        mineffect = "scale"; # Faster minimize effect
       };
 
       finder = {
@@ -175,6 +186,9 @@
         ShowPathbar = true;
         ShowStatusBar = false;
         FXPreferredViewStyle = "clmv"; # Column view
+        # Behavior improvements
+        FXEnableExtensionChangeWarning = false; # No warning when changing extensions
+        _FXShowPosixPathInTitle = true; # Show full path in title
       };
 
       NSGlobalDomain = {
@@ -182,12 +196,47 @@
         AppleShowAllExtensions = true;
         InitialKeyRepeat = 15;
         KeyRepeat = 1;
+        # Behavior improvements
+        ApplePressAndHoldEnabled = false; # Enable key repeat instead of accent menu
+        NSNavPanelExpandedStateForSaveMode = true; # Expanded save panel by default
+        "com.apple.swipescrolldirection" = true; # Natural scrolling
+        # Animation disabling
+        NSAutomaticWindowAnimationsEnabled = false; # Disable window animations
+        NSScrollAnimationEnabled = false; # Disable smooth scrolling animations
+        NSUseAnimatedFocusRing = false; # Disable focus ring animation
+        NSWindowResizeTime = 0.001; # Instant window resize
       };
 
       trackpad = {
         Clicking = false; # Tap to click disabled
         TrackpadRightClick = true;
         TrackpadThreeFingerDrag = false;
+      };
+
+      # Spaces configuration
+      spaces.spans-displays = false; # Displays have separate spaces
+
+      # Login window
+      loginwindow = {
+        GuestEnabled = false; # Disable guest account
+        DisableConsoleAccess = true; # Disable console login
+      };
+
+      # Accessibility (also disables animations system-wide)
+      universalaccess = {
+        reduceMotion = true; # Reduce motion system-wide
+        reduceTransparency = true; # Reduce transparency effects
+      };
+
+      # Custom user preferences (for settings not directly exposed)
+      CustomUserPreferences = {
+        "com.apple.finder" = {
+          DisableAllAnimations = true; # Disable all Finder animations
+        };
+        NSGlobalDomain = {
+          AppleAccentColor = 6; # Pink
+          AppleHighlightColor = "1.000000 0.749020 0.823529 Pink"; # Pink selection color
+        };
       };
     }; # end system.defaults
   }; # end system
@@ -240,6 +289,40 @@
       EnvironmentVariables = {
         "GOMAXPROCS" = "2";
       };
+    };
+  };
+
+  # Set wallpaper to solid color on login
+  launchd.user.agents.set-wallpaper = {
+    script = ''
+      ${pkgs.swift}/bin/swift - <<'SWIFT'
+      import Cocoa
+      import AppKit
+
+      extension NSColor {
+          convenience init(hex: String) {
+              let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+              var int: UInt64 = 0
+              Scanner(string: hex).scanHexInt64(&int)
+              let r = CGFloat((int >> 16) & 0xFF) / 255.0
+              let g = CGFloat((int >> 8) & 0xFF) / 255.0
+              let b = CGFloat(int & 0xFF) / 255.0
+              self.init(red: r, green: g, blue: b, alpha: 1.0)
+          }
+      }
+
+      let transparentImage = URL(fileURLWithPath: "/System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopPictures.prefPane/Contents/Resources/Transparent.tiff")
+      let color = NSColor(hex: "13141C")
+      let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.fillColor: color]
+
+      for screen in NSScreen.screens {
+          try? NSWorkspace.shared.setDesktopImageURL(transparentImage, for: screen, options: options)
+      }
+      SWIFT
+    '';
+    serviceConfig = {
+      RunAtLoad = true;
+      ProcessType = "Interactive";
     };
   };
 
