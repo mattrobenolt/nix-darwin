@@ -24,7 +24,7 @@
     atuin
     audacity
     automake
-    awscli
+    awscli2
     bats
     btop
     buf
@@ -36,7 +36,6 @@
     deadnix
     delta
     difftastic
-    discord
     dust
     ec2-instance-selector
     entr
@@ -151,6 +150,7 @@
       "vanilla"
       "vibetunnel"
       "imageoptim"
+      "discord"
     ];
   };
 
