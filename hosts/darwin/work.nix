@@ -3,6 +3,10 @@
 {
   # Work MacBook Pro specific configuration
 
+  imports = [
+    ./disable-bloat.nix
+  ];
+
   # Package overrides
   nixpkgs.overlays = [
     (_final: prev: {
@@ -80,6 +84,7 @@
     pgcli
     postgresql
     pscale
+    pstree
     pyright
     python3
     ruff
