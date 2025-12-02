@@ -10,6 +10,7 @@
     ./home/ghostty.nix
     ./home/git.nix
     ./home/htop.nix
+    ./home/lazygit.nix
     ./home/neovim.nix
     ./home/yazi.nix
     ./home/zellij.nix
