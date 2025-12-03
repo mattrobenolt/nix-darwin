@@ -151,11 +151,13 @@
       "orbstack"
       "plexamp"
       "raycast"
+      "scroll-reverser"
       "session-manager-plugin"
       "vanilla"
       "vibetunnel"
       "imageoptim"
       "discord"
+      "slack"
     ];
   };
 
@@ -294,6 +296,27 @@
       EnvironmentVariables = {
         "GOMAXPROCS" = "2";
       };
+    };
+  };
+
+  # Configure Scroll Reverser to launch and reverse mouse only
+  launchd.user.agents.configure-scroll-reverser = {
+    script = ''
+      # Set Scroll Reverser preferences
+      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseScrolling -bool true
+      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseMouseScrolling -bool true
+      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTrackpad -bool false
+      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTablet -bool false
+      /usr/bin/defaults write com.pilotmoon.scroll-reverser StartAtLogin -bool true
+
+      # Launch Scroll Reverser if not already running
+      if ! pgrep -x "Scroll Reverser" > /dev/null; then
+        open -a "Scroll Reverser"
+      fi
+    '';
+    serviceConfig = {
+      RunAtLoad = true;
+      ProcessType = "Interactive";
     };
   };
 
