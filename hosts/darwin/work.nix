@@ -358,6 +358,7 @@
   security.pam.services.sudo_local.touchIdAuth = true;
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=86400
+    Defaults timestamp_type=global
   '';
 
   # Platform
