@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, matt-nixpkgs, ... }:
 
 {
   # Work MacBook Pro specific configuration
@@ -9,6 +9,9 @@
 
   # Package overrides
   nixpkgs.overlays = [
+    # Use custom packaging from personal nixpkgs fork (matt_go, zlint, etc.)
+    matt-nixpkgs.overlays.default
+
     (_final: prev: {
       # coredns build is broken in nixpkgs-unstable (bad patches), skip patches and tests
       coredns = prev.coredns.overrideAttrs (_oldAttrs: {
@@ -43,14 +46,13 @@
     dust
     ec2-instance-selector
     entr
-    etcd
     fish
     fortune
     fzf
     gh
     glow
     gnutar
-    go
+    matt_go
     golangci-lint
     graphviz
     grpcurl
@@ -76,14 +78,12 @@
     nixfmt-rfc-style
     nixfmt-tree
     nodejs
-    nomad
     obsidian
     packer
     pandoc
     pgbouncer
     pgcli
     postgresql
-    pscale
     pstree
     pyright
     python3
@@ -97,12 +97,9 @@
     swift-format
     tcping-rs
     telegram-desktop
-    terraform
-    terragrunt
     timg
     utm
     uv
-    vault
     vector
     w3m
     watch
@@ -299,6 +296,12 @@
     };
   };
 
+  # Restart coredns after configuration changes
+  system.activationScripts.postActivation.text = ''
+    echo "Restarting coredns..."
+    /bin/launchctl kickstart -k system/org.nixos.coredns 2>/dev/null || true
+  '';
+
   # Configure Scroll Reverser to launch and reverse mouse only
   launchd.user.agents.configure-scroll-reverser = {
     script = ''
@@ -358,7 +361,7 @@
   security.pam.services.sudo_local.touchIdAuth = true;
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=86400
-    Defaults timestamp_type=global
+    Defaults timestamp_type=tty
   '';
 
   # Platform

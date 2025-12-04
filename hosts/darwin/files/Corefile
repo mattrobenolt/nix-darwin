@@ -2,6 +2,7 @@
   bind 127.0.0.1
 
   forward . 192.168.2.100 tls://1.1.1.1 tls://1.0.0.1 {
+    policy sequential
     tls_servername one.one.one.one
     health_check 60s
   }

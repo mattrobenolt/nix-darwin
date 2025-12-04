@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    matt-nixpkgs.url = "github:mattrobenolt/nixpkgs";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
@@ -12,6 +13,7 @@
   outputs =
     {
       self,
+      matt-nixpkgs,
       nix-darwin,
       home-manager,
       ...
@@ -24,6 +26,7 @@
       darwinConfigurations = {
         # Work MacBook Pro
         "Matts-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+          specialArgs = { inherit matt-nixpkgs; };
           modules = [
             # Shared config (common packages, settings)
             ./common.nix
