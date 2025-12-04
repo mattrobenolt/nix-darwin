@@ -14,6 +14,10 @@
     username = lib.mkForce "matt";
     homeDirectory = lib.mkForce "/Users/matt";
 
+    # Explicitly set UID for home-manager (required as of home-manager PR #8284)
+    # On macOS, run `id -u` to get your UID (typically 501 for first user)
+    uid = 501;
+
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
     # introduces backwards incompatible changes.

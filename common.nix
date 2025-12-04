@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   # Shared configuration across all machines (macOS and Linux)
@@ -36,7 +36,11 @@
 
   # Shell integration
   programs.zsh.enable = true;
+  # Note: User's default shell is managed by home-manager (see home/zsh.nix)
 
-  # Default shell for user
-  users.users.matt.shell = pkgs.zsh;
+  # Minimal user definition for nix-darwin (home-manager's nix-darwin integration needs this)
+  # Only define on Darwin - NixOS hosts should define users in their host config
+  users.users.matt = lib.mkIf pkgs.stdenv.isDarwin {
+    uid = 501; # Standard first user UID on macOS - override in host config if different
+  };
 }
