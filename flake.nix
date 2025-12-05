@@ -47,6 +47,10 @@
                 useUserPackages = true;
                 backupFileExtension = "backup";
                 users.matt = import ./home.nix;
+                # Disable home-manager's nix management when system nix is disabled
+                sharedModules = [
+                  { nix.enable = false; }
+                ];
               };
             }
           ];

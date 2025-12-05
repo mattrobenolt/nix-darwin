@@ -52,7 +52,7 @@
     gh
     glow
     gnutar
-    matt_go
+    go-bin
     golangci-lint
     graphviz
     grpcurl
