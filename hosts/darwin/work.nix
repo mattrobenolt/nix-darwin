@@ -276,6 +276,11 @@
     };
   };
 
+  # Nix daemon custom configuration
+  environment.etc."nix/nix.custom.conf".text = ''
+    download-buffer-size = 128M
+  '';
+
   # CoreDNS configuration
   # Place Corefile in /etc
   environment.etc."coredns/Corefile".source = ./files/Corefile;
@@ -296,8 +301,11 @@
     };
   };
 
-  # Restart coredns after configuration changes
+  # Restart services after configuration changes
   system.activationScripts.postActivation.text = ''
+    echo "Restarting nix daemon..."
+    /bin/launchctl kickstart -k system/org.nixos.nix-daemon 2>/dev/null || true
+
     echo "Restarting coredns..."
     /bin/launchctl kickstart -k system/org.nixos.coredns 2>/dev/null || true
   '';
