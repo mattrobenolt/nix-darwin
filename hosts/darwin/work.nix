@@ -36,6 +36,7 @@
     btop
     buf
     bun
+    clang
     claude-code
     codex
     coredns
@@ -88,6 +89,7 @@
     pyright
     python3
     ruff
+    rustup
     scc
     sentry-cli
     shellcheck

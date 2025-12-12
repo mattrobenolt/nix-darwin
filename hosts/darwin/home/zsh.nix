@@ -10,6 +10,7 @@
     HOMEBREW_REPOSITORY = "/opt/homebrew";
     EZA_COLORS = "uu=36:gu=37:sn=32:sb=32:da=34:ur=34:uw=35:ux=36:ue=36:gr=34:gw=35:gx=36:tr=34:tw=35:tx=36:";
     UV_PYTHON_REFERENCE = "only-managed";
+    PSKUBE_NO_COLOR = "1";
   };
 
   home.sessionPath = [
@@ -18,7 +19,6 @@
     "/opt/homebrew/sbin"
     "$HOME/bin"
     "$HOME/.local/bin"
-    "$HOME/.cargo/bin"
     "$HOME/go/bin"
     "$HOME/.bun/bin"
     "$HOME/.orbstack/bin"
