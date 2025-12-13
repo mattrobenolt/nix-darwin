@@ -307,7 +307,7 @@
   # Restart services after configuration changes
   system.activationScripts.postActivation.text = ''
     echo "Restarting nix daemon..."
-    /bin/launchctl kickstart -k system/org.nixos.nix-daemon 2>/dev/null || true
+    /bin/launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
 
     echo "Restarting coredns..."
     /bin/launchctl kickstart -k system/org.nixos.coredns 2>/dev/null || true
