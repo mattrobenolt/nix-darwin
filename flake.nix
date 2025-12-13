@@ -8,6 +8,13 @@
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    llm-agents.url = "github:numtide/llm-agents.nix";
+  };
+
+  # Binary cache configuration for pre-built packages
+  nixConfig = {
+    extra-substituters = [ "https://cache.numtide.com" ];
+    extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
   };
 
   outputs =
@@ -16,6 +23,7 @@
       matt-nixpkgs,
       nix-darwin,
       home-manager,
+      llm-agents,
       ...
     }:
     {
@@ -26,7 +34,7 @@
       darwinConfigurations = {
         # Work MacBook Pro
         "Matts-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-          specialArgs = { inherit matt-nixpkgs; };
+          specialArgs = { inherit matt-nixpkgs llm-agents; };
           modules = [
             # Shared config (common packages, settings)
             ./common.nix

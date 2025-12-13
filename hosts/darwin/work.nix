@@ -1,4 +1,4 @@
-{ pkgs, matt-nixpkgs, ... }:
+{ pkgs, matt-nixpkgs, llm-agents, ... }:
 
 {
   # Work MacBook Pro specific configuration
@@ -37,8 +37,6 @@
     buf
     bun
     clang
-    claude-code
-    codex
     coredns
     cowsay
     deadnix
@@ -113,7 +111,10 @@
     yq
     zig
     zoxide
-  ];
+  ] ++ (with llm-agents.packages.${pkgs.system}; [
+    claude-code
+    codex
+  ]);
 
   # Homebrew integration (macOS GUI apps)
   homebrew = {
