@@ -1,4 +1,9 @@
-{ pkgs, matt-nixpkgs, llm-agents, ... }:
+{
+  pkgs,
+  matt-nixpkgs,
+  llm-agents,
+  ...
+}:
 
 {
   # Work MacBook Pro specific configuration
@@ -21,100 +26,102 @@
     })
   ];
 
-  environment.systemPackages = with pkgs; [
-    _1password-cli
-    aerc
-    age
-    appcleaner
-    argocd
-    asciinema
-    atuin
-    audacity
-    automake
-    awscli2
-    bats
-    btop
-    buf
-    bun
-    clang
-    coredns
-    cowsay
-    deadnix
-    delta
-    difftastic
-    dust
-    ec2-instance-selector
-    entr
-    fish
-    fortune
-    fzf
-    gh
-    glow
-    gnutar
-    go-bin
-    golangci-lint
-    graphviz
-    grpcurl
-    hexyl
-    hwatch
-    hyperfine
-    jaq
-    jinja2-cli
-    jo
-    just
-    kustomize
-    lazygit
-    libffi
-    lolcat
-    luarocks
-    mariadb.client
-    mkcert
-    mtr
-    mycli
-    nghttp2
-    nil
-    nixd
-    nixfmt-rfc-style
-    nixfmt-tree
-    nodejs
-    obsidian
-    packer
-    pandoc
-    pgbouncer
-    pgcli
-    postgresql
-    pstree
-    pyright
-    python3
-    ruff
-    rustup
-    scc
-    sentry-cli
-    shellcheck
-    socat
-    statix
-    swift
-    swift-format
-    tcping-rs
-    telegram-desktop
-    timg
-    utm
-    uv
-    vector
-    w3m
-    watch
-    watchexec
-    weechat
-    wrk
-    yazi
-    yj
-    yq
-    zig
-    zoxide
-  ] ++ (with llm-agents.packages.${pkgs.system}; [
-    claude-code
-    codex
-  ]);
+  environment.systemPackages =
+    with pkgs;
+    [
+      _1password-cli
+      aerc
+      age
+      appcleaner
+      argocd
+      asciinema
+      atuin
+      audacity
+      automake
+      awscli2
+      bats
+      btop
+      buf
+      bun
+      clang
+      coredns
+      cowsay
+      deadnix
+      delta
+      difftastic
+      dust
+      ec2-instance-selector
+      entr
+      fish
+      fortune
+      fzf
+      gh
+      glow
+      gnutar
+      go-bin
+      golangci-lint
+      graphviz
+      grpcurl
+      hexyl
+      hwatch
+      hyperfine
+      jaq
+      jinja2-cli
+      jo
+      just
+      kustomize
+      lazygit
+      libffi
+      lolcat
+      luarocks
+      mariadb.client
+      mkcert
+      mtr
+      mycli
+      nghttp2
+      nil
+      nixd
+      nixfmt-rfc-style
+      nixfmt-tree
+      nodejs
+      obsidian
+      packer
+      pandoc
+      pgbouncer
+      pgcli
+      postgresql
+      pstree
+      pyright
+      python3
+      ruff
+      rustup
+      scc
+      sentry-cli
+      shellcheck
+      socat
+      statix
+      swift
+      swift-format
+      tcping-rs
+      telegram-desktop
+      timg
+      utm
+      uv
+      vector
+      w3m
+      watch
+      watchexec
+      weechat
+      wrk
+      yazi
+      yj
+      yq
+      zoxide
+    ]
+    ++ (with llm-agents.packages.${pkgs.system}; [
+      claude-code
+      codex
+    ]);
 
   # Homebrew integration (macOS GUI apps)
   homebrew = {
@@ -158,6 +165,7 @@
       "imageoptim"
       "discord"
       "slack"
+      "opencode-desktop"
     ];
   };
 
@@ -177,15 +185,15 @@
         show-recents = false;
         tilesize = 67;
         # Behavior improvements
-        mru-spaces = false; # Don't auto-rearrange spaces
+        mru-spaces = true; # Don't auto-rearrange spaces
         show-process-indicators = true; # Show dots under running apps
         minimize-to-application = false; # Minimize into app icon
         # Animation disabling
         autohide-delay = 0.0; # No delay before dock appears
         autohide-time-modifier = 0.0; # Instant dock show/hide
         expose-animation-duration = 0.0; # Instant mission control
-        launchanim = false; # Disable app launch bouncing
-        mineffect = "scale"; # Faster minimize effect
+        launchanim = true; # Disable app launch bouncing
+        mineffect = "genie"; # Faster minimize effect
       };
 
       finder = {
@@ -231,7 +239,7 @@
 
       # Accessibility (also disables animations system-wide)
       universalaccess = {
-        reduceMotion = true; # Reduce motion system-wide
+        reduceMotion = false; # Reduce motion system-wide
         reduceTransparency = true; # Reduce transparency effects
       };
 

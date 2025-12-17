@@ -14,6 +14,7 @@
     ./home/neovim.nix
     ./home/yazi.nix
     ./home/zellij.nix
+    ./home/zoxide.nix
     ./home/zsh.nix
   ];
 }
