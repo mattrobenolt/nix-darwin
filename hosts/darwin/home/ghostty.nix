@@ -57,13 +57,14 @@ _:
 
     macos-icon = custom-style
     macos-icon-frame = aluminum
-    macos-icon-ghost-color = black
-    macos-icon-screen-color = black,black
+    macos-icon-ghost-color = #000000
+    macos-icon-screen-color = #000000,#000000
 
     quick-terminal-autohide = false
     quick-terminal-position = center
     keybind = shift+enter=text:\n
 
     auto-update = off
+    auto-update-channel = tip
   '';
 }

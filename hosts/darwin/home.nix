@@ -12,6 +12,7 @@
     ./home/htop.nix
     ./home/lazygit.nix
     ./home/neovim.nix
+    ./home/ssh.nix
     ./home/yazi.nix
     ./home/zellij.nix
     ./home/zoxide.nix

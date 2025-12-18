@@ -12,6 +12,9 @@
     ./disable-bloat.nix
   ];
 
+  # 1Password GUI - installs to /Applications
+  programs._1password-gui.enable = true;
+
   # Package overrides
   nixpkgs.overlays = [
     # Use custom packaging from personal nixpkgs fork (matt_go, zlint, etc.)
@@ -203,6 +206,8 @@
         FXPreferredViewStyle = "clmv"; # Column view
         # Behavior improvements
         FXEnableExtensionChangeWarning = false; # No warning when changing extensions
+        FXDefaultSearchScope = "SCcf";
+        QuitMenuItem = true;
         _FXShowPosixPathInTitle = true; # Show full path in title
       };
 
@@ -220,6 +225,17 @@
         NSScrollAnimationEnabled = false; # Disable smooth scrolling animations
         NSUseAnimatedFocusRing = false; # Disable focus ring animation
         NSWindowResizeTime = 0.001; # Instant window resize
+        NSDocumentSaveNewDocumentsToCloud = false;
+        AppleICUForce24HourTime = true;
+      };
+
+      menuExtraClock = {
+        Show24Hour = true;
+        IsAnalog = true;
+      };
+
+      controlcenter = {
+        NowPlaying = false;
       };
 
       trackpad = {
@@ -253,6 +269,15 @@
           AppleHighlightColor = "1.000000 0.749020 0.823529 Pink"; # Pink selection color
         };
       };
+
+      WindowManager = {
+        GloballyEnabled = false;
+        EnableTiledWindowMargins = false;
+        StandardHideWidgets = true;
+        EnableStandardClickToShowDesktop = false;
+      };
+
+      LaunchServices.LSQuarantine = false;
     }; # end system.defaults
   }; # end system
 
@@ -262,6 +287,7 @@
     hostName = "Matts-MacBook-Pro";
     localHostName = "Matts-MacBook-Pro";
     knownNetworkServices = [ "Wi-Fi" ];
+    wakeOnLan.enable = false;
 
     # Point to local coredns instance
     dns = [ "127.0.0.1" ];
@@ -319,6 +345,9 @@
 
     echo "Restarting coredns..."
     /bin/launchctl kickstart -k system/org.nixos.coredns 2>/dev/null || true
+
+    echo "Clearing icon cache..."
+    /usr/bin/find /private/var/folders/ -name com.apple.dock.iconcache -exec rm -f {} \; 2>/dev/null || true
   '';
 
   # Configure Scroll Reverser to launch and reverse mouse only
@@ -362,7 +391,7 @@
       }
 
       let transparentImage = URL(fileURLWithPath: "/System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopPictures.prefPane/Contents/Resources/Transparent.tiff")
-      let color = NSColor(hex: "13141C")
+      let color = NSColor(hex: "191A24")
       let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.fillColor: color]
 
       for screen in NSScreen.screens {
@@ -377,7 +406,11 @@
   };
 
   # Security configuration
-  security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    watchIdAuth = true;
+    reattach = true;
+  };
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=86400
     Defaults timestamp_type=tty
