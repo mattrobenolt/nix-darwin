@@ -53,7 +53,6 @@
       delta
       difftastic
       dust
-      ec2-instance-selector
       entr
       fish
       fortune
@@ -63,6 +62,7 @@
       gnutar
       go-bin
       golangci-lint
+      google-cloud-sdk
       graphviz
       grpcurl
       hexyl
@@ -150,14 +150,7 @@
     casks = [
       "chatgpt"
       "claude"
-      "font-hack"
-      "font-hack-nerd-font"
-      "font-inter"
-      "font-jetbrains-mono-nerd-font"
-      "font-symbols-only-nerd-font"
-      "gcloud-cli"
       "istat-menus"
-      "messenger"
       "orbstack"
       "plexamp"
       "raycast"
@@ -171,6 +164,15 @@
       "opencode-desktop"
     ];
   };
+
+  # Fonts
+  fonts.packages = with pkgs; [
+    hack-font
+    inter
+    nerd-fonts.hack
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
+  ];
 
   # System configuration
   system = {

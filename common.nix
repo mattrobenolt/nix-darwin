@@ -43,4 +43,22 @@
   users.users.matt = lib.mkIf pkgs.stdenv.isDarwin {
     uid = 501; # Standard first user UID on macOS - override in host config if different
   };
+
+  # Automatic garbage collection (Darwin only, manual launchd daemon since nix.enable = false)
+  # Based on nix-darwin's nix-gc module but without the nix.enable requirement
+  launchd.daemons.nix-gc = lib.mkIf pkgs.stdenv.isDarwin {
+    script = ''
+      exec ${pkgs.nix}/bin/nix-collect-garbage --delete-older-than 30d
+    '';
+    serviceConfig = {
+      StartCalendarInterval = [
+        {
+          Weekday = 0; # Sunday
+          Hour = 3;
+          Minute = 15;
+        }
+      ];
+      RunAtLoad = false;
+    };
+  };
 }
