@@ -162,6 +162,7 @@
       "discord"
       "slack"
       "opencode-desktop"
+      "helium-browser"
     ];
   };
 
@@ -301,41 +302,101 @@
     ];
   };
 
-  # DNS enforcement daemon
-  # Ensures DNS stays pointed to coredns even when DHCP tries to override
-  launchd.daemons.enforce-dns = {
-    script = ''
-      if /usr/sbin/networksetup -getinfo "Wi-Fi" &>/dev/null 2>&1; then
-        /usr/sbin/networksetup -setdnsservers "Wi-Fi" 127.0.0.1 2>/dev/null || true
-      fi
+  # Environment configuration
+  environment.etc = {
+    # Nix daemon custom configuration
+    "nix/nix.custom.conf".text = ''
+      download-buffer-size = 128M
     '';
-    serviceConfig = {
-      RunAtLoad = true;
-      StartInterval = 3600; # Check every hour
-    };
+
+    # CoreDNS configuration - Place Corefile in /etc
+    "coredns/Corefile".source = ./files/Corefile;
   };
 
-  # Nix daemon custom configuration
-  environment.etc."nix/nix.custom.conf".text = ''
-    download-buffer-size = 128M
-  '';
+  # LaunchD services
+  launchd = {
+    # DNS enforcement daemon
+    # Ensures DNS stays pointed to coredns even when DHCP tries to override
+    daemons.enforce-dns = {
+      script = ''
+        if /usr/sbin/networksetup -getinfo "Wi-Fi" &>/dev/null 2>&1; then
+          /usr/sbin/networksetup -setdnsservers "Wi-Fi" 127.0.0.1 2>/dev/null || true
+        fi
+      '';
+      serviceConfig = {
+        RunAtLoad = true;
+        StartInterval = 3600; # Check every hour
+      };
+    };
 
-  # CoreDNS configuration
-  # Place Corefile in /etc
-  environment.etc."coredns/Corefile".source = ./files/Corefile;
+    # Run coredns as a system daemon
+    daemons.coredns = {
+      script = ''
+        exec ${pkgs.coredns}/bin/coredns -conf /etc/coredns/Corefile
+      '';
+      serviceConfig = {
+        KeepAlive = true;
+        RunAtLoad = true;
+        StandardOutPath = "/var/log/coredns.log";
+        StandardErrorPath = "/var/log/coredns.log";
+        EnvironmentVariables = {
+          "GOMAXPROCS" = "2";
+        };
+      };
+    };
 
-  # Run coredns as a system daemon
-  launchd.daemons.coredns = {
-    script = ''
-      exec ${pkgs.coredns}/bin/coredns -conf /etc/coredns/Corefile
-    '';
-    serviceConfig = {
-      KeepAlive = true;
-      RunAtLoad = true;
-      StandardOutPath = "/var/log/coredns.log";
-      StandardErrorPath = "/var/log/coredns.log";
-      EnvironmentVariables = {
-        "GOMAXPROCS" = "2";
+    # Configure Scroll Reverser to launch and reverse mouse only
+    user.agents.configure-scroll-reverser = {
+      script = ''
+        # Set Scroll Reverser preferences
+        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseScrolling -bool true
+        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseMouseScrolling -bool true
+        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTrackpad -bool false
+        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTablet -bool false
+        /usr/bin/defaults write com.pilotmoon.scroll-reverser StartAtLogin -bool true
+
+        # Launch Scroll Reverser if not already running
+        if ! pgrep -x "Scroll Reverser" > /dev/null; then
+          open -a "Scroll Reverser"
+        fi
+      '';
+      serviceConfig = {
+        RunAtLoad = true;
+        ProcessType = "Interactive";
+      };
+    };
+
+    # Set wallpaper to solid color on login
+    user.agents.set-wallpaper = {
+      script = ''
+        ${pkgs.swift}/bin/swift - <<'SWIFT'
+        import Cocoa
+        import AppKit
+
+        extension NSColor {
+            convenience init(hex: String) {
+                let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+                var int: UInt64 = 0
+                Scanner(string: hex).scanHexInt64(&int)
+                let r = CGFloat((int >> 16) & 0xFF) / 255.0
+                let g = CGFloat((int >> 8) & 0xFF) / 255.0
+                let b = CGFloat(int & 0xFF) / 255.0
+                self.init(red: r, green: g, blue: b, alpha: 1.0)
+            }
+        }
+
+        let transparentImage = URL(fileURLWithPath: "/System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopPictures.prefPane/Contents/Resources/Transparent.tiff")
+        let color = NSColor(hex: "191A24")
+        let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.fillColor: color]
+
+        for screen in NSScreen.screens {
+            try? NSWorkspace.shared.setDesktopImageURL(transparentImage, for: screen, options: options)
+        }
+        SWIFT
+      '';
+      serviceConfig = {
+        RunAtLoad = true;
+        ProcessType = "Interactive";
       };
     };
   };
@@ -351,61 +412,6 @@
     echo "Clearing icon cache..."
     /usr/bin/find /private/var/folders/ -name com.apple.dock.iconcache -exec rm -f {} \; 2>/dev/null || true
   '';
-
-  # Configure Scroll Reverser to launch and reverse mouse only
-  launchd.user.agents.configure-scroll-reverser = {
-    script = ''
-      # Set Scroll Reverser preferences
-      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseScrolling -bool true
-      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseMouseScrolling -bool true
-      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTrackpad -bool false
-      /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTablet -bool false
-      /usr/bin/defaults write com.pilotmoon.scroll-reverser StartAtLogin -bool true
-
-      # Launch Scroll Reverser if not already running
-      if ! pgrep -x "Scroll Reverser" > /dev/null; then
-        open -a "Scroll Reverser"
-      fi
-    '';
-    serviceConfig = {
-      RunAtLoad = true;
-      ProcessType = "Interactive";
-    };
-  };
-
-  # Set wallpaper to solid color on login
-  launchd.user.agents.set-wallpaper = {
-    script = ''
-      ${pkgs.swift}/bin/swift - <<'SWIFT'
-      import Cocoa
-      import AppKit
-
-      extension NSColor {
-          convenience init(hex: String) {
-              let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-              var int: UInt64 = 0
-              Scanner(string: hex).scanHexInt64(&int)
-              let r = CGFloat((int >> 16) & 0xFF) / 255.0
-              let g = CGFloat((int >> 8) & 0xFF) / 255.0
-              let b = CGFloat(int & 0xFF) / 255.0
-              self.init(red: r, green: g, blue: b, alpha: 1.0)
-          }
-      }
-
-      let transparentImage = URL(fileURLWithPath: "/System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopPictures.prefPane/Contents/Resources/Transparent.tiff")
-      let color = NSColor(hex: "191A24")
-      let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.fillColor: color]
-
-      for screen in NSScreen.screens {
-          try? NSWorkspace.shared.setDesktopImageURL(transparentImage, for: screen, options: options)
-      }
-      SWIFT
-    '';
-    serviceConfig = {
-      RunAtLoad = true;
-      ProcessType = "Interactive";
-    };
-  };
 
   # Security configuration
   security.pam.services.sudo_local = {
