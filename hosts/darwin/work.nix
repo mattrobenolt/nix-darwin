@@ -94,6 +94,7 @@
       pgcli
       postgresql
       pstree
+      pwgen
       pyright
       python3
       ruff
