@@ -33,18 +33,13 @@
     with pkgs;
     [
       _1password-cli
-      aerc
       age
       appcleaner
-      argocd
       asciinema
       atuin
       audacity
-      automake
       awscli2
-      bats
       btop
-      buf
       bun
       clang
       coredns
@@ -54,6 +49,7 @@
       difftastic
       dust
       entr
+      exiftool
       fish
       fortune
       fzf
@@ -64,13 +60,11 @@
       golangci-lint
       google-cloud-sdk
       graphviz
-      grpcurl
       hexyl
       hwatch
       hyperfine
       jaq
       jinja2-cli
-      jo
       just
       kustomize
       lazygit
@@ -88,16 +82,11 @@
       nixfmt-tree
       nodejs
       obsidian
-      packer
-      pandoc
-      pgbouncer
       pgcli
       postgresql
       pstree
       pwgen
-      pyright
       python3
-      ruff
       rustup
       scc
       sentry-cli
@@ -108,11 +97,8 @@
       swift-format
       tcping-rs
       telegram-desktop
-      timg
       utm
       uv
-      vector
-      w3m
       watch
       watchexec
       weechat
@@ -139,6 +125,7 @@
 
     # Work-specific taps
     taps = [
+      "mattrobenolt/stuff"
       "sst/tap"
     ];
 
@@ -151,19 +138,20 @@
     casks = [
       "chatgpt"
       "claude"
+      "discord"
+      "helium-browser"
+      "imageoptim"
+      "inbox"
       "istat-menus"
+      "opencode-desktop"
       "orbstack"
       "plexamp"
       "raycast"
       "scroll-reverser"
       "session-manager-plugin"
+      "slack"
       "vanilla"
       "vibetunnel"
-      "imageoptim"
-      "discord"
-      "slack"
-      "opencode-desktop"
-      "helium-browser"
     ];
   };
 
