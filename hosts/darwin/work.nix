@@ -32,12 +32,9 @@
   environment.systemPackages =
     with pkgs;
     [
-      _1password-cli
       age
-      appcleaner
       asciinema
       atuin
-      audacity
       awscli2
       btop
       bun
@@ -50,7 +47,6 @@
       dust
       entr
       exiftool
-      fish
       fortune
       fzf
       gh
@@ -72,17 +68,14 @@
       lolcat
       luarocks
       mariadb.client
-      mkcert
       mtr
-      mycli
       nghttp2
       nil
       nixd
       nixfmt-rfc-style
       nixfmt-tree
       nodejs
-      obsidian
-      pgcli
+      procs
       postgresql
       pstree
       pwgen
@@ -96,8 +89,6 @@
       swift
       swift-format
       tcping-rs
-      telegram-desktop
-      utm
       uv
       watch
       watchexec
@@ -136,6 +127,9 @@
     ];
 
     casks = [
+      "1password-cli@beta"
+      "1password@beta"
+      "audacity"
       "chatgpt"
       "claude"
       "discord"
@@ -143,6 +137,8 @@
       "imageoptim"
       "inbox"
       "istat-menus"
+      "notion"
+      "obsidian"
       "opencode-desktop"
       "orbstack"
       "plexamp"
@@ -150,6 +146,8 @@
       "scroll-reverser"
       "session-manager-plugin"
       "slack"
+      "telegram-desktop"
+      "utm"
       "vanilla"
       "vibetunnel"
     ];
