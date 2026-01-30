@@ -1,6 +1,6 @@
 {
   pkgs,
-  matt-nixpkgs,
+  mattware,
   llm-agents,
   ...
 }:
@@ -18,7 +18,7 @@
   # Package overrides
   nixpkgs.overlays = [
     # Use custom packaging from personal nixpkgs fork (matt_go, zlint, etc.)
-    matt-nixpkgs.overlays.default
+    mattware.overlays.default
 
     (_final: prev: {
       # coredns build is broken in nixpkgs-unstable (bad patches), skip patches and tests
@@ -52,7 +52,7 @@
       gh
       glow
       gnutar
-      go-bin
+      go-bin_1_25
       golangci-lint
       google-cloud-sdk
       graphviz
@@ -70,9 +70,8 @@
       mariadb.client
       mtr
       nghttp2
-      nil
       nixd
-      nixfmt-rfc-style
+      nixfmt
       nixfmt-tree
       nodejs
       procs
@@ -89,6 +88,7 @@
       swift
       swift-format
       tcping-rs
+      timg
       uv
       watch
       watchexec
@@ -98,10 +98,11 @@
       yj
       yq
       zoxide
+      zig_0_15
+      zls_0_15
     ]
     ++ (with llm-agents.packages.${pkgs.system}; [
-      claude-code
-      codex
+      amp
     ]);
 
   # Homebrew integration (macOS GUI apps)
@@ -122,6 +123,7 @@
 
     brews = [
       "sst/tap/opencode"
+      "gemini-cli"
       "syncthing"
       "tailscale"
     ];
@@ -129,9 +131,12 @@
     casks = [
       "1password-cli@beta"
       "1password@beta"
+      "appify"
       "audacity"
       "chatgpt"
       "claude"
+      "claude-code"
+      "codex"
       "discord"
       "helium-browser"
       "imageoptim"
@@ -142,6 +147,7 @@
       "opencode-desktop"
       "orbstack"
       "plexamp"
+      "proton-pass"
       "raycast"
       "scroll-reverser"
       "session-manager-plugin"
