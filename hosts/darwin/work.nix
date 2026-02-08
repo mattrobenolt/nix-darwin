@@ -13,7 +13,7 @@
   ];
 
   # 1Password GUI - installs to /Applications
-  programs._1password-gui.enable = true;
+  # programs._1password-gui.enable = true;
 
   # Package overrides
   nixpkgs.overlays = [
@@ -126,11 +126,12 @@
       "gemini-cli"
       "syncthing"
       "tailscale"
+      "tracy"
     ];
 
     casks = [
-      "1password-cli@beta"
-      "1password@beta"
+      "1password-cli"
+      "1password"
       "appify"
       "audacity"
       "chatgpt"
