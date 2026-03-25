@@ -4,6 +4,7 @@ _:
   programs.git = {
     signing = {
       signByDefault = true;
+      format = "ssh";
       key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG";
     };
 

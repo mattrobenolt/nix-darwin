@@ -2,7 +2,7 @@
   description = "Matt's multi-platform nix configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     mattware.url = "github:mattrobenolt/nixpkgs";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
@@ -13,12 +13,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-  };
-
-  # Binary cache configuration for pre-built packages
-  nixConfig = {
-    extra-substituters = [ "https://cache.numtide.com" ];
-    extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
   };
 
   outputs =

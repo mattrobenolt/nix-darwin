@@ -52,7 +52,7 @@
       gh
       glow
       gnutar
-      go-bin_1_25
+      go-bin_1_26
       golangci-lint
       google-cloud-sdk
       graphviz
@@ -75,7 +75,7 @@
       nixfmt-tree
       nodejs
       procs
-      postgresql
+      postgresql_18
       pstree
       pwgen
       python3
@@ -101,7 +101,7 @@
       zig_0_15
       zls_0_15
     ]
-    ++ (with llm-agents.packages.${pkgs.system}; [
+    ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
       amp
     ]);
 
@@ -127,6 +127,7 @@
       "syncthing"
       "tailscale"
       "tracy"
+      "mole"
     ];
 
     casks = [
@@ -301,6 +302,8 @@
     # Nix daemon custom configuration
     "nix/nix.custom.conf".text = ''
       download-buffer-size = 128M
+      extra-trusted-substituters = https://cache.numtide.com
+      extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
     '';
 
     # CoreDNS configuration - Place Corefile in /etc

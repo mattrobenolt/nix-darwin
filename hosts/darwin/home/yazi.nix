@@ -4,6 +4,7 @@ _:
   programs.yazi = {
     enable = true;
     enableZshIntegration = true;
+    shellWrapperName = "y";
 
     settings = {
       manager = {
