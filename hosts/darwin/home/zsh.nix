@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, osConfig, ... }:
 
 {
   home.sessionVariables = {
@@ -8,7 +8,6 @@
     HOMEBREW_PREFIX = "/opt/homebrew";
     HOMEBREW_CELLAR = "/opt/homebrew/Cellar";
     HOMEBREW_REPOSITORY = "/opt/homebrew";
-    EZA_COLORS = "uu=36:gu=37:sn=32:sb=32:da=34:ur=34:uw=35:ux=36:ue=36:gr=34:gw=35:gx=36:tr=34:tw=35:tx=36:";
     UV_PYTHON_REFERENCE = "only-managed";
     PSKUBE_NO_COLOR = "1";
   };
@@ -36,9 +35,9 @@
       "..." = "cd ../../";
       nproc = "sysctl -n hw.perflevel0.logicalcpu";
       pssh = "ps-turtle ssh";
-      ls = "eza --octal-permissions --group";
       jq = "jaq";
       lg = "lazygit";
+      darwin-update = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#${osConfig.networking.hostName}";
     };
 
     history = {
@@ -74,11 +73,6 @@
     '';
 
     initContent = ''
-      bindkey "^[[H" beginning-of-line
-      bindkey "^[[F" end-of-line
-      bindkey "^[[3~" delete-char
-      bindkey "^[[2~" overwrite-mode
-
       export MANPATH="/opt/homebrew/share/man''${MANPATH+:$MANPATH}:"
       export INFOPATH="/opt/homebrew/share/info:''${INFOPATH:-}"
 

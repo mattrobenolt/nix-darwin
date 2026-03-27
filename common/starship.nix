@@ -1,11 +1,11 @@
-_:
+{ lib, ... }:
 
 {
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
     settings = {
-      format = "$directory$fill$git_branch$git_status$time\n$character";
+      format = lib.mkDefault "$directory$fill$git_branch$git_status$time\n$character";
       add_newline = true;
 
       time = {
@@ -28,7 +28,7 @@ _:
         truncation_length = 4;
         truncation_symbol = "…/";
         truncate_to_repo = true;
-        format = "[ $path]($style)";
+        format = lib.mkDefault "[ $path]($style)";
         repo_root_style = "cyan bold";
         repo_root_format = "[󰳏 ]($style)[$repo_root]($repo_root_style)[$path]($style)";
       };

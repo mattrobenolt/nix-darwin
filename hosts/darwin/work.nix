@@ -1,9 +1,14 @@
 {
   pkgs,
+  lib,
   mattware,
   llm-agents,
   ...
 }:
+
+let
+  nixSettings = import ../../common/nix-settings.nix;
+in
 
 {
   # Work MacBook Pro specific configuration
@@ -301,9 +306,10 @@
   environment.etc = {
     # Nix daemon custom configuration
     "nix/nix.custom.conf".text = ''
-      download-buffer-size = 128M
-      extra-trusted-substituters = https://cache.numtide.com
-      extra-trusted-public-keys = niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
+      download-buffer-size = ${nixSettings.downloadBufferSize}
+      extra-trusted-substituters = ${lib.concatStringsSep " " nixSettings.substituters}
+      extra-trusted-public-keys = ${lib.concatStringsSep " " nixSettings.trustedPublicKeys}
+      trusted-users = ${lib.concatStringsSep " " nixSettings.trustedUsers}
     '';
 
     # CoreDNS configuration - Place Corefile in /etc
