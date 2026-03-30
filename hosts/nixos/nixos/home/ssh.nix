@@ -2,12 +2,12 @@ _: {
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    extraConfig = ''
-      Match exec "test -S ~/.1password/agent.sock"
-        IdentityAgent ~/.1password/agent.sock
-    '';
 
     matchBlocks = {
+      "1password-agent" = {
+        match = "exec \"test -S ~/.1password/agent.sock\"";
+        identityAgent = "~/.1password/agent.sock";
+      };
       "github.com" = {
         user = "git";
       };
