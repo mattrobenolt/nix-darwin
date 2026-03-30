@@ -8,6 +8,39 @@
     };
     home-manager.url = "github:nix-community/home-manager";
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    # Desktop PC (nixos) inputs
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprlock = {
+      url = "github:hyprwm/hyprlock";
+      inputs.nixpkgs.follows = "hyprland/nixpkgs";
+    };
+    hypridle = {
+      url = "github:hyprwm/hypridle";
+      inputs.nixpkgs.follows = "hyprland/nixpkgs";
+    };
+    hyprpolkitagent = {
+      url = "github:hyprwm/hyprpolkitagent";
+      inputs.nixpkgs.follows = "hyprland/nixpkgs";
+    };
+    hyprsunset = {
+      url = "github:hyprwm/hyprsunset";
+      inputs.nixpkgs.follows = "hyprland/nixpkgs";
+    };
+    hyprshell = {
+      url = "github:H3rmt/hyprshell";
+      inputs.hyprland.follows = "hyprland";
+    };
+    ghostty.url = "github:ghostty-org/ghostty";
+    zed.url = "github:zed-industries/zed/v0.228.0-pre";
+    helium = {
+      url = "github:amaanq/helium-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -19,7 +52,7 @@
       home-manager,
       llm-agents,
       ...
-    }:
+    }@inputs:
     {
       # ============================================================================
       # macOS Systems (nix-darwin)
@@ -65,7 +98,7 @@
 
       nixosConfigurations = {
         # OrbStack VM (aarch64-linux, shares filesystem with Mac)
-        nixos = nixpkgs.lib.nixosSystem {
+        orbstack = nixpkgs.lib.nixosSystem {
           system = "aarch64-linux";
           modules = [
             ./hosts/nixos/orbstack/default.nix
@@ -79,6 +112,41 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 users.matt = import ./hosts/nixos/orbstack/home.nix;
+              };
+            }
+          ];
+        };
+
+        # Desktop PC (x86_64-linux)
+        nixos = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./hosts/nixos/nixos/default.nix
+
+            {
+              nixpkgs.overlays = [
+                llm-agents.overlays.default
+                (final: prev: {
+                  ghostty = inputs.ghostty.packages.${prev.stdenv.hostPlatform.system}.default;
+                  zed-editor = inputs.zed.packages.${prev.stdenv.hostPlatform.system}.default;
+                  helium = inputs.helium.packages.${prev.stdenv.hostPlatform.system}.default;
+                  hyprshell = inputs.hyprshell.packages.${prev.stdenv.hostPlatform.system}.default;
+                  hyprlock = inputs.hyprlock.packages.${prev.stdenv.hostPlatform.system}.default;
+                  hypridle = inputs.hypridle.packages.${prev.stdenv.hostPlatform.system}.default;
+                  hyprpolkitagent = inputs.hyprpolkitagent.packages.${prev.stdenv.hostPlatform.system}.default;
+                  hyprsunset = inputs.hyprsunset.packages.${prev.stdenv.hostPlatform.system}.default;
+                })
+              ];
+            }
+
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.matt = import ./hosts/nixos/nixos/home;
+                extraSpecialArgs = { inherit inputs; };
               };
             }
           ];

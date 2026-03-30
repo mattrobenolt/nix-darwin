@@ -37,6 +37,7 @@ in
     file = {
       ".agents/skills".source = config.lib.file.mkOutOfStoreSymlink "${macHome}/.agents/skills";
       ".claude/skills".source = config.lib.file.mkOutOfStoreSymlink "/home/matt/.agents/skills";
+      ".pi".source = config.lib.file.mkOutOfStoreSymlink "${macHome}/.pi";
       "code".source = config.lib.file.mkOutOfStoreSymlink "/Users/matt/code";
     }
     // builtins.listToAttrs (
@@ -61,6 +62,7 @@ in
       uv
       llm-agents.claude-code
       llm-agents.codex
+      llm-agents.pi
     ];
   };
 

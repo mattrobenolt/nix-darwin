@@ -20,7 +20,7 @@ in
   system.stateVersion = "26.05";
 
   networking = {
-    hostName = "nixos";
+    hostName = "orbstack";
     dhcpcd = {
       enable = false;
       extraConfig = ''

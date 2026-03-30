@@ -108,6 +108,7 @@ in
     ]
     ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
       amp
+      pi
     ]);
 
   # Homebrew integration (macOS GUI apps)
