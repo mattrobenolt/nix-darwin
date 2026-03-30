@@ -86,37 +86,5 @@ in
         };
       };
     };
-
-    git = {
-      signing = {
-        signByDefault = true;
-        key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG";
-      };
-
-      settings = {
-        user = {
-          name = "Matt Robenolt";
-          email = "m@robenolt.com";
-        };
-
-        url."git@github.com:" = {
-          insteadOf = "https://github.com";
-        };
-
-        http = {
-          cookiefile = "~/.gitcookies";
-        };
-
-        gpg = {
-          format = "ssh";
-        };
-      };
-    };
-
-    # Override the default format from common/starship.nix to include OS indicator
-    starship.settings = {
-      format = "\\(nixos\\) $directory$fill$git_branch$git_status$time\n$character";
-      directory.format = "[$path]($style)";
-    };
   };
 }

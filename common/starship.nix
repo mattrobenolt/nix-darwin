@@ -5,8 +5,13 @@
     enable = true;
     enableZshIntegration = true;
     settings = {
-      format = lib.mkDefault "$directory$fill$git_branch$git_status$time\n$character";
+      format = lib.mkDefault "$hostname$directory$fill$git_branch$git_status$time\n$character";
       add_newline = true;
+
+      hostname = {
+        ssh_only = true;
+        format = "\\($hostname\\) ";
+      };
 
       time = {
         disabled = false;

@@ -11,8 +11,12 @@
     ./common/bat.nix
     ./common/delta.nix
     ./common/direnv.nix
+    ./common/btop.nix
     ./common/eza.nix
+    ./common/htop.nix
     ./common/neovim.nix
+    ./common/yazi.nix
+    ./common/zellij.nix
     ./common/zoxide.nix
   ];
 }

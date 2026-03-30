@@ -1,4 +1,4 @@
-_:
+{ pkgs, ... }:
 
 {
   programs.yazi = {
@@ -15,18 +15,18 @@ _:
         prepend_previewers = [
           {
             name = "*.md";
-            run = "glow";
+            run = "${pkgs.glow}/bin/glow";
           }
           {
             mime = "text/*";
-            run = "bat";
+            run = "${pkgs.bat}/bin/bat";
           }
         ];
 
         append_previewers = [
           {
             name = "*";
-            run = "hexyl";
+            run = "${pkgs.hexyl}/bin/hexyl";
           }
         ];
       };

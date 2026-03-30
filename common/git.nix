@@ -4,7 +4,30 @@ _:
   programs.git = {
     enable = true;
 
+    signing = {
+      signByDefault = true;
+      format = "ssh";
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG";
+    };
+
     settings = {
+      user = {
+        name = "Matt Robenolt";
+        email = "m@robenolt.com";
+      };
+
+      url."git@github.com:" = {
+        insteadOf = "https://github.com";
+      };
+
+      http = {
+        cookiefile = "~/.gitcookies";
+      };
+
+      gpg = {
+        format = "ssh";
+      };
+
       rebase = {
         automerge = true;
         autostash = true;

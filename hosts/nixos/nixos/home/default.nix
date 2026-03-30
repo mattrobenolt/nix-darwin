@@ -1,11 +1,18 @@
 { pkgs, ... }:
 {
   imports = [
-    ./atuin.nix
-    ./bat.nix
-    ./btop.nix
-    ./delta.nix
-    ./direnv.nix
+    ../../../../common/atuin.nix
+    ../../../../common/bat.nix
+    ../../../../common/btop.nix
+    ../../../../common/delta.nix
+    ../../../../common/direnv.nix
+    ../../../../common/eza.nix
+    ../../../../common/htop.nix
+    ../../../../common/starship.nix
+    ../../../../common/yazi.nix
+    ../../../../common/zellij.nix
+    ../../../../common/zoxide.nix
+    ../../../../common/zsh.nix
     ./ghostty.nix
     ./git.nix
     ./hypridle.nix
@@ -13,14 +20,10 @@
     ./hyprlock.nix
     ./hyprshell.nix
     ./hyprsunset.nix
-    ./ssh.nix
-    ./starship.nix
-    ./waybar.nix
-    ./yazi.nix
-    ./zellij.nix
-    ./zsh.nix
-    ./htop.nix
     ./neovim.nix
+    ./ssh.nix
+    ./waybar.nix
+    ./zsh.nix
   ];
 
   home = {
@@ -94,10 +97,5 @@
 
   programs = {
     firefox.enable = true;
-
-    zoxide = {
-      enable = true;
-      enableZshIntegration = true;
-    };
   };
 }
