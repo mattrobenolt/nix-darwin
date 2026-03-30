@@ -8,6 +8,7 @@
     };
     home-manager.url = "github:nix-community/home-manager";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     # Desktop PC (nixos) inputs
     hyprland.url = "github:hyprwm/Hyprland";
@@ -80,7 +81,7 @@
       darwinConfigurations = {
         # Work MacBook Pro
         "Matts-MacBook-Pro" = nix-darwin.lib.darwinSystem {
-          specialArgs = { inherit mattware llm-agents; };
+          specialArgs = { inherit inputs mattware llm-agents; };
           modules = [
             # Shared config (common packages, settings)
             ./common.nix
@@ -101,6 +102,7 @@
                 useUserPackages = true;
                 backupFileExtension = "backup";
                 users.matt = import ./home.nix;
+                extraSpecialArgs = { inherit inputs; };
                 # Disable home-manager's nix management when system nix is disabled
                 sharedModules = [
                   { nix.enable = false; }
@@ -131,6 +133,7 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 users.matt = import ./hosts/nixos/orbstack/home.nix;
+                extraSpecialArgs = { inherit inputs; };
               };
             }
           ];

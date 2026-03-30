@@ -20,7 +20,6 @@
     ./hyprlock.nix
     ./hyprshell.nix
     ./hyprsunset.nix
-    ./neovim.nix
     ./ssh.nix
     ./waybar.nix
     ./zsh.nix

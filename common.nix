@@ -15,7 +15,6 @@
     git
     htop
     jq
-    neovim
     nix-direnv
     pkg-config
     ripgrep
