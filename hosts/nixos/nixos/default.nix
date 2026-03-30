@@ -4,6 +4,10 @@
   inputs,
   ...
 }:
+
+let
+  nixSettings = import ../../../common/nix-settings.nix;
+in
 {
   imports = [ ./hardware-configuration.nix ];
 
@@ -121,7 +125,8 @@
     hyprland = {
       enable = true;
       package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-      portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+      portalPackage =
+        inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
     };
 
     nix-ld = {
@@ -138,28 +143,14 @@
   nix = {
     enable = true;
     settings = {
-      substituters = [
-        "https://hyprland.cachix.org"
-        "https://hyprshell.cachix.org"
-        "https://ghostty.cachix.org"
-        "https://zed.cachix.org"
-        "https://cache.garnix.io"
-        "https://cache.numtide.com"
-      ];
-      trusted-public-keys = [
-        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-        "hyprshell.cachix.org-1:Ri7eg9v4s0u9XXi3J6FlrkrVB/ms7TFVKxilBHs2weA="
-        "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
-        "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
-        "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
-        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-      ];
+      extra-substituters = nixSettings.substituters;
+      extra-trusted-public-keys = nixSettings.trustedPublicKeys;
+      trusted-users = nixSettings.trustedUsers;
       experimental-features = [
         "nix-command"
         "flakes"
       ];
-      trusted-users = [ "matt" ];
-      download-buffer-size = "128M";
+      download-buffer-size = nixSettings.downloadBufferSize;
       eval-cache = true;
     };
 

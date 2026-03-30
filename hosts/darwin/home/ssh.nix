@@ -35,6 +35,12 @@ _:
       "robenolt.com" = {
         user = "m";
       };
+
+      # Desktop PC
+      "nixos.local" = {
+        user = "matt";
+        forwardAgent = true;
+      };
     };
   };
 }

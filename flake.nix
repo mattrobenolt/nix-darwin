@@ -53,7 +53,26 @@
       llm-agents,
       ...
     }@inputs:
+    let
+      forAllSystems = nixpkgs.lib.genAttrs [
+        "aarch64-darwin"
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+    in
     {
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
+
+      devShells = forAllSystems (system: {
+        default = nixpkgs.legacyPackages.${system}.mkShell {
+          packages = with nixpkgs.legacyPackages.${system}; [
+            just
+            nixfmt
+            statix
+            deadnix
+          ];
+        };
+      });
       # ============================================================================
       # macOS Systems (nix-darwin)
       # ============================================================================
