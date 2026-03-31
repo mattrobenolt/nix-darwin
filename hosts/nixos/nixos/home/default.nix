@@ -8,6 +8,7 @@
     ../../../../common/direnv.nix
     ../../../../common/eza.nix
     ../../../../common/htop.nix
+    ../../../../common/neovim.nix
     ../../../../common/starship.nix
     ../../../../common/yazi.nix
     ../../../../common/zellij.nix
