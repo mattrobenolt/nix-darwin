@@ -403,6 +403,30 @@ in
         ProcessType = "Interactive";
       };
     };
+
+    user.agents.pi-memory-curate = {
+      serviceConfig =
+        let
+          pi = llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi;
+          qmd = pkgs.writeShellScriptBin "qmd" "exec ${pkgs.bun}/bin/bunx @tobilu/qmd@2.0.1 \"$@\"";
+        in
+        {
+          Label = "com.mattrobenolt.pi-memory-curate";
+          ProgramArguments = [
+            "${pkgs.nushell}/bin/nu"
+            "/Users/matt/.pi/agent/skills/curate-memory/run.sh"
+          ];
+          EnvironmentVariables = {
+            HOME = "/Users/matt";
+            PATH = "${pi}/bin:${qmd}/bin:${pkgs.nushell}/bin:${pkgs.bun}/bin:/usr/bin:/bin";
+          };
+          # Run hourly — script decides whether to actually curate based on activity
+          StartInterval = 3600;
+          StandardOutPath = "/Users/matt/.pi/agent/memory/curation.log";
+          StandardErrorPath = "/Users/matt/.pi/agent/memory/curation.log";
+          RunAtLoad = false;
+        };
+    };
   };
 
   # Restart services after configuration changes
