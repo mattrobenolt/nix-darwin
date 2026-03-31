@@ -31,40 +31,32 @@
     homeDirectory = "/home/matt";
 
     packages = with pkgs; [
-      btop
       curl
-      delta
-      eza
       fastfetch
       fd
       file
       hexyl
-      htop
       gh
       hypridle
       hyprlock
       hyprpolkitagent
       hyprshutdown
       hyprsunset
-      nixd
       jq
       just
+      nixd
       nixfmt
       psmisc
       ripgrep
+      ruff
       strace
+      uv
       wget
       wl-clip-persist
       wl-clipboard
       pulseaudio
       claude-code
       codex
-
-      # LSPs (system-wide)
-      nixd
-      ruff
-      uv # For uvx ty (Python type checker)
-
       helium
       zed-editor
     ];
