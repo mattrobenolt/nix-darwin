@@ -1,4 +1,10 @@
 [default]
+_default:
+  @just --list
+
+update *args:
+  nu scripts/update.nu {{args}}
+
 apply:
   #!/usr/bin/env sh
   case "$(uname)" in

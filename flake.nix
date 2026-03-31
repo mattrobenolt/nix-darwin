@@ -1,16 +1,20 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    mattware.url = "github:mattrobenolt/nixpkgs";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    mattware.url = "github:mattrobenolt/nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     llm-agents.url = "github:numtide/llm-agents.nix";
-    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
-    # Desktop PC (nixos) inputs
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     hyprland.url = "github:hyprwm/Hyprland";
     hyprlock = {
       url = "github:hyprwm/hyprlock";
@@ -32,14 +36,11 @@
       url = "github:H3rmt/hyprshell";
       inputs.hyprland.follows = "hyprland";
     };
+
     ghostty.url = "github:ghostty-org/ghostty";
-    zed.url = "github:zed-industries/zed/v0.228.0-pre";
+    zed.url = "github:zed-industries/zed/v0.230.0-pre";
     helium = {
       url = "github:amaanq/helium-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixvim = {
-      url = "github:nix-community/nixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -67,10 +68,12 @@
       devShells = forAllSystems (system: {
         default = nixpkgs.legacyPackages.${system}.mkShell {
           packages = with nixpkgs.legacyPackages.${system}; [
+            deadnix
+            gum
             just
             nixfmt
+            nushell
             statix
-            deadnix
           ];
         };
       });
