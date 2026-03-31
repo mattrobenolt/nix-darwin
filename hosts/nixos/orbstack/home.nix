@@ -38,6 +38,7 @@ in
       ".agents/skills".source = config.lib.file.mkOutOfStoreSymlink "${macHome}/.agents/skills";
       ".claude/skills".source = config.lib.file.mkOutOfStoreSymlink "/home/matt/.agents/skills";
       ".pi".source = config.lib.file.mkOutOfStoreSymlink "${macHome}/.pi";
+      ".cache/qmd".source = config.lib.file.mkOutOfStoreSymlink "${macHome}/.cache/qmd";
       "code".source = config.lib.file.mkOutOfStoreSymlink "/Users/matt/code";
     }
     // builtins.listToAttrs (

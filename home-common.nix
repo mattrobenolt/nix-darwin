@@ -18,5 +18,6 @@
     ./common/yazi.nix
     ./common/zellij.nix
     ./common/zoxide.nix
+    ./common/qmd.nix
   ];
 }
