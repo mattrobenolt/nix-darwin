@@ -5,7 +5,7 @@ _: {
 
     matchBlocks = {
       "1password-agent" = {
-        match = "exec \"test -n '$WAYLAND_DISPLAY'\"";
+        match = "exec \"test -n \\\"$WAYLAND_DISPLAY\\\"\"";
         identityAgent = "~/.1password/agent.sock";
       };
       "github.com" = {
