@@ -66,5 +66,7 @@ _:
 
     auto-update = off
     auto-update-channel = tip
+
+    desktop-notifications = true
   '';
 }

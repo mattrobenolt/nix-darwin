@@ -5,10 +5,15 @@
   # https://github.com/tobi/qmd
   #
   # Not in nixpkgs (node-llama-cpp native deps resist packaging).
-  # Wrapper delegates to bunx which caches the package in ~/.bun/install/cache/.
-  home.packages = [
+  # Installed once into ~/.local/share/qmd, then exec'd directly.
+  home.packages = let qmdVersion = "2.0.1"; in [
     (pkgs.writeShellScriptBin "qmd" ''
-      exec ${pkgs.bun}/bin/bunx @tobilu/qmd@2.0.1 "$@"
+      QMD_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/qmd/${qmdVersion}"
+      if [ ! -d "$QMD_DIR/node_modules" ]; then
+        mkdir -p "$QMD_DIR"
+        (cd "$QMD_DIR" && ${pkgs.bun}/bin/bun add --trust @tobilu/qmd@${qmdVersion})
+      fi
+      exec "$QMD_DIR/node_modules/.bin/qmd" "$@"
     '')
   ];
 }

@@ -8,7 +8,7 @@ update *args:
 apply:
   #!/usr/bin/env sh
   case "$(uname)" in
-    Darwin) darwin-rebuild switch --flake . ;;
+    Darwin) sudo darwin-rebuild switch --flake . ;;
     *) sudo nixos-rebuild switch --flake . ;;
   esac
 

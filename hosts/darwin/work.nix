@@ -408,7 +408,15 @@ in
       serviceConfig =
         let
           pi = llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi;
-          qmd = pkgs.writeShellScriptBin "qmd" "exec ${pkgs.bun}/bin/bunx @tobilu/qmd@2.0.1 \"$@\"";
+          qmdVersion = "2.0.1";
+          qmd = pkgs.writeShellScriptBin "qmd" ''
+            QMD_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/qmd/${qmdVersion}"
+            if [ ! -d "$QMD_DIR/node_modules" ]; then
+              mkdir -p "$QMD_DIR"
+              (cd "$QMD_DIR" && ${pkgs.bun}/bin/bun add --trust @tobilu/qmd@${qmdVersion})
+            fi
+            exec "$QMD_DIR/node_modules/.bin/qmd" "$@"
+          '';
         in
         {
           Label = "com.mattrobenolt.pi-memory-curate";
