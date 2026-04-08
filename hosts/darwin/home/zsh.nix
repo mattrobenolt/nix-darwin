@@ -20,9 +20,8 @@
     "$HOME/go/bin"
     "$HOME/.bun/bin"
     "$HOME/.orbstack/bin"
-    "/opt/homebrew/opt/ruby@3/bin"
-    "/opt/homebrew/lib/ruby/gems/3.2.0/bin"
     "$HOME/.rbenv/shims"
+    "$HOME/.ps-toolbox/bin"
   ];
 
   programs.zsh = {
@@ -31,7 +30,6 @@
       "..." = "cd ../../";
       nproc = "sysctl -n hw.perflevel0.logicalcpu";
       pssh = "ps-turtle ssh";
-      jq = "jaq";
       lg = "lazygit";
       darwin-update = "sudo darwin-rebuild switch --flake ~/.config/nix-darwin#${osConfig.networking.hostName}";
     };

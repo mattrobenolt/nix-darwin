@@ -8,6 +8,20 @@
 
 let
   nixSettings = import ../../common/nix-settings.nix;
+  piWrapper = pkgs.writeShellScriptBin "pi" ''
+    set -euo pipefail
+
+    PI_HOME="$HOME/.pi/agent"
+    PI_BIN="$PI_HOME/node_modules/.bin/pi"
+
+    if [ ! -x "$PI_BIN" ]; then
+      echo "pi is not installed in $PI_HOME" >&2
+      echo "Run: cd $PI_HOME && npm install" >&2
+      exit 1
+    fi
+
+    exec "$PI_BIN" "$@"
+  '';
 in
 
 {
@@ -45,14 +59,12 @@ in
       bun
       clang
       coredns
-      cowsay
       deadnix
       delta
       difftastic
       dust
       entr
       exiftool
-      fortune
       fzf
       gh
       glow
@@ -64,13 +76,11 @@ in
       hexyl
       hwatch
       hyperfine
-      jaq
       jinja2-cli
       just
       kustomize
       lazygit
       libffi
-      lolcat
       luarocks
       mariadb.client
       mtr
@@ -106,10 +116,10 @@ in
       zig_0_15
       zls_0_15
     ]
-    ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
-      amp
-      pi
-    ]);
+    ++ [
+      llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.amp
+      piWrapper
+    ];
 
   # Homebrew integration (macOS GUI apps)
   homebrew = {
@@ -163,7 +173,6 @@ in
       "telegram-desktop"
       "utm"
       "vanilla"
-      "vibetunnel"
     ];
   };
 
@@ -407,7 +416,7 @@ in
     user.agents.pi-memory-curate = {
       serviceConfig =
         let
-          pi = llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi;
+          pi = piWrapper;
           qmdVersion = "2.0.1";
           qmd = pkgs.writeShellScriptBin "qmd" ''
             QMD_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/qmd/${qmdVersion}"
