@@ -7,6 +7,7 @@
     ../../../../common/delta.nix
     ../../../../common/direnv.nix
     ../../../../common/eza.nix
+    ../../../../common/git.nix
     ../../../../common/htop.nix
     ../../../../common/neovim.nix
     ../../../../common/starship.nix
