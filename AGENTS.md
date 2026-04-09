@@ -112,3 +112,11 @@ Use `nixpkgs.overlays` in host config to override package builds. See existing h
 ## Development Practices
 
 Always format and lint before committing changes using `./scripts/check.sh`.
+
+### Commits in this repo
+
+This repository does not follow a strict "user must pre-stage changes" workflow.
+
+If Matt asks you to commit here, inspect the working tree, determine the intended scope from the conversation and diff, and stage those files yourself when the scope is clear. Do not stop just because nothing is staged yet.
+
+Only ask for clarification when the scope is genuinely ambiguous or there are unrelated changes you can't safely separate.
