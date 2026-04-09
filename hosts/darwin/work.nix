@@ -70,7 +70,6 @@ in
       glow
       gnutar
       go-bin_1_26
-      golangci-lint
       google-cloud-sdk
       graphviz
       hexyl
@@ -80,7 +79,6 @@ in
       just
       kustomize
       lazygit
-      libffi
       luarocks
       mariadb.client
       mtr
@@ -102,7 +100,6 @@ in
       statix
       swift
       swift-format
-      tcping-rs
       timg
       uv
       watch
@@ -323,7 +320,9 @@ in
     '';
 
     # CoreDNS configuration - Place Corefile in /etc
-    "coredns/Corefile".source = ./files/Corefile;
+    # Use .text instead of .source so nix creates a dedicated store derivation
+    # that's properly tracked in the closure and won't get GC'd.
+    "coredns/Corefile".text = builtins.readFile ./files/Corefile;
   };
 
   # LaunchD services
