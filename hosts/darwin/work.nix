@@ -13,6 +13,7 @@ let
 
     PI_HOME="$HOME/.pi/agent"
     PI_BIN="$PI_HOME/node_modules/.bin/pi"
+    PI_PROFILE_SCRIPT="$PI_HOME/scripts/pi-profile"
 
     if [ ! -x "$PI_BIN" ]; then
       echo "pi is not installed in $PI_HOME" >&2
@@ -20,7 +21,23 @@ let
       exit 1
     fi
 
-    exec "$PI_BIN" "$@"
+    PI_PROFILE=work PI_BIN="$PI_BIN" exec "$PI_PROFILE_SCRIPT" "$@"
+  '';
+
+  piPersonalWrapper = pkgs.writeShellScriptBin "pi-personal" ''
+    set -euo pipefail
+
+    PI_HOME="$HOME/.pi/agent"
+    PI_BIN="$PI_HOME/node_modules/.bin/pi"
+    PI_PROFILE_SCRIPT="$PI_HOME/scripts/pi-profile"
+
+    if [ ! -x "$PI_BIN" ]; then
+      echo "pi is not installed in $PI_HOME" >&2
+      echo "Run: cd $PI_HOME && npm install" >&2
+      exit 1
+    fi
+
+    PI_PROFILE=personal PI_BIN="$PI_BIN" exec "$PI_PROFILE_SCRIPT" "$@"
   '';
 in
 
@@ -116,6 +133,7 @@ in
     ++ [
       llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.amp
       piWrapper
+      piPersonalWrapper
     ];
 
   # Homebrew integration (macOS GUI apps)
@@ -434,7 +452,7 @@ in
           ];
           EnvironmentVariables = {
             HOME = "/Users/matt";
-            PATH = "${pi}/bin:${qmd}/bin:${pkgs.nushell}/bin:${pkgs.bun}/bin:/usr/bin:/bin";
+            PATH = "${pi}/bin:${qmd}/bin:${pkgs.nushell}/bin:${pkgs.bun}/bin:${pkgs.nodejs}/bin:/usr/bin:/bin";
           };
           # Run hourly — script decides whether to actually curate based on activity
           StartInterval = 3600;
