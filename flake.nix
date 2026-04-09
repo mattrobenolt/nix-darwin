@@ -38,7 +38,6 @@
     };
 
     ghostty.url = "github:ghostty-org/ghostty";
-    zed.url = "github:zed-industries/zed/v0.230.0-pre";
     helium = {
       url = "github:amaanq/helium-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -152,9 +151,9 @@
             {
               nixpkgs.overlays = [
                 llm-agents.overlays.default
+                mattware.overlays.default
                 (final: prev: {
                   ghostty = inputs.ghostty.packages.${prev.stdenv.hostPlatform.system}.default;
-                  zed-editor = inputs.zed.packages.${prev.stdenv.hostPlatform.system}.default;
                   helium = inputs.helium.packages.${prev.stdenv.hostPlatform.system}.default;
                   hyprshell = inputs.hyprshell.packages.${prev.stdenv.hostPlatform.system}.default;
                   hyprlock = inputs.hyprlock.packages.${prev.stdenv.hostPlatform.system}.default;

@@ -60,7 +60,7 @@
       claude-code
       codex
       helium
-      zed-editor
+      zed-preview
     ];
 
     pointerCursor = {
