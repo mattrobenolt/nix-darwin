@@ -1,26 +1,34 @@
-[default]
-_default:
-  @just --list
+[private]
+default:
+    @just --list
 
-update *args:
-  nu scripts/update.nu {{args}}
-
+[doc("Rebuild and switch to the current flake config for this host")]
+[group("nix")]
+[script("sh")]
 apply:
-  #!/usr/bin/env sh
-  case "$(uname)" in
-    Darwin) sudo darwin-rebuild switch --flake . ;;
-    *) sudo nixos-rebuild switch --flake . ;;
-  esac
+    case "$(uname)" in
+      Darwin) sudo darwin-rebuild switch --flake . ;;
+      *) sudo nixos-rebuild switch --flake . ;;
+    esac
 
+[doc("Format all nix files")]
+[group("nix")]
 fmt:
-  nix fmt -- --tree-root .
+    nix fmt -- --tree-root .
 
-# Check for linting issues
+[doc("Check for linting issues")]
+[group("nix")]
 lint:
-  statix check --ignore .direnv '**/hardware-configuration.nix' .
-  deadnix --exclude .direnv '**/hardware-configuration.nix' .
+    statix check --ignore .direnv '**/hardware-configuration.nix' .
+    deadnix --exclude .direnv '**/hardware-configuration.nix' .
 
-# Fix linting issues automatically
+[doc("Fix linting issues automatically")]
+[group("nix")]
 fix:
-  statix fix --ignore .direnv '**/hardware-configuration.nix' .
-  deadnix --edit --exclude .direnv '**/hardware-configuration.nix' .
+    statix fix --ignore .direnv '**/hardware-configuration.nix' .
+    deadnix --edit --exclude .direnv '**/hardware-configuration.nix' .
+
+[doc("Update flake inputs. Groups: core ghostty hyprland neovim (omit for interactive picker)")]
+[group("scripts")]
+update *groups:
+    @nu scripts/update.nu {{ groups }}

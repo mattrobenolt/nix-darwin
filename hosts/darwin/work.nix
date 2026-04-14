@@ -39,6 +39,27 @@ let
 
     PI_PROFILE=personal PI_BIN="$PI_BIN" exec "$PI_PROFILE_SCRIPT" "$@"
   '';
+
+  ccBash = pkgs.writeShellScriptBin "cc-bash" ''
+    rm -f "$HOME/.claude/shell-snapshots"/snapshot-bash-*.sh
+    exec /usr/bin/env -i \
+      HOME="$HOME" \
+      USER="$USER" \
+      LOGNAME="$LOGNAME" \
+      TMPDIR="''${TMPDIR:-/tmp}" \
+      TERM="''${TERM:-xterm-256color}" \
+      LANG="''${LANG:-en_US.UTF-8}" \
+      PATH="${pkgs.direnv}/bin:/usr/local/bin:/usr/bin:/bin" \
+      ''${TMUX:+TMUX="$TMUX"} \
+      ''${TMUX_PANE:+TMUX_PANE="$TMUX_PANE"} \
+      ''${CLAUDE_CODE_TMPDIR:+CLAUDE_CODE_TMPDIR="$CLAUDE_CODE_TMPDIR"} \
+      ''${http_proxy:+http_proxy="$http_proxy"} \
+      ''${https_proxy:+https_proxy="$https_proxy"} \
+      ''${HTTP_PROXY:+HTTP_PROXY="$HTTP_PROXY"} \
+      ''${HTTPS_PROXY:+HTTPS_PROXY="$HTTPS_PROXY"} \
+      ${pkgs.direnv}/bin/direnv exec . ${pkgs.bash}/bin/bash "$@"
+  '';
+
 in
 
 {
@@ -134,6 +155,7 @@ in
       llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.amp
       piWrapper
       piPersonalWrapper
+      ccBash
     ];
 
   # Homebrew integration (macOS GUI apps)
@@ -375,92 +397,94 @@ in
       };
     };
 
-    # Configure Scroll Reverser to launch and reverse mouse only
-    user.agents.configure-scroll-reverser = {
-      script = ''
-        # Set Scroll Reverser preferences
-        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseScrolling -bool true
-        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseMouseScrolling -bool true
-        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTrackpad -bool false
-        /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTablet -bool false
-        /usr/bin/defaults write com.pilotmoon.scroll-reverser StartAtLogin -bool true
+    user.agents = {
+      # Configure Scroll Reverser to launch and reverse mouse only
+      configure-scroll-reverser = {
+        script = ''
+          # Set Scroll Reverser preferences
+          /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseScrolling -bool true
+          /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseMouseScrolling -bool true
+          /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTrackpad -bool false
+          /usr/bin/defaults write com.pilotmoon.scroll-reverser ReverseTablet -bool false
+          /usr/bin/defaults write com.pilotmoon.scroll-reverser StartAtLogin -bool true
 
-        # Launch Scroll Reverser if not already running
-        if ! pgrep -x "Scroll Reverser" > /dev/null; then
-          open -a "Scroll Reverser"
-        fi
-      '';
-      serviceConfig = {
-        RunAtLoad = true;
-        ProcessType = "Interactive";
-      };
-    };
-
-    # Set wallpaper to solid color on login
-    user.agents.set-wallpaper = {
-      script = ''
-        ${pkgs.swift}/bin/swift - <<'SWIFT'
-        import Cocoa
-        import AppKit
-
-        extension NSColor {
-            convenience init(hex: String) {
-                let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-                var int: UInt64 = 0
-                Scanner(string: hex).scanHexInt64(&int)
-                let r = CGFloat((int >> 16) & 0xFF) / 255.0
-                let g = CGFloat((int >> 8) & 0xFF) / 255.0
-                let b = CGFloat(int & 0xFF) / 255.0
-                self.init(red: r, green: g, blue: b, alpha: 1.0)
-            }
-        }
-
-        let transparentImage = URL(fileURLWithPath: "/System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopPictures.prefPane/Contents/Resources/Transparent.tiff")
-        let color = NSColor(hex: "191A24")
-        let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.fillColor: color]
-
-        for screen in NSScreen.screens {
-            try? NSWorkspace.shared.setDesktopImageURL(transparentImage, for: screen, options: options)
-        }
-        SWIFT
-      '';
-      serviceConfig = {
-        RunAtLoad = true;
-        ProcessType = "Interactive";
-      };
-    };
-
-    user.agents.pi-memory-curate = {
-      serviceConfig =
-        let
-          pi = piWrapper;
-          qmdVersion = "2.0.1";
-          qmd = pkgs.writeShellScriptBin "qmd" ''
-            QMD_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/qmd/${qmdVersion}"
-            if [ ! -d "$QMD_DIR/node_modules" ]; then
-              mkdir -p "$QMD_DIR"
-              (cd "$QMD_DIR" && ${pkgs.bun}/bin/bun add --trust @tobilu/qmd@${qmdVersion})
-            fi
-            exec "$QMD_DIR/node_modules/.bin/qmd" "$@"
-          '';
-        in
-        {
-          Label = "com.mattrobenolt.pi-memory-curate";
-          ProgramArguments = [
-            "${pkgs.nushell}/bin/nu"
-            "/Users/matt/.pi/agent/skills/curate-memory/run.sh"
-          ];
-          EnvironmentVariables = {
-            HOME = "/Users/matt";
-            PATH = "${pi}/bin:${qmd}/bin:${pkgs.nushell}/bin:${pkgs.bun}/bin:${pkgs.nodejs}/bin:/usr/bin:/bin";
-          };
-          # Run hourly — script decides whether to actually curate based on activity
-          StartInterval = 3600;
-          StandardOutPath = "/Users/matt/.pi/agent/memory/curation.log";
-          StandardErrorPath = "/Users/matt/.pi/agent/memory/curation.log";
-          RunAtLoad = false;
+          # Launch Scroll Reverser if not already running
+          if ! pgrep -x "Scroll Reverser" > /dev/null; then
+            open -a "Scroll Reverser"
+          fi
+        '';
+        serviceConfig = {
+          RunAtLoad = true;
+          ProcessType = "Interactive";
         };
-    };
+      };
+
+      # Set wallpaper to solid color on login
+      set-wallpaper = {
+        script = ''
+          ${pkgs.swift}/bin/swift - <<'SWIFT'
+          import Cocoa
+          import AppKit
+
+          extension NSColor {
+              convenience init(hex: String) {
+                  let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+                  var int: UInt64 = 0
+                  Scanner(string: hex).scanHexInt64(&int)
+                  let r = CGFloat((int >> 16) & 0xFF) / 255.0
+                  let g = CGFloat((int >> 8) & 0xFF) / 255.0
+                  let b = CGFloat(int & 0xFF) / 255.0
+                  self.init(red: r, green: g, blue: b, alpha: 1.0)
+              }
+          }
+
+          let transparentImage = URL(fileURLWithPath: "/System/Library/PreferencePanes/DesktopScreenEffectsPref.prefPane/Contents/Resources/DesktopPictures.prefPane/Contents/Resources/Transparent.tiff")
+          let color = NSColor(hex: "191A24")
+          let options: [NSWorkspace.DesktopImageOptionKey: Any] = [.fillColor: color]
+
+          for screen in NSScreen.screens {
+              try? NSWorkspace.shared.setDesktopImageURL(transparentImage, for: screen, options: options)
+          }
+          SWIFT
+        '';
+        serviceConfig = {
+          RunAtLoad = true;
+          ProcessType = "Interactive";
+        };
+      };
+
+      pi-memory-curate = {
+        serviceConfig =
+          let
+            pi = piWrapper;
+            qmdVersion = "2.0.1";
+            qmd = pkgs.writeShellScriptBin "qmd" ''
+              QMD_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/qmd/${qmdVersion}"
+              if [ ! -d "$QMD_DIR/node_modules" ]; then
+                mkdir -p "$QMD_DIR"
+                (cd "$QMD_DIR" && ${pkgs.bun}/bin/bun add --trust @tobilu/qmd@${qmdVersion})
+              fi
+              exec "$QMD_DIR/node_modules/.bin/qmd" "$@"
+            '';
+          in
+          {
+            Label = "com.mattrobenolt.pi-memory-curate";
+            ProgramArguments = [
+              "${pkgs.nushell}/bin/nu"
+              "/Users/matt/.pi/agent/skills/curate-memory/run.sh"
+            ];
+            EnvironmentVariables = {
+              HOME = "/Users/matt";
+              PATH = "${pi}/bin:${qmd}/bin:${pkgs.nushell}/bin:${pkgs.bun}/bin:${pkgs.nodejs}/bin:/usr/bin:/bin";
+            };
+            # Run hourly — script decides whether to actually curate based on activity
+            StartInterval = 3600;
+            StandardOutPath = "/Users/matt/.pi/agent/memory/curation.log";
+            StandardErrorPath = "/Users/matt/.pi/agent/memory/curation.log";
+            RunAtLoad = false;
+          };
+      };
+    }; # user.agents
   };
 
   # Restart services after configuration changes
