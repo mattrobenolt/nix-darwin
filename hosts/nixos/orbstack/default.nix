@@ -8,36 +8,7 @@
 
 let
   nixSettings = import ../../../common/nix-settings.nix;
-  direnvQuietConfig = pkgs.writeTextDir "direnv.toml" ''
-    [global]
-    bash_path = "${pkgs.bash}/bin/bash"
-    hide_env_diff = true
-    log_filter = "^$"
-    strict_env = true
-    warn_timeout = "1m"
-  '';
-  ccBash = pkgs.writeShellScriptBin "cc-bash" ''
-    rm -f "$HOME/.claude/shell-snapshots"/snapshot-bash-*.sh
-    exec /usr/bin/env -i \
-      HOME="$HOME" \
-      USER="$USER" \
-      LOGNAME="$LOGNAME" \
-      TMPDIR="''${TMPDIR:-/tmp}" \
-      TERM="''${TERM:-xterm-256color}" \
-      LANG="''${LANG:-en_US.UTF-8}" \
-      PATH="${pkgs.direnv}/bin:/run/current-system/sw/bin:/usr/bin:/bin" \
-      DIRENV_CONFIG="${direnvQuietConfig}" \
-      DIRENV_LOG_FORMAT= \
-      ''${TMUX:+TMUX="$TMUX"} \
-      ''${TMUX_PANE:+TMUX_PANE="$TMUX_PANE"} \
-      ''${CLAUDE_CODE_TMPDIR:+CLAUDE_CODE_TMPDIR="$CLAUDE_CODE_TMPDIR"} \
-      ''${http_proxy:+http_proxy="$http_proxy"} \
-      ''${https_proxy:+https_proxy="$https_proxy"} \
-      ''${HTTP_PROXY:+HTTP_PROXY="$HTTP_PROXY"} \
-      ''${HTTPS_PROXY:+HTTPS_PROXY="$HTTPS_PROXY"} \
-      ''${SSH_AUTH_SOCK:+SSH_AUTH_SOCK="$SSH_AUTH_SOCK"} \
-      ${pkgs.direnv}/bin/direnv exec . ${pkgs.bash}/bin/bash "$@"
-  '';
+
 in
 
 {
@@ -76,7 +47,6 @@ in
       nixfmt
       dig
       ghostty.terminfo
-      ccBash
     ];
 
     shellInit = ''

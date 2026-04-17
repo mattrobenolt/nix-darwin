@@ -40,26 +40,6 @@ let
     PI_PROFILE=personal PI_BIN="$PI_BIN" exec "$PI_PROFILE_SCRIPT" "$@"
   '';
 
-  ccBash = pkgs.writeShellScriptBin "cc-bash" ''
-    rm -f "$HOME/.claude/shell-snapshots"/snapshot-bash-*.sh
-    exec /usr/bin/env -i \
-      HOME="$HOME" \
-      USER="$USER" \
-      LOGNAME="$LOGNAME" \
-      TMPDIR="''${TMPDIR:-/tmp}" \
-      TERM="''${TERM:-xterm-256color}" \
-      LANG="''${LANG:-en_US.UTF-8}" \
-      PATH="${pkgs.direnv}/bin:/usr/local/bin:/usr/bin:/bin" \
-      ''${TMUX:+TMUX="$TMUX"} \
-      ''${TMUX_PANE:+TMUX_PANE="$TMUX_PANE"} \
-      ''${CLAUDE_CODE_TMPDIR:+CLAUDE_CODE_TMPDIR="$CLAUDE_CODE_TMPDIR"} \
-      ''${http_proxy:+http_proxy="$http_proxy"} \
-      ''${https_proxy:+https_proxy="$https_proxy"} \
-      ''${HTTP_PROXY:+HTTP_PROXY="$HTTP_PROXY"} \
-      ''${HTTPS_PROXY:+HTTPS_PROXY="$HTTPS_PROXY"} \
-      ${pkgs.direnv}/bin/direnv exec . ${pkgs.bash}/bin/bash "$@"
-  '';
-
 in
 
 {
@@ -155,7 +135,6 @@ in
       llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.amp
       piWrapper
       piPersonalWrapper
-      ccBash
     ];
 
   # Homebrew integration (macOS GUI apps)

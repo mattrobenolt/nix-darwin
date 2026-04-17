@@ -26,6 +26,7 @@ let
     PI_BIN="$PI_BIN" exec "$PI_PROFILE_SCRIPT" "$@"
   '';
   claudeShared = [
+    "CLAUDE.md"
     "settings.json"
     "agents"
     "agent-memory"
@@ -34,6 +35,7 @@ let
     "plugins"
     "statusline-command.sh"
     "projects"
+    "hooks"
   ];
 in
 

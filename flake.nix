@@ -71,7 +71,8 @@
             gum
             just
             nixfmt
-            nushell
+            # nushell 0.112.1 has SHLVL tests that fail in the Nix sandbox; skip them
+            (nushell.overrideAttrs (_: { doCheck = false; }))
             statix
           ];
         };
