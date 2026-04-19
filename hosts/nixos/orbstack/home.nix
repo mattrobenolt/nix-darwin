@@ -36,6 +36,7 @@ let
     "statusline-command.sh"
     "projects"
     "hooks"
+    "caffeine"
   ];
 in
 

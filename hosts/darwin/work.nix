@@ -131,8 +131,12 @@ in
       zig_0_15
       zls_0_15
     ]
+    ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
+      amp
+      claude-code
+      codex
+    ])
     ++ [
-      llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.amp
       piWrapper
       piPersonalWrapper
     ];
@@ -169,8 +173,6 @@ in
       "audacity"
       "chatgpt"
       "claude"
-      "claude-code"
-      "codex"
       "discord"
       "helium-browser"
       "imageoptim"
