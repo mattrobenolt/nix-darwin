@@ -167,12 +167,13 @@ in
     ];
 
     casks = [
-      "1password-cli"
       "1password"
+      "1password-cli"
       "appify"
       "audacity"
       "chatgpt"
       "claude"
+      "codex-app"
       "discord"
       "helium-browser"
       "imageoptim"
