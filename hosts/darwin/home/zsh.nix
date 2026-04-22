@@ -1,8 +1,9 @@
-{ osConfig, ... }:
+{ pkgs, osConfig, ... }:
 
 {
   home.sessionVariables = {
     PYTHONDONTWRITEBYTECODE = "1";
+    CGO_LDFLAGS = "-L${pkgs.apple-sdk}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib";
     KUBECTL_EXTERNAL_DIFF = "delta";
     HOMEBREW_PREFIX = "/opt/homebrew";
     HOMEBREW_CELLAR = "/opt/homebrew/Cellar";
