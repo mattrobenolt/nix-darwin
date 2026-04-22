@@ -20,6 +20,19 @@
     ];
 
     extraConfigLua = ''
+      vim.filetype.add({
+        extension = {
+          gotmpl = 'gotmpl',
+          tmpl = function(path, _)
+            local dir = vim.fs.dirname(path)
+            if vim.fs.find({ 'go.mod', 'go.work' }, { path = dir, upward = true })[1] then
+              return 'gotmpl'
+            end
+            return 'template'
+          end,
+        },
+      })
+
       -- LSP keymaps on attach
       vim.api.nvim_create_autocmd('LspAttach', {
         callback = function(args)
@@ -122,7 +135,7 @@
 
       vim.lsp.config('zls', {
         cmd = { 'zls' },
-        filetypes = { 'zig', 'zir', 'zon' },
+        filetypes = { 'zig', 'zir' },
         root_markers = { 'zls.json', 'build.zig', '.git' },
         settings = {
           zls = { enable_build_on_save = true },
@@ -151,7 +164,7 @@
 
       vim.lsp.config('yamlls', {
         cmd = { 'yaml-language-server', '--stdio' },
-        filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab' },
+        filetypes = { 'yaml' },
         root_markers = { '.git' },
         settings = {
           yaml = {
