@@ -20,6 +20,16 @@
     ];
 
     extraConfigLua = ''
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          local max_filesize = 20 * 1024 * 1024
+          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(args.buf))
+          if ok and stats and stats.size > max_filesize then
+            vim.treesitter.stop(args.buf)
+          end
+        end,
+      })
+
       vim.filetype.add({
         extension = {
           gotmpl = 'gotmpl',
@@ -211,21 +221,10 @@
 
     plugins.treesitter = {
       enable = true;
+      highlight.enable = true;
       settings = {
         indent.enable = true;
-        highlight = {
-          enable = true;
-          additional_vim_regex_highlighting = false;
-          disable.__raw = ''
-            function(lang, buf)
-              local max_filesize = 20 * 1024 * 1024
-              local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-              if ok and stats and stats.size > max_filesize then
-                return true
-              end
-            end
-          '';
-        };
+        highlight.additional_vim_regex_highlighting = false;
       };
       grammarPackages = with pkgs.vimPlugins.nvim-treesitter.builtGrammars; [
         bash

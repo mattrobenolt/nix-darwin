@@ -38,6 +38,19 @@ let
     "hooks"
     "caffeine"
   ];
+  codexShared = [
+    "AGENTS.md"
+    "config.toml"
+    "memories"
+    "rules"
+    "plugins"
+    "sessions"
+    "session_index.jsonl"
+    "history.jsonl"
+    "internal_storage.json"
+    "state_5.sqlite"
+    "sqlite"
+  ];
 in
 
 {
@@ -64,6 +77,12 @@ in
         name = ".claude/${name}";
         value = mkSymlink "${macHome}/.claude/${name}";
       }) claudeShared
+    )
+    // builtins.listToAttrs (
+      map (name: {
+        name = ".codex/${name}";
+        value = mkSymlink "${macHome}/.codex/${name}";
+      }) codexShared
     );
 
     packages = with pkgs; [

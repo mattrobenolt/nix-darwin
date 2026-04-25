@@ -42,6 +42,8 @@
       url = "github:amaanq/helium-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    llama-cpp.url = "github:ggml-org/llama.cpp";
   };
 
   outputs =

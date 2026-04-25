@@ -34,7 +34,7 @@ _:
       };
 
       merge = {
-        conflictstyle = "diff3";
+        conflictstyle = "zdiff3";
       };
 
       color = {
