@@ -15,7 +15,6 @@ let
 
     PI_HOME="$HOME/.pi/agent"
     PI_BIN="$PI_HOME/node_modules/.bin/pi"
-    PI_PROFILE_SCRIPT="$PI_HOME/scripts/pi-profile"
 
     if [ ! -x "$PI_BIN" ]; then
       echo "pi is not installed in $PI_HOME" >&2
@@ -23,7 +22,7 @@ let
       exit 1
     fi
 
-    PI_BIN="$PI_BIN" exec "$PI_PROFILE_SCRIPT" "$@"
+    exec "$PI_BIN" "$@"
   '';
   claudeShared = [
     "CLAUDE.md"
@@ -90,17 +89,18 @@ in
       bun
       fastfetch
       fd
+      gh
       hexyl
       htop
       jq
+      llm-agents.claude-code
+      llm-agents.codex
       nixd
       nixfmt
       nodejs
+      piWrapper
       ripgrep
       uv
-      llm-agents.claude-code
-      llm-agents.codex
-      piWrapper
     ];
   };
 

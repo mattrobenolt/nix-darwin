@@ -36,17 +36,17 @@ in
 
   environment = {
     systemPackages = with pkgs; [
-      file
       curl
+      dig
+      file
+      ghostty.terminfo
+      hivemind
       neovim
+      nixfmt
+      psmisc
+      strace
       wget
       zsh
-      hivemind
-      strace
-      psmisc
-      nixfmt
-      dig
-      ghostty.terminfo
     ];
 
     shellInit = ''
@@ -279,7 +279,6 @@ in
       ];
       extra-platforms = [
         "x86_64-linux"
-        "i686-linux"
       ];
     };
     gc = {

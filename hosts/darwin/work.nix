@@ -52,6 +52,7 @@ in
   environment.systemPackages =
     with pkgs;
     [
+      _1password-cli
       age
       asciinema
       atuin
@@ -113,17 +114,15 @@ in
       zig_0_15
       zls_0_15
       zoxide
+      llama-cpp
+      llama-swap
+      piWrapper
     ]
     ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
       amp
       claude-code
       codex
-    ])
-    ++ [
-      piWrapper
-      pkgs.llama-cpp
-      pkgs.llama-swap
-    ];
+    ]);
 
   # Homebrew integration (macOS GUI apps)
   homebrew = {
@@ -143,7 +142,6 @@ in
 
     brews = [
       "sst/tap/opencode"
-      "gemini-cli"
       "syncthing"
       "tailscale"
       "tracy"
@@ -152,28 +150,27 @@ in
 
     casks = [
       "1password"
-      "1password-cli"
       "appify"
-      # "audacity"  # broken: homebrew-cask PR #260975 depends_on macos bug
+      "audacity"
       "chatgpt"
       "claude"
       "codex-app"
-      # "discord"  # broken: homebrew-cask PR #260975 depends_on macos bug
+      "discord"
       "helium-browser"
       "imageoptim"
       "inbox"
       "istat-menus"
       "notion"
       "obsidian"
-      # "opencode-desktop"  # broken: homebrew-cask PR #260975 depends_on macos bug
+      "opencode-desktop"
       "orbstack"
       "plexamp"
       "proton-pass"
       "raycast"
       "scroll-reverser"
-      # "session-manager-plugin"  # broken: homebrew-cask PR #260975 depends_on macos bug
+      "session-manager-plugin"
       "slack"
-      # "telegram-desktop"  # broken: homebrew-cask PR #260975 depends_on macos bug
+      "telegram-desktop"
       "utm"
       "vanilla"
     ];
