@@ -18,6 +18,7 @@
     nix-direnv
     pkg-config
     ripgrep
+    rtk
     starship
     tmux
     vim

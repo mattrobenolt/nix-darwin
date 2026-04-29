@@ -100,6 +100,7 @@ in
       nodejs
       piWrapper
       ripgrep
+      rtk
       uv
     ];
   };

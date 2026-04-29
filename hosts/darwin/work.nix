@@ -1,7 +1,6 @@
 {
   pkgs,
   lib,
-  inputs,
   mattware,
   llm-agents,
   ...

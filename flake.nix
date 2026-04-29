@@ -42,8 +42,6 @@
       url = "github:amaanq/helium-flake";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    llama-cpp.url = "github:ggml-org/llama.cpp";
   };
 
   outputs =
@@ -62,6 +60,9 @@
         "x86_64-linux"
         "aarch64-linux"
       ];
+      llmAgentsRtkOverlay = final: _prev: {
+        inherit (final.llm-agents) rtk;
+      };
     in
     {
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
@@ -89,6 +90,13 @@
           modules = [
             # Shared config (common packages, settings)
             ./common.nix
+
+            {
+              nixpkgs.overlays = [
+                llm-agents.overlays.default
+                llmAgentsRtkOverlay
+              ];
+            }
 
             # Host-specific config
             ./hosts/darwin/work.nix
@@ -129,7 +137,12 @@
             ./hosts/nixos/orbstack/default.nix
 
             # Apply llm-agents overlay so pkgs.llm-agents.* is available
-            { nixpkgs.overlays = [ llm-agents.overlays.default ]; }
+            {
+              nixpkgs.overlays = [
+                llm-agents.overlays.default
+                llmAgentsRtkOverlay
+              ];
+            }
 
             home-manager.nixosModules.home-manager
             {
