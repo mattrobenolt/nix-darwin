@@ -32,6 +32,7 @@ in
     useDHCP = false;
     useHostResolvConf = false;
     enableIPv6 = false;
+    resolvconf.enable = false;
   };
 
   environment = {
