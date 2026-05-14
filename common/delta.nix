@@ -3,7 +3,7 @@ _:
 {
   programs.delta = {
     enable = true;
-    enableGitIntegration = true;
+    enableGitIntegration = false;
     options = {
       features = "interactive";
       line-numbers = true;

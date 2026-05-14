@@ -136,10 +136,11 @@
           modules = [
             ./hosts/nixos/orbstack/default.nix
 
-            # Apply llm-agents overlay so pkgs.llm-agents.* is available
+            # Apply package overlays used by home-manager and system packages
             {
               nixpkgs.overlays = [
                 llm-agents.overlays.default
+                mattware.overlays.default
                 llmAgentsRtkOverlay
               ];
             }

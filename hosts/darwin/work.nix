@@ -16,7 +16,7 @@ let
 
     if [ ! -x "$PI_BIN" ]; then
       echo "pi is not installed in $PI_HOME" >&2
-      echo "Run: cd $PI_HOME && npm install" >&2
+      echo "Run: cd $PI_HOME && pnpm install" >&2
       exit 1
     fi
 
@@ -115,7 +115,9 @@ in
       zoxide
       llama-cpp
       llama-swap
+      pinact
       piWrapper
+      zizmor
     ]
     ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
       amp
