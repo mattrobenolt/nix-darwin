@@ -22,14 +22,14 @@ darwin-rebuild check --flake .
 
 ### Development Workflow
 ```bash
-# Format all Nix files (uses treefmt)
-./scripts/format.sh
+# Format all Nix files
+just fmt
 
-# Lint Nix files (statix + deadnix)
-./scripts/lint.sh
+# Lint Nix files
+just lint
 
-# Run all checks: format, lint, and build
-./scripts/check.sh
+# Rebuild and switch to the current flake config for this host
+just apply
 ```
 
 ## Configuration Architecture
@@ -111,7 +111,7 @@ Use `nixpkgs.overlays` in host config to override package builds. See existing h
 
 ## Development Practices
 
-Always format and lint before committing changes using `./scripts/check.sh`.
+Always format and lint before committing changes using `just fmt` and `just lint`.
 
 ### Commits in this repo
 

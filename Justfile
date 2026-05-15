@@ -19,14 +19,14 @@ fmt:
 [doc("Check for linting issues")]
 [group("nix")]
 lint:
-    statix check --ignore .direnv '**/hardware-configuration.nix' .
-    deadnix --exclude .direnv '**/hardware-configuration.nix' .
+    statix check --ignore .direnv --ignore '**/hardware-configuration.nix' .
+    fd --extension nix --exclude hardware-configuration.nix --exclude .direnv --exec-batch deadnix
 
 [doc("Fix linting issues automatically")]
 [group("nix")]
 fix:
-    statix fix --ignore .direnv '**/hardware-configuration.nix' .
-    deadnix --edit --exclude .direnv '**/hardware-configuration.nix' .
+    statix fix --ignore .direnv --ignore '**/hardware-configuration.nix' .
+    fd --extension nix --exclude hardware-configuration.nix --exclude .direnv --exec-batch deadnix --edit
 
 [doc("Update flake inputs. Groups: core ghostty hyprland neovim (omit for interactive picker)")]
 [group("scripts")]

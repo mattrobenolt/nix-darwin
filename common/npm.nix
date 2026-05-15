@@ -11,20 +11,28 @@ let
     '';
   };
 in
-
 {
-  home.packages = [ pnpm ];
+  home = {
+    packages = [ pnpm ];
 
-  home.file.".npmrc".text = ''
-    @planetscale:registry=https://registry.npmjs.org/
-    allow-git=none
-    min-release-age=3
-    ignore-scripts=true
-  '';
+    sessionVariables = {
+      NPM_CONFIG_USERCONFIG = "${config.home.homeDirectory}/.config/npm/npmrc";
+      NPM_CONFIG_GLOBALCONFIG = "${config.home.homeDirectory}/.config/npm/global-npmrc";
+    };
 
-  home.file.".config/pnpm/rc".text = ''
-    allow-git=none
-    min-release-age=3
-    ignore-scripts=true
-  '';
+    file = {
+      ".config/npm/global-npmrc".text = ''
+        @planetscale:registry=https://registry.npmjs.org/
+        allow-git=none
+        min-release-age=3
+        ignore-scripts=true
+      '';
+
+      ".config/pnpm/rc".text = ''
+        allow-git=none
+        min-release-age=3
+        ignore-scripts=true
+      '';
+    };
+  };
 }

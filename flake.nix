@@ -73,6 +73,7 @@
             deadnix
             gum
             just
+            fd
             nixfmt
             nushell
             statix
@@ -168,7 +169,7 @@
               nixpkgs.overlays = [
                 llm-agents.overlays.default
                 mattware.overlays.default
-                (final: prev: {
+                (_final: prev: {
                   ghostty = inputs.ghostty.packages.${prev.stdenv.hostPlatform.system}.default;
                   helium = inputs.helium.packages.${prev.stdenv.hostPlatform.system}.default;
                   hyprshell = inputs.hyprshell.packages.${prev.stdenv.hostPlatform.system}.default;

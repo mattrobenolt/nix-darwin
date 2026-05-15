@@ -65,9 +65,18 @@
       claude_context = {
         format = "[↑$input_tokens ↓$output_tokens]($style) ";
         display = [
-          { threshold = 0; style = "bright-black"; }
-          { threshold = 80; style = "yellow"; }
-          { threshold = 95; style = "red bold"; }
+          {
+            threshold = 0;
+            style = "bright-black";
+          }
+          {
+            threshold = 80;
+            style = "yellow";
+          }
+          {
+            threshold = 95;
+            style = "red bold";
+          }
         ];
       };
     };

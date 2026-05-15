@@ -14,6 +14,10 @@
         warn_timeout = "1m";
         strict_env = true;
       };
+
+      whitelist.prefix = [
+        "/"
+      ];
     };
   };
 }
