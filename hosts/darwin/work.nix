@@ -8,7 +8,7 @@
 
 let
   nixSettings = import ../../common/nix-settings.nix;
-  piWrapper = pkgs.writeShellScriptBin "pi" ''
+  piBaseWrapper = pkgs.writeShellScriptBin "pi-base" ''
     set -euo pipefail
 
     PI_HOME="$HOME/.pi/agent"
@@ -21,6 +21,29 @@ let
     fi
 
     exec "$PI_BIN" "$@"
+  '';
+  piProfileWrapper = pkgs.writeShellScriptBin "pi-profile" ''
+    set -euo pipefail
+
+    PI_HOME="$HOME/.pi/agent"
+    PI_PROFILE_BIN="$PI_HOME/node_modules/.bin/pi-profile"
+
+    if [ ! -x "$PI_PROFILE_BIN" ]; then
+      echo "pi-profile is not installed in $PI_HOME" >&2
+      echo "Run: cd $PI_HOME && pnpm install" >&2
+      exit 1
+    fi
+
+    exec "$PI_PROFILE_BIN" "$@"
+  '';
+  piWrapper = pkgs.writeShellScriptBin "pi" ''
+    exec ${piProfileWrapper}/bin/pi-profile run default -- "$@"
+  '';
+  piWorkWrapper = pkgs.writeShellScriptBin "pi-work" ''
+    exec ${piProfileWrapper}/bin/pi-profile run work -- "$@"
+  '';
+  piPersonalWrapper = pkgs.writeShellScriptBin "pi-personal" ''
+    exec ${piProfileWrapper}/bin/pi-profile run personal -- "$@"
   '';
 in
 
@@ -81,6 +104,8 @@ in
       kustomize
       lazygit
       less
+      llama-cpp
+      llama-swap
       luarocks
       mariadb.client
       mtr
@@ -89,6 +114,12 @@ in
       nixfmt
       nixfmt-tree
       nodejs
+      piBaseWrapper
+      piPersonalWrapper
+      piProfileWrapper
+      piWorkWrapper
+      piWrapper
+      pinact
       postgresql_18
       procs
       pstree
@@ -111,13 +142,9 @@ in
       yj
       yq
       zig_0_15
+      zizmor
       zls_0_15
       zoxide
-      llama-cpp
-      llama-swap
-      pinact
-      piWrapper
-      zizmor
     ]
     ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
       amp

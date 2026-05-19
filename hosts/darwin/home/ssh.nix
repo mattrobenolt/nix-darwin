@@ -8,38 +8,34 @@ _:
     # Include OrbStack SSH config
     includes = [ "~/.orbstack/ssh/config" ];
 
-    matchBlocks = {
+    settings = {
       # Global settings for all hosts
       "*" = {
-        addKeysToAgent = "yes";
-        extraOptions = {
-          UseKeychain = "yes";
-          IdentityAgent = "\"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\"";
-        };
+        AddKeysToAgent = "yes";
+        UseKeychain = "yes";
+        IdentityAgent = "\"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\"";
       };
 
       # Diskstation - password auth only
       "diskstation.local" = {
-        extraOptions = {
-          PubkeyAuthentication = "no";
-          PreferredAuthentications = "password";
-        };
+        PubkeyAuthentication = "no";
+        PreferredAuthentications = "password";
       };
 
       # GitHub
       "github.com" = {
-        user = "git";
+        User = "git";
       };
 
       # Personal server
       "robenolt.com" = {
-        user = "m";
+        User = "m";
       };
 
       # Desktop PC
       "nixos.local" = {
-        user = "matt";
-        forwardAgent = true;
+        User = "matt";
+        ForwardAgent = true;
       };
     };
   };
