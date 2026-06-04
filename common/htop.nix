@@ -22,9 +22,9 @@ _:
       column_meter_modes_0 = "1 1 1";
       column_meters_1 = "RightCPUs2 Tasks LoadAverage Uptime";
       column_meter_modes_1 = "1 2 2 2";
-      tree_view = 1;
-      sort_key = 47;
-      tree_sort_key = 47;
+      tree_view = 0;
+      sort_key = 46;
+      tree_sort_key = 46;
       sort_direction = -1;
       tree_sort_direction = -1;
     };

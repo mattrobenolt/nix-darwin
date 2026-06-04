@@ -11,14 +11,18 @@ in
 {
   imports = [ ./hardware-configuration.nix ];
 
-  boot.loader = {
-    systemd-boot = {
-      enable = true;
-      configurationLimit = 2;
-      consoleMode = "max";
+  boot = {
+    kernelPackages = pkgs.linuxPackages_latest;
+
+    loader = {
+      systemd-boot = {
+        enable = true;
+        configurationLimit = 2;
+        consoleMode = "max";
+      };
+      timeout = 5;
+      efi.canTouchEfiVariables = true;
     };
-    timeout = 5;
-    efi.canTouchEfiVariables = true;
   };
 
   networking = {
