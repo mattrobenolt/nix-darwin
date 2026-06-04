@@ -1,109 +1,82 @@
 _: {
   wayland.windowManager.hyprland = {
     enable = true;
-    settings = {
-      "$mod" = "SUPER";
-      "$terminal" = "ghostty";
+    configType = "lua";
 
-      monitor = ",preferred,auto,auto";
+    extraConfig = ''
+      local mod = "SUPER"
+      local terminal = "ghostty"
 
-      exec-once = [
-        "waybar"
-        "wl-clip-persist --clipboard regular"
-        "1password --silent"
-      ];
+      hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
-      bind = [
-        # App launching (like macOS Cmd+Space, Cmd+Return)
-        # Launcher handled by hyprshell overview (Alt+Space)
-        #"$mod, Return, exec, $terminal +new-window"
+      hl.on("hyprland.start", function()
+        hl.exec_cmd("waybar")
+        hl.exec_cmd("wl-clip-persist --clipboard regular")
+        hl.exec_cmd("1password --silent")
+      end)
 
-        # Window management (macOS-style)
-        "$mod, Q, killactive" # Cmd+Q to quit/close window
-        #"$mod, W, killactive" # Also Cmd+W (more macOS-like for closing)
-        #"$mod, F, fullscreen, 0" # Cmd+Ctrl+F for fullscreen on macOS
+      hl.config({
+        general = {
+          gaps_in = 0,
+          gaps_out = 0,
+          border_size = 1,
+          col = {
+            active_border = "rgb(50fa7b) rgb(bd93f9) 45deg",
+            inactive_border = "rgb(44475a)",
+          },
+        },
 
-        # Focus movement (like macOS window switching)
-        "$mod, H, movefocus, l"
-        "$mod, L, movefocus, r"
-        "$mod, K, movefocus, u"
-        "$mod, J, movefocus, d"
+        decoration = {
+          rounding = 0,
+          shadow = { enabled = false },
+          blur = { enabled = false },
+        },
 
-        # Move windows
-        "$mod SHIFT, H, movewindow, l"
-        "$mod SHIFT, L, movewindow, r"
-        "$mod SHIFT, K, movewindow, u"
-        "$mod SHIFT, J, movewindow, d"
+        animations = { enabled = false },
 
-        # Workspace switching (like macOS Spaces with Ctrl+1,2,3...)
-        "$mod, 1, workspace, 1"
-        "$mod, 2, workspace, 2"
-        "$mod, 3, workspace, 3"
-        "$mod, 4, workspace, 4"
-        "$mod, 5, workspace, 5"
-        "$mod, 6, workspace, 6"
-        "$mod, 7, workspace, 7"
-        "$mod, 8, workspace, 8"
-        "$mod, 9, workspace, 9"
+        input = {
+          follow_mouse = 1,
+          accel_profile = "adaptive",
+          sensitivity = -0.8,
+          repeat_rate = 65,
+          repeat_delay = 225,
+          kb_options = "altwin:swap_alt_win",
+        },
 
-        # Move window to workspace (like macOS Cmd+Shift+1,2,3...)
-        "$mod SHIFT, 1, movetoworkspace, 1"
-        "$mod SHIFT, 2, movetoworkspace, 2"
-        "$mod SHIFT, 3, movetoworkspace, 3"
-        "$mod SHIFT, 4, movetoworkspace, 4"
-        "$mod SHIFT, 5, movetoworkspace, 5"
-        "$mod SHIFT, 6, movetoworkspace, 6"
-        "$mod SHIFT, 7, movetoworkspace, 7"
-        "$mod SHIFT, 8, movetoworkspace, 8"
-        "$mod SHIFT, 9, movetoworkspace, 9"
+        env = {
+          "LIBVA_DRIVER_NAME,nvidia",
+          "XDG_SESSION_TYPE,wayland",
+          "GBM_BACKEND,nvidia-drm",
+          "__GLX_VENDOR_LIBRARY_NAME,nvidia",
+          "NIXOS_OZONE_WL,1",
+        },
 
-        # Window switcher handled by hyprshell module (Alt+Tab)
-      ];
+        misc = {
+          disable_hyprland_logo = true,
+          background_color = "rgb(191a24)",
+        },
+      })
 
-      bindm = [
-        "$mod, mouse:272, movewindow"
-        "$mod, mouse:273, resizewindow"
-      ];
+      hl.bind(mod .. " + Q", hl.dsp.window.close())
 
-      general = {
-        gaps_in = 0;
-        gaps_out = 0;
-        border_size = 1;
-        "col.active_border" = "rgb(50fa7b) rgb(bd93f9) 45deg";
-        "col.inactive_border" = "rgb(44475a)";
-      };
+      hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
+      hl.bind(mod .. " + L", hl.dsp.focus({ direction = "r" }))
+      hl.bind(mod .. " + K", hl.dsp.focus({ direction = "u" }))
+      hl.bind(mod .. " + J", hl.dsp.focus({ direction = "d" }))
 
-      decoration = {
-        rounding = 0;
-        shadow.enabled = false;
-        blur.enabled = false;
-      };
+      hl.bind(mod .. " + SHIFT + H", hl.dsp.window.move({ direction = "l" }))
+      hl.bind(mod .. " + SHIFT + L", hl.dsp.window.move({ direction = "r" }))
+      hl.bind(mod .. " + SHIFT + K", hl.dsp.window.move({ direction = "u" }))
+      hl.bind(mod .. " + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
 
-      animations.enabled = false;
+      for i = 1, 9 do
+        local workspace = tostring(i)
+        hl.bind(mod .. " + " .. workspace, hl.dsp.focus({ workspace = workspace }))
+        hl.bind(mod .. " + SHIFT + " .. workspace, hl.dsp.window.move({ workspace = workspace }))
+      end
 
-      input = {
-        follow_mouse = 1;
-        accel_profile = "adaptive";
-        sensitivity = -0.8;
-
-        repeat_rate = 65;
-        repeat_delay = 225;
-
-        kb_options = "altwin:swap_alt_win";
-      };
-
-      env = [
-        "LIBVA_DRIVER_NAME,nvidia"
-        "XDG_SESSION_TYPE,wayland"
-        "GBM_BACKEND,nvidia-drm"
-        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-        "NIXOS_OZONE_WL,1"
-      ];
-
-      misc = {
-        disable_hyprland_logo = true;
-        background_color = "rgb(191a24)";
-      };
-    };
+      hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
+      hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+    '';
   };
 }
