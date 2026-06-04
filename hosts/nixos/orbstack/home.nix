@@ -108,6 +108,7 @@ in
     );
 
     packages = with pkgs; [
+      ast-grep
       btop
       bun
       fastfetch
@@ -146,9 +147,9 @@ in
     ssh = {
       enable = true;
       enableDefaultConfig = false;
-      matchBlocks = {
+      settings = {
         "github.com" = {
-          user = "git";
+          User = "git";
         };
       };
     };

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   home.sessionVariables = {
@@ -67,7 +67,9 @@
       geoip() { curl -s http://ip-api.com/json/$1?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query | jq . }
       bq() { jq "$@" | bat -l json }
 
-      ${pkgs.fortune}/bin/fortune | ${pkgs.cowsay}/bin/cowsay -f hellokitty | ${pkgs.lolcat}/bin/lolcat -t
+      ${pkgs.fortune}/bin/fortune | ${pkgs.cowsay}/bin/cowsay -f hellokitty | ${
+        inputs.mattware.packages.${pkgs.stdenv.hostPlatform.system}.prismacat
+      }/bin/prismacat --theme "Dracula"
     '';
   };
 }

@@ -78,6 +78,7 @@ in
       age
       asciinema
       atuin
+      ast-grep
       awscli2
       btop
       bun
@@ -160,6 +161,7 @@ in
       autoUpdate = true;
       upgrade = true;
       cleanup = "zap";
+      extraFlags = [ "--force-cleanup" ];
     };
 
     # Work-specific taps
@@ -169,11 +171,12 @@ in
     ];
 
     brews = [
+      "mole"
+      "sniffnet"
       "sst/tap/opencode"
       "syncthing"
       "tailscale"
       "tracy"
-      "mole"
     ];
 
     casks = [
@@ -199,6 +202,7 @@ in
       "session-manager-plugin"
       "slack"
       "telegram-desktop"
+      "todoist-app"
       "utm"
       "vanilla"
     ];
@@ -505,6 +509,12 @@ in
 
   # Restart services after configuration changes
   system.activationScripts.postActivation.text = ''
+    echo "Updating Homebrew..."
+    sudo --user=matt --set-home /opt/homebrew/bin/brew update
+
+    echo "Upgrading Homebrew packages..."
+    sudo --user=matt --set-home /opt/homebrew/bin/brew upgrade
+
     echo "Restarting nix daemon..."
     /bin/launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
 
