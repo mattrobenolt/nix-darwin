@@ -9,6 +9,7 @@
     extraConfig = ''
       local mod = "SUPER"
       local terminal = "ghostty"
+      local hyprshell = "${inputs.hyprshell.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell}/bin/hyprshell"
 
       hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
@@ -64,6 +65,7 @@
       })
 
       hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
+      hl.bind(mod .. " + Space", hl.dsp.exec_cmd(hyprshell .. " socat '\"OpenOverview\"'"))
       hl.bind(mod .. " + Q", hl.dsp.window.close())
 
       hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))
