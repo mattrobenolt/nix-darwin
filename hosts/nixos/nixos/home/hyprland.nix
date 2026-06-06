@@ -21,7 +21,10 @@ _: {
           gaps_out = 0,
           border_size = 1,
           col = {
-            active_border = "rgb(50fa7b) rgb(bd93f9) 45deg",
+            active_border = {
+              colors = { "rgb(50fa7b)", "rgb(bd93f9)" },
+              angle = 45,
+            },
             inactive_border = "rgb(44475a)",
           },
         },
@@ -57,6 +60,7 @@ _: {
         },
       })
 
+      hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
       hl.bind(mod .. " + Q", hl.dsp.window.close())
 
       hl.bind(mod .. " + H", hl.dsp.focus({ direction = "l" }))

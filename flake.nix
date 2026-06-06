@@ -75,6 +75,7 @@
             just
             fd
             nixfmt
+            lua5_4
             nushell
             statix
           ];
