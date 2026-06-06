@@ -1,31 +1,29 @@
 { inputs, pkgs, ... }:
 {
   imports = [
-    inputs.hyprshell.homeModules.hyprshell
+    inputs.hyprshell.homeModules.default
   ];
 
   programs.hyprshell = {
     enable = true;
-    package = inputs.hyprshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    package = inputs.hyprshell.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell;
 
     settings = {
       windows = {
-        enable = true; # Must enable windows to use switch and overview
+        enable = true;
 
-        # Window switcher (Alt+Tab)
-        switch = {
-          enable = true;
-          modifier = "super"; # Alt key (after swap) triggers the switcher
-        };
-
-        # App launcher + window overview (Alt+Space like macOS Cmd+Space)
         overview = {
           enable = true;
-          key = "space"; # Space key
-          modifier = "super"; # Physical Alt (sends Super after swap)
+          key = "space";
+          modifier = "super";
           launcher = {
-            max_items = 3; # Show up to 8 launcher items
+            max_items = 6;
           };
+        };
+
+        switch = {
+          enable = true;
+          modifier = "super";
         };
       };
     };
