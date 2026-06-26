@@ -8,29 +8,23 @@ This is a declarative macOS system configuration using nix-darwin and home-manag
 
 ## Essential Commands
 
-### Apply Configuration Changes
+Use the `just` recipes from the repo root instead of calling `darwin-rebuild` or `nixos-rebuild` directly. The recipes pick the right command for the current host.
+
 ```bash
-# Build and activate system configuration (requires sudo)
-sudo darwin-rebuild switch
+# Build the current host config without activating it
+just check
 
-# Build without activating (for testing)
-darwin-rebuild build --flake .
-
-# Check what would change without building
-darwin-rebuild check --flake .
-```
-
-### Development Workflow
-```bash
 # Format all Nix files
 just fmt
 
 # Lint Nix files
 just lint
 
-# Rebuild and switch to the current flake config for this host
+# Rebuild and switch to the current host config
 just apply
 ```
+
+`just apply` may prompt for sudo when activation needs it. For validation-only work, prefer `just check`.
 
 ## Configuration Architecture
 

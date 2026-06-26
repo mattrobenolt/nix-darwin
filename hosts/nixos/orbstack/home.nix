@@ -108,7 +108,12 @@ in
     );
 
     packages = with pkgs; [
-      ast-grep
+      (ast-grep {
+        languages.zig = {
+          grammar = tree-sitter-grammars.tree-sitter-zig;
+          extensions = [ "zig" ];
+        };
+      })
       btop
       bun
       fastfetch

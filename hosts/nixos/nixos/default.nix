@@ -55,7 +55,9 @@ in
       fd
       file
       git
+      perl
       psmisc
+      python3
       ripgrep
       strace
       vim

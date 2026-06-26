@@ -44,7 +44,9 @@ in
       hivemind
       neovim
       nixfmt
+      perl
       psmisc
+      python3
       strace
       wget
       zsh

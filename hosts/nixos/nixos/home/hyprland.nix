@@ -3,13 +3,16 @@
   wayland.windowManager.hyprland = {
     enable = true;
     package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
+    portalPackage =
+      inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
     configType = "lua";
 
     extraConfig = ''
       local mod = "SUPER"
       local terminal = "ghostty"
-      local hyprshell = "${inputs.hyprshell.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell}/bin/hyprshell"
+      local hyprshell = "${
+        inputs.hyprshell.packages.${pkgs.stdenv.hostPlatform.system}.hyprshell
+      }/bin/hyprshell"
 
       hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 

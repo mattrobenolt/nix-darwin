@@ -4,7 +4,6 @@
   # qmd — local hybrid search engine for Markdown (BM25 + vector + reranking)
   # https://github.com/tobi/qmd
   #
-  # Not in nixpkgs (node-llama-cpp native deps resist packaging).
   # Installed once into ~/.local/share/qmd, then exec'd directly.
   home.packages =
     let

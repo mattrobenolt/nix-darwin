@@ -2,6 +2,15 @@
 default:
     @just --list
 
+[doc("Build the current host config without activating it")]
+[group("nix")]
+[script("sh")]
+check:
+    case "$(uname)" in
+      Darwin) darwin-rebuild build --flake . ;;
+      *) nixos-rebuild build --flake . ;;
+    esac
+
 [doc("Rebuild and switch to the current flake config for this host")]
 [group("nix")]
 [script("sh")]
