@@ -4,21 +4,27 @@ default:
 
 [doc("Build the current host config without activating it")]
 [group("nix")]
-[script("sh")]
+[macos]
 check:
-    case "$(uname)" in
-      Darwin) darwin-rebuild build --flake . ;;
-      *) nixos-rebuild build --flake . ;;
-    esac
+    darwin-rebuild build --flake .
+
+[doc("Build the current host config without activating it")]
+[group("nix")]
+[linux]
+check:
+    nixos-rebuild build --flake .
 
 [doc("Rebuild and switch to the current flake config for this host")]
 [group("nix")]
-[script("sh")]
+[macos]
 apply:
-    case "$(uname)" in
-      Darwin) sudo darwin-rebuild switch --flake . ;;
-      *) sudo nixos-rebuild switch --flake . ;;
-    esac
+    sudo darwin-rebuild switch --flake .
+
+[doc("Rebuild and switch to the current flake config for this host")]
+[group("nix")]
+[linux]
+apply:
+    sudo nixos-rebuild switch --flake .
 
 [doc("Format all nix files")]
 [group("nix")]

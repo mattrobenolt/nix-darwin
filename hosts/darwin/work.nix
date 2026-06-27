@@ -168,9 +168,19 @@ in
 
     # Work-specific taps
     taps = [
-      "jundot/omlx"
-      "mattrobenolt/stuff"
-      "sst/tap"
+      {
+        name = "jundot/omlx";
+        clone_target = "https://github.com/jundot/omlx";
+        trusted = true;
+      }
+      {
+        name = "mattrobenolt/stuff";
+        trusted = true;
+      }
+      {
+        name = "sst/tap";
+        trusted = true;
+      }
     ];
 
     brews = [
