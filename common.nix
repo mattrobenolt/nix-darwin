@@ -34,6 +34,15 @@
   # Allow unfree packages (VS Code, etc.)
   nixpkgs.config.allowUnfree = true;
 
+  # nix-darwin's generated HTML manual currently lags nixos-render-docs.
+  # Keep manpages, skip the fragile HTML manual/darwin-help package.
+  documentation.doc.enable = false;
+
+  # The bundled uninstaller builds its own default darwin system, including
+  # the same broken HTML manual. Prefer `nix run nix-darwin#darwin-uninstaller`
+  # if this machine ever needs uninstalling.
+  system.tools.darwin-uninstaller.enable = false;
+
   # Shell integration
   programs.zsh.enable = true;
   # Note: User's default shell is managed by home-manager (see home/zsh.nix)

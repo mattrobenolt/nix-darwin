@@ -206,6 +206,7 @@ in
       "imageoptim"
       "inbox"
       "istat-menus"
+      "macshot"
       "notion"
       "obsidian"
       "opencode-desktop"
