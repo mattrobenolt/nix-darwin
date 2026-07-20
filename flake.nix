@@ -95,7 +95,7 @@
 
             {
               nixpkgs.overlays = [
-                llm-agents.overlays.default
+                llm-agents.overlays.shared-nixpkgs
                 llmAgentsRtkOverlay
               ];
             }
@@ -141,7 +141,7 @@
             # Apply package overlays used by home-manager and system packages
             {
               nixpkgs.overlays = [
-                llm-agents.overlays.default
+                llm-agents.overlays.shared-nixpkgs
                 mattware.overlays.default
                 llmAgentsRtkOverlay
               ];
@@ -168,7 +168,7 @@
 
             {
               nixpkgs.overlays = [
-                llm-agents.overlays.default
+                llm-agents.overlays.shared-nixpkgs
                 mattware.overlays.default
                 (_final: prev: {
                   ghostty = inputs.ghostty.packages.${prev.stdenv.hostPlatform.system}.default;
