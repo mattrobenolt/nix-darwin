@@ -197,24 +197,6 @@
         "type": "github"
       }
     },
-    "flake-utils": {
-      "inputs": {
-        "systems": "systems_9"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "ghostty": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -1237,11 +1219,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1784524375,
-        "narHash": "sha256-4Zoj1u26uc1SAkBfDPht95No60hjsluHInNc5/CJqZ0=",
+        "lastModified": 1785016798,
+        "narHash": "sha256-kkVIOjpT8iBPQyl09XgWGd5OX001uXpNp2aWFV70nHw=",
         "owner": "mattrobenolt",
         "repo": "nixpkgs",
-        "rev": "164acffd62d42462bf43784d4371c357fd131892",
+        "rev": "4f1e9a4f34a30fa11e14bdfbd29f557de62255d3",
         "type": "github"
       },
       "original": {
@@ -1477,28 +1459,6 @@
         "type": "github"
       }
     },
-    "qmd": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1782276828,
-        "narHash": "sha256-LLkrANLLR+2QgOpSdrjbwvzgP7dpOzayy9nCVqFUzeI=",
-        "owner": "tobi",
-        "repo": "qmd",
-        "rev": "e428df76bc0274d9e93eb7ca3e95673315c42e90",
-        "type": "github"
-      },
-      "original": {
-        "owner": "tobi",
-        "repo": "qmd",
-        "rev": "e428df76bc0274d9e93eb7ca3e95673315c42e90",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "ghostty": "ghostty",
@@ -1515,8 +1475,7 @@
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_8",
-        "nixvim": "nixvim",
-        "qmd": "qmd"
+        "nixvim": "nixvim"
       }
     },
     "systems": {
@@ -1637,21 +1596,6 @@
       "original": {
         "owner": "nix-systems",
         "ref": "future-26.11",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_9": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
         "repo": "default",
         "type": "github"
       }

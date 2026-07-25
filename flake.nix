@@ -9,11 +9,6 @@
     home-manager.url = "github:nix-community/home-manager";
     llm-agents.url = "github:numtide/llm-agents.nix";
 
-    qmd = {
-      url = "github:tobi/qmd/e428df76bc0274d9e93eb7ca3e95673315c42e90";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     nixvim = {
       url = "github:nix-community/nixvim";
