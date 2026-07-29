@@ -92,6 +92,7 @@ _:
 
       ".zig-cache/"
       "zig-out/"
+      ".pi-subagents"
     ];
   };
 }
