@@ -218,9 +218,9 @@ in
       "session-manager-plugin"
       "slack"
       "telegram-desktop"
+      "thaw"
       "todoist-app"
       "utm"
-      "vanilla"
     ];
   };
 
