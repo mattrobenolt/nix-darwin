@@ -221,6 +221,7 @@ in
       "thaw"
       "todoist-app"
       "utm"
+      "canon-eos-utility"
     ];
   };
 
@@ -249,7 +250,7 @@ in
         show-recents = false;
         tilesize = 67;
         # Behavior improvements
-        mru-spaces = true; # Don't auto-rearrange spaces
+        mru-spaces = false; # Keep Spaces in their configured order
         show-process-indicators = true; # Show dots under running apps
         minimize-to-application = false; # Minimize into app icon
         # Animation disabling
