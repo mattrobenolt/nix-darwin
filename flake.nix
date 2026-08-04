@@ -8,6 +8,7 @@
     mattware.url = "github:mattrobenolt/nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     llm-agents.url = "github:numtide/llm-agents.nix";
+    herdr.url = "github:herdrdev/herdr/v0.8.0";
 
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     nixvim = {

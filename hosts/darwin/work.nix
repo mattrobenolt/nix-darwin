@@ -1,12 +1,14 @@
 {
   pkgs,
   lib,
+  inputs,
   mattware,
   llm-agents,
   ...
 }:
 
 let
+  herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   nixSettings = import ../../common/nix-settings.nix;
   piBaseWrapper = pkgs.writeShellScriptBin "pi-base" ''
     set -euo pipefail
@@ -102,6 +104,7 @@ in
       go-bin_1_26
       google-cloud-sdk
       graphviz
+      herdr
       hexyl
       hwatch
       hyperfine
