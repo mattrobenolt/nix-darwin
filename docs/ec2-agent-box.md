@@ -15,6 +15,11 @@ Scaffolding landed with these deviations from the text below:
 - Local tofu state first; S3 backend documented but not enabled.
 - Bring-up runbook that reflects reality lives in `infra/launchpad/README.md`.
 
+2026-08-16: syncthing daemon + `pi-agent` share are live (box pulls
+~/.pi/agent per the scope below; canonical .stignore in
+hosts/nixos/launchpad/files/). Still pending: ~/code share to the box,
+diskstation ignore parity + junk sweep, identity pinning via 1Password.
+
 ## Decisions already made
 
 - **Multiplexer: herdr.** Already pinned in the flake (v0.8.0) with the pi

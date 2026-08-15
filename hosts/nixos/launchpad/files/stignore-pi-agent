@@ -1,0 +1,26 @@
+// Canonical ignore set for the pi-agent syncthing folder
+// (docs/ec2-agent-box.md "State sync: Syncthing, scoped").
+// Both sides symlink this file to ~/.pi/agent/.stignore.
+//
+// Syncs: the working tree, memory/, settings.json, auth.json, trust.json.
+// Ignores: autonomous-writer churn, caches, and local-only state.
+
+// Conflict forks are noise; never index them, never block cleanup.
+(?d)*.sync-conflict-*
+
+// Session history is per-machine. Backfill one-directionally at most.
+sessions
+sessions-index
+
+// pi's own git/worktree cache and any .git metadata. Live git dirs and
+// syncthing do not mix.
+git
+.git
+
+// Caches and build artifacts
+node_modules
+.direnv
+.cache
+
+// Runtime subagent scratch state. (Beyond the doc's list — veto welcome.)
+.pi-subagents

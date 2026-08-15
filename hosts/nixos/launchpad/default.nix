@@ -44,7 +44,20 @@ in
       # anywhere. Within syncthing's security model. The GUI stays on
       # 127.0.0.1:8384 — reach it with ssh -L 8384:localhost:8384.
       openDefaultPorts = true;
-      # Devices and folders are NOT declared yet — pairing is its own step.
+
+      settings = {
+        devices."Matts-MBP" = {
+          id = "2PAUDHA-72WFQLX-B6DJG63-VQXOUKE-FJJ345J-APVEJRI-VRG6VVM-F4CQ2Q2";
+        };
+        folders."pi-agent" = {
+          # ~/.pi/agent, scoped per docs/ec2-agent-box.md. Ignore patterns:
+          # files/stignore-pi-agent, symlinked into place on both sides.
+          path = "/home/matt/.pi/agent";
+          devices = [ "Matts-MBP" ];
+          # Sync permission bits so auth.json keeps 0600.
+          ignorePerms = false;
+        };
+      };
     };
   };
 
