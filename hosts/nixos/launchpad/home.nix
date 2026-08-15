@@ -25,6 +25,10 @@ in
 
   home.stateVersion = "26.05";
 
+  # Matches users.users.matt.home: identical absolute paths to the Mac so
+  # synced pi state (trust.json, sessions, skills) resolves correctly.
+  home.homeDirectory = lib.mkForce "/Users/matt";
+
   home.packages = [ piWrapper ];
 
   # Canonical ignore set for the pi-agent syncthing folder. The folder is

@@ -55,7 +55,9 @@ in
         folders."pi-agent" = {
           # ~/.pi/agent, scoped per docs/ec2-agent-box.md. Ignore patterns:
           # files/stignore-pi-agent, symlinked into place on both sides.
-          path = "/home/matt/.pi/agent";
+          # Same absolute path as the Mac — that's the point of the
+          # /Users/matt home.
+          path = "/Users/matt/.pi/agent";
           devices = [ "Matts-MBP" ];
           # Sync permission bits so auth.json keeps 0600.
           ignorePerms = false;
@@ -68,6 +70,8 @@ in
   # "syncthing" user; we run as matt, so make it ourselves.
   systemd.tmpfiles.rules = [
     "d /var/lib/syncthing 0700 matt users -"
+    # Parent of the unconventional home (see users.users.matt.home).
+    "d /Users 0755 root root -"
   ];
 
   environment.systemPackages = with pkgs; [
@@ -93,6 +97,12 @@ in
       isNormalUser = true;
       extraGroups = [ "wheel" ];
       shell = pkgs.zsh;
+      # Deliberately /Users/matt, not /home/matt: the synced pi state is
+      # full of absolute Mac paths (trust.json, session keys, skills).
+      # Matching the Mac's home path makes the synced tree correct by
+      # construction. Linux does not care; passwd drives $HOME.
+      home = "/Users/matt";
+      createHome = true;
       openssh.authorizedKeys.keys = [
         mattMainKey
       ];
