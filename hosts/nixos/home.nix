@@ -18,26 +18,44 @@
           extensions = [ "zig" ];
         };
       })
+      atuin
+      awscli2
       bun
       curl
+      deadnix
+      dnsutils
+      dust
+      entr
       fastfetch
       fd
       file
+      fzf
       gh
+      glow
+      gnutar
+      google-cloud-sdk
       hexyl
+      hwatch
+      hyperfine
+      inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
       jq
       just
+      mtr
       nixd
       nixfmt
       nodejs
       psmisc
+      python3
       ripgrep
       rtk
       ruff
+      socat
+      statix
       strace
       uv
       wget
-      inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
+      yq
+      zoxide
     ];
   };
 

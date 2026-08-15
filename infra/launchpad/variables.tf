@@ -46,7 +46,7 @@ variable "nixos_release" {
 }
 
 variable "ssh_public_key" {
-  description = "Bootstrap SSH public key, installed as the EC2 keypair. The NixOS AMI injects it for root at boot. Repeat it in hosts/nixos/launchpad/default.nix so matt gets it too."
+  description = "SSH public key installed as the EC2 keypair; the NixOS AMI injects it for root at boot. Matt's daily key — the same one in hosts/nixos/launchpad/default.nix. There is deliberately no separate bootstrap key."
   type        = string
 }
 

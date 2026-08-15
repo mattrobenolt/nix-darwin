@@ -72,86 +72,84 @@ in
     })
   ];
 
-  environment.systemPackages =
-    with pkgs;
-    [
-      _1password-cli
-      age
-      asciinema
-      atuin
-      (ast-grep {
-        languages.zig = {
-          grammar = tree-sitter-grammars.tree-sitter-zig;
-          extensions = [ "zig" ];
-        };
-      })
-      awscli2
-      btop
-      bun
-      clang
-      coredns
-      deadnix
-      delta
-      difftastic
-      dust
-      entr
-      exiftool
-      fzf
-      gh
-      glow
-      gnutar
-      go-bin_1_26
-      google-cloud-sdk
-      graphviz
-      herdr
-      hexyl
-      hwatch
-      hyperfine
-      jinja2-cli
-      just
-      kustomize
-      lazygit
-      less
-      luarocks
-      mariadb.client
-      mtr
-      nghttp2
-      nixd
-      nixfmt
-      nixfmt-tree
-      nodejs
-      piBaseWrapper
-      piPersonalWrapper
-      piProfileWrapper
-      piWorkWrapper
-      piWrapper
-      pinact
-      postgresql_18
-      procs
-      pstree
-      python3
-      rustup
-      scc
-      sentry-cli
-      shellcheck
-      socat
-      statix
-      swift
-      swift-format
-      timg
-      uv
-      watch
-      watchexec
-      weechat
-      wrk
-      yazi
-      yj
-      yq
-      zig_0_15
-      zizmor
-      zls_0_15
-      zoxide
-    ];
+  environment.systemPackages = with pkgs; [
+    _1password-cli
+    age
+    asciinema
+    atuin
+    (ast-grep {
+      languages.zig = {
+        grammar = tree-sitter-grammars.tree-sitter-zig;
+        extensions = [ "zig" ];
+      };
+    })
+    awscli2
+    btop
+    bun
+    clang
+    coredns
+    deadnix
+    delta
+    difftastic
+    dust
+    entr
+    exiftool
+    fzf
+    gh
+    glow
+    gnutar
+    go-bin_1_26
+    google-cloud-sdk
+    graphviz
+    herdr
+    hexyl
+    hwatch
+    hyperfine
+    jinja2-cli
+    just
+    kustomize
+    lazygit
+    less
+    luarocks
+    mariadb.client
+    mtr
+    nghttp2
+    nixd
+    nixfmt
+    nixfmt-tree
+    nodejs
+    piBaseWrapper
+    piPersonalWrapper
+    piProfileWrapper
+    piWorkWrapper
+    piWrapper
+    pinact
+    postgresql_18
+    procs
+    pstree
+    python3
+    rustup
+    scc
+    sentry-cli
+    shellcheck
+    socat
+    statix
+    swift
+    swift-format
+    timg
+    uv
+    watch
+    watchexec
+    weechat
+    wrk
+    yazi
+    yj
+    yq
+    zig_0_15
+    zizmor
+    zls_0_15
+    zoxide
+  ];
 
   # Homebrew integration (macOS GUI apps)
   homebrew = {

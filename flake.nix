@@ -81,6 +81,7 @@
             nushell
             opentofu
             statix
+            awscli2
           ];
         };
       });

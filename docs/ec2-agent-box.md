@@ -105,8 +105,9 @@ if a corp tool needs it.
 ## Bootstrap runbook
 
 Phase 1 — tofu:
-1. Create 1Password items: bootstrap SSH keypair, tailscale auth key
-   (reusable, pre-tagged). (For scaffolding, a plain local keypair is fine.)
+1. ~~Create 1Password bootstrap SSH keypair~~ — dropped 2026-08-16: the EC2
+   keypair is matt's daily key (already 1Password-backed). No second key.
+   Tailscale auth key still TBD when that iteration lands.
 2. ~~Create the S3 state bucket~~ — deferred; local state for now.
 3. `tofu -chdir=infra/launchpad init && apply`. Note the public IP.
 

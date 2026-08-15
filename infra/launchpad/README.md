@@ -18,68 +18,63 @@ inside it.
 
 - `tofu` and `nixos-rebuild` (both in the devShell).
 - `aws` CLI with SSO access to the playground account.
-- An SSH keypair for bootstrap. To create a dedicated one:
-
-  ```
-  ssh-keygen -t ed25519 -f ~/.ssh/launchpad-bootstrap -C launchpad
-  ```
+- matt's daily SSH key (`~/.ssh/id_ed25519`, served by the 1Password agent).
+  This same key is the EC2 keypair: there is no separate bootstrap key, by
+  design — one fewer secret, and the key that births the box is the key that
+  daily-drives it.
 
 ## Bring up the box
 
 1. Log in to AWS SSO:
 
    ```
-   aws sso login --profile playground-ops
+   aws sso login --profile playground
    ```
 
-2. Paste the bootstrap **public** key into two places:
-   `authorizedKeys` in `hosts/nixos/launchpad/default.nix`, and the
-   `-var ssh_public_key` flag below. (Two copies today; fix when it annoys.)
-
-3. Apply:
+2. Apply:
 
    ```
    tofu init
-   tofu apply -var ssh_public_key="$(cat ~/.ssh/launchpad-bootstrap.pub)"
+   tofu apply -var ssh_public_key="$(cat ~/.ssh/id_ed25519.pub)"
    ```
 
-4. Note the `public_ip` output. Verify the stock AMI works:
+3. Note the `public_ip` output. Verify the stock AMI works:
 
    ```
-   ssh -i ~/.ssh/launchpad-bootstrap -o IdentitiesOnly=yes root@<ip>
+   ssh root@<ip>
    ```
 
-   If the instance was already up before the key existed, reboot it. The
-   AMI injects the EC2 keypair for root at boot only.
+   The AMI injects the EC2 keypair for root at boot only. If the instance
+   was already running before the key existed, reboot it.
 
-5. Rebuild the box from this flake. Run from the repo root. The devShell
-   provides `nixos-rebuild` (the Mac does not ship one). Evaluation happens
-   on the Mac, the build happens on the box (no linux builder needed):
+4. Rebuild the box from this flake. Run from the repo root. Evaluation
+   happens on the Mac, the build happens on the box (no linux builder
+   needed). With the ssh `Host launchpad` entry active on the Mac, this is:
 
    ```
-   NIX_SSHOPTS="-i $HOME/.ssh/launchpad-bootstrap -o IdentitiesOnly=yes" \
+   just remote-apply
+   ```
+
+   which wraps:
+
+   ```
    nixos-rebuild switch --flake .#launchpad \
      --target-host root@<ip> --build-host root@<ip>
    ```
 
-   The NIX_SSHOPTS ceremony is only needed until matt's daily key lands in
-   the box config (done) and the ssh `Host launchpad` entry is active on
-   the Mac. After that: `--target-host root@launchpad --build-host root@launchpad`.
-
-6. Verify user access:
+5. Verify user access:
 
    ```
    ssh matt@<ip>
    ```
 
-From then on, day-2 changes are edits to `hosts/nixos/launchpad/` plus the
-same `nixos-rebuild` command.
+From then on, day-2 changes are edits to `hosts/nixos/launchpad/` plus
+`just remote-apply`.
 
 ## SSH access (Mac)
 
 `hosts/darwin/home/ssh.nix` defines `Host launchpad` pointing at the EIP.
-The 1Password agent serves matt's daily key for it. Until the Mac config is
-applied, use `ssh matt@<ip>` directly — the agent path already works.
+The 1Password agent serves matt's daily key for it.
 
 ## Resize the box
 

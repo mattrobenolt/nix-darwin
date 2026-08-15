@@ -3,9 +3,11 @@
 let
   nixSettings = import ../../../common/nix-settings.nix;
 
-  # matt's daily key, served by the 1Password agent on the Mac.
+  # matt's daily key, served by the 1Password agent on the Mac. Also the
+  # EC2 keypair (var.ssh_public_key in infra/launchpad), so a fresh AMI
+  # birth injects this same key for root. There is no separate bootstrap
+  # key.
   mattMainKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG matt@ydekproductions.com";
-  bootstrapKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJz8zsFy2vUN9wDFGLSV5dZw1vNQ9IwIHQF4yIhVxTa0 launchpad-bootstrap";
 in
 {
   imports = [ ./hardware.nix ];
@@ -46,8 +48,8 @@ in
   programs.zsh.enable = true;
 
   users.users = {
-    # Break-glass + nixos-rebuild target. The AMI also injects the EC2
-    # keypair (launchpad-bootstrap) for root at boot.
+    # nixos-rebuild target + daily login. The AMI also injects the EC2
+    # keypair (= the same key) for root at boot.
     root.openssh.authorizedKeys.keys = [
       mattMainKey
     ];
@@ -58,9 +60,6 @@ in
       shell = pkgs.zsh;
       openssh.authorizedKeys.keys = [
         mattMainKey
-        # launchpad-bootstrap: break-glass key, also the EC2 keypair
-        # (var.ssh_public_key in infra/launchpad).
-        bootstrapKey
       ];
     };
   };
