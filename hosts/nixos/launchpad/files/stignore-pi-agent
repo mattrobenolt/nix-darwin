@@ -1,26 +1,30 @@
-// Canonical ignore set for the pi-agent syncthing folder
-// (docs/ec2-agent-box.md "State sync: Syncthing, scoped").
+// Canonical ignore set for the pi-agent syncthing folder.
 // Both sides symlink this file to ~/.pi/agent/.stignore.
 //
-// Syncs: the working tree, memory/, settings.json, auth.json, trust.json.
-// Ignores: autonomous-writer churn, caches, and local-only state.
+// GOTCHA (box side): the symlink target lives in the nix store, where all
+// mtimes are epoch 0. Syncthing detects .stignore changes by mtime, so it
+// never notices an update. After changing this file, restart syncthing on
+// the box: sudo systemctl restart syncthing (the Mac side is a real file
+// and reloads on its own).
+//
+// Syncs: the working tree, memory/, settings.json, auth.json, trust.json,
+// sessions/ (the box's curation writer reads Mac-side sessions), git/
+// (clones; ~/code has synced live git dirs for years without issue).
 
 // Conflict forks are noise; never index them, never block cleanup.
 (?d)*.sync-conflict-*
 
-// Session history is per-machine. Backfill one-directionally at most.
-sessions
+// Derived session index: a live sqlite DB (shared sqlite + concurrent
+// writers = corruption). Each machine rebuilds its own via qmd embed.
 sessions-index
 
-// pi's own git/worktree cache and any .git metadata. Live git dirs and
-// syncthing do not mix.
-git
-.git
-
-// Caches and build artifacts
+// Machine-local build artifacts. .direnv holds symlinks into the Mac's
+// /nix/store; meaningless on the box. node_modules is one pnpm install away.
 node_modules
 .direnv
+
+// qmd cache: models + embeddings. Local per machine.
 .cache
 
-// Runtime subagent scratch state. (Beyond the doc's list — veto welcome.)
+// Runtime subagent state (pids, sockets) — dead on arrival cross-machine.
 .pi-subagents

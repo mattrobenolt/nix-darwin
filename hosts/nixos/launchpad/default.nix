@@ -48,6 +48,9 @@ in
       settings = {
         devices."Matts-MBP" = {
           id = "2PAUDHA-72WFQLX-B6DJG63-VQXOUKE-FJJ345J-APVEJRI-VRG6VVM-F4CQ2Q2";
+          # Remote link over a home upload; everything bulky is text. LZ4
+          # is cheap on both ends.
+          compression = "always";
         };
         folders."pi-agent" = {
           # ~/.pi/agent, scoped per docs/ec2-agent-box.md. Ignore patterns:
