@@ -1,0 +1,43 @@
+// Mirror of ~/code/.stignore-shared (the syncthing-mesh canonical).
+// The box can't #include the synced file: the include only exists
+// AFTER the first sync, and a missing include fails ignore parsing
+// and blocks that sync. Keep the two in sync manually.
+
+// Conflict forks are noise; never let them sync or block cleanup.
+(?d)*.sync-conflict-*
+
+// Exception: a nested git repo literally named "target" (a clone inside
+// exosphere-red-team, gitignored by the parent). Must precede the bare
+// target pattern — first match wins.
+!/planetscale/exosphere-red-team/target
+
+// JS/TS build output
+(?d)node_modules
+(?d)dist
+(?d).next
+(?d).turbo
+(?d).vercel
+(?d).wrangler
+
+// Python
+(?d)__pycache__
+(?d).pytest_cache
+(?d).mypy_cache
+(?d).ruff_cache
+(?d).venv
+(?d)*.egg-info
+
+// Rust / Zig
+(?d)target
+(?d).zig-cache
+(?d)zig-out
+
+// Nix
+(?d).direnv
+(?d)result
+(?d)result-*
+
+// Infra / OS
+(?d).terraform
+(?d).gradle
+(?d).DS_Store

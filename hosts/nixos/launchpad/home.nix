@@ -79,18 +79,30 @@ in
     '';
   };
 
+  # Box-side herdr server config. Client-side rendering settings stay in
+  # the Mac's config — in --remote mode the local client owns them.
+  xdg.configFile."herdr/config.toml".text = ''
+    onboarding = false
+
+    [update]
+    version_check = false
+    manifest_check = false
+
+    [session]
+    resume_agents_on_restore = true
+  '';
+
   # Canonical ignore set for the pi-agent syncthing folder. The folder is
   # created by syncthing itself on first share; this symlink pre-exists so
   # the ignores are in effect before the first pull. The Mac side symlinks
   # the same file from this repo checkout.
   home.file.".pi/agent/.stignore".source = ./files/stignore-pi-agent;
 
-  # ~/code share: same include pattern as the Mac — the shared list arrives
-  # with the sync itself; pull direction is pre-filtered by the Mac anyway.
-  home.file."code/.stignore".text = ''
-    // Shared list is synced as .stignore-shared (same as every node).
-    #include .stignore-shared
-  '';
+  # ~/code share: repo-managed literal ignore list. Do NOT use
+  # "#include .stignore-shared" here — the shared file only exists after
+  # the first sync, and a missing include fails ignore parsing, which
+  # blocks that sync (chicken-and-egg, learned the hard way).
+  home.file."code/.stignore".source = ./files/stignore-code;
 
   programs.git = {
     # The box signs with its own key, registered on GitHub as a signing key
