@@ -33,7 +33,26 @@ in
     };
     # Never. coredns owns :53.
     resolved.enable = false;
+
+    syncthing = {
+      enable = true;
+      # Run as matt: synced files land owned by the same user the agents
+      # run as. State lives in /var/lib/syncthing (module default).
+      user = "matt";
+      group = "users";
+      # Opens the NixOS firewall for 22000 tcp/udp; the SG allows it from
+      # anywhere. Within syncthing's security model. The GUI stays on
+      # 127.0.0.1:8384 — reach it with ssh -L 8384:localhost:8384.
+      openDefaultPorts = true;
+      # Devices and folders are NOT declared yet — pairing is its own step.
+    };
   };
+
+  # The syncthing module only creates its state dir for the default
+  # "syncthing" user; we run as matt, so make it ourselves.
+  systemd.tmpfiles.rules = [
+    "d /var/lib/syncthing 0700 matt users -"
+  ];
 
   environment.systemPackages = with pkgs; [
     curl

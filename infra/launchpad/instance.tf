@@ -39,6 +39,24 @@ resource "aws_security_group" "main" {
     cidr_blocks = var.allowed_ssh_cidrs
   }
 
+  # syncthing: designed for untrusted networks (mutual TLS, the device ID is
+  # the cert fingerprint — unknown peers get nothing). Exposed on purpose.
+  ingress {
+    description = "syncthing TCP"
+    from_port   = 22000
+    to_port     = 22000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "syncthing QUIC"
+    from_port   = 22000
+    to_port     = 22000
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
