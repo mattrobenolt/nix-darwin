@@ -15,10 +15,9 @@ Scaffolding landed with these deviations from the text below:
 - Local tofu state first; S3 backend documented but not enabled.
 - Bring-up runbook that reflects reality lives in `infra/launchpad/README.md`.
 
-2026-08-16: syncthing daemon + `pi-agent` share are live (box pulls
-~/.pi/agent per the scope below; canonical .stignore in
-hosts/nixos/launchpad/files/). Still pending: ~/code share to the box,
-diskstation ignore parity + junk sweep, identity pinning via 1Password.
+2026-08-16: syncthing daemon + `pi-agent` share are live and complete
+(4.25GB, compression=always both sides). Still pending: ~/code share to the
+box, diskstation ignore parity + junk sweep, identity pinning via 1Password.
 
 ## Decisions already made
 
@@ -45,10 +44,16 @@ diskstation ignore parity + junk sweep, identity pinning via 1Password.
 - **State sync: Syncthing, scoped.** Matt already runs Syncthing over all of
   ~/code (years, no issues) because humans write one-keyboard-at-a-time.
   `~/.pi` has autonomous writers (agents, hourly curation), so scope it:
-  - Sync: `memory/`, `settings.json`, `auth.json`, `trust.json`, working tree.
-  - Ignore: `sessions-index/`, `.cache/qmd`, `node_modules/`, `.direnv/`,
-    `git/`, `sessions/` (backfill one-directionally at most), and
+  - Sync: `memory/`, `settings.json`, `auth.json`, `trust.json`, working tree,
+    `sessions/` (the box's curation writer reads Mac-side sessions — required),
+    `git/` (live git dirs sync fine; ~/code has done it for years).
+  - Ignore (revised 2026-08-16): `sessions-index/`, `.cache` (live sqlite,
+    rebuilt per machine via qmd embed), `node_modules/`, `.direnv/` (Mac
+    /nix/store symlinks), `.pi-subagents/` (runtime state), and
     `*.sync-conflict-*` (so conflict forks never get indexed by qmd).
+  - Canonical ignore file: `hosts/nixos/launchpad/files/stignore-pi-agent`,
+    symlinked into place on both sides. Box-side changes need a syncthing
+    restart (nix store mtimes are epoch 0 — mtime detection never fires).
   - **Exactly one curation writer across all machines.** The hourly
     curate-memory timer lives on the box; the launchd job on the Mac gets
     deleted at cutover. No exceptions.
@@ -132,14 +137,17 @@ Phase 3 — auth:
 4. Adjust `~/.gitconfig`: drop `op-ssh-sign`, point signing at the box key.
 5. Deploy the box SSH key to internal hosts that agents touch.
 
-Phase 4 — state:
+Phase 4 — state: (partially done 2026-08-16)
 1. Bulk re-clone ~/code from origin URLs (script over the Mac's remotes);
    rsync unpushed/local-only repos (bench-results, adventofcode, etc.).
-2. rsync `~/.pi/agent/memory/` (5MB) and historical `sessions/` if wanted.
-3. Configure the Syncthing folder per the scoped rules above.
-4. `pnpm install` in the agent repo; verify `pi` runs (orbstack wrapper
-   pattern: `node_modules/.bin/pi`).
-5. `qmd embed` on the box to rebuild the memory index.
+   [or: share ~/code via syncthing folder bjkky-xjf6r — pending]
+2. ~~rsync `~/.pi/agent/memory/`~~ — syncthing `pi-agent` share covers it.
+3. ~~Configure the Syncthing folder per the scoped rules above~~ — done;
+   canonical ignore file in hosts/nixos/launchpad/files/.
+4. ~~`pnpm install` in the agent repo; verify `pi` runs~~ — done. `pi` is a
+   home-manager wrapper (no pi-profile on the box); install with
+   `pnpm install --frozen-lockfile` (never mutate the synced lockfile).
+5. `qmd embed` on the box to rebuild the memory index. [pending]
 
 Phase 5 — cutover:
 1. Add the curate-memory systemd timer on the box.
