@@ -104,9 +104,10 @@ in
   # blocks that sync (chicken-and-egg, learned the hard way).
   home.file."code/.stignore".source = ./files/stignore-code;
 
-  # aws-login: device-code SSO login for the box (see infra/launchpad/README.md).
+  # aws-login: headless SSO login flags (see infra/launchpad/README.md).
+  # Usage: aws-login --profile <name>
   programs.zsh.shellAliases = {
-    aws-login = "aws sso login --profile playground --use-device-code --no-browser";
+    aws-login = "aws sso login --use-device-code --no-browser";
   };
 
   programs.git = {

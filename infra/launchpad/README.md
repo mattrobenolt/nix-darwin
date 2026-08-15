@@ -93,8 +93,8 @@ profiles change on the Mac, re-rsync it.
 
 When aws calls fail with "Token has expired and refresh failed":
 
-1. On the box, run: `aws-login` (alias for
-   `aws sso login --profile playground --use-device-code --no-browser`).
+1. On the box, run: `aws-login --profile playground` (alias for
+   `aws sso login --use-device-code --no-browser`; pass any profile).
 2. It prints a URL and a code. Open the URL in any browser and approve.
 3. Done — one login covers every profile, because they all share
    `sso_session = planetscale`.
