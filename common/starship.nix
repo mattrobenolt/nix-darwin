@@ -51,34 +51,6 @@
         untracked = "";
         modified = "*";
       };
-
-      profiles = {
-        claude-code = "$directory $git_branch$git_status$time$fill$claude_model$claude_context";
-      };
-
-      claude_model = {
-        format = "[$model]($style) ";
-        style = "bright-black";
-        symbol = "";
-      };
-
-      claude_context = {
-        format = "[↑$input_tokens ↓$output_tokens]($style) ";
-        display = [
-          {
-            threshold = 0;
-            style = "bright-black";
-          }
-          {
-            threshold = 80;
-            style = "yellow";
-          }
-          {
-            threshold = 95;
-            style = "red bold";
-          }
-        ];
-      };
     };
   };
 }

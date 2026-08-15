@@ -72,12 +72,14 @@
         default = nixpkgs.legacyPackages.${system}.mkShell {
           packages = with nixpkgs.legacyPackages.${system}; [
             deadnix
+            fd
             gum
             just
-            fd
-            nixfmt
             lua5_4
+            nixfmt
+            nixos-rebuild
             nushell
+            opentofu
             statix
           ];
         };
@@ -133,6 +135,34 @@
       # ============================================================================
 
       nixosConfigurations = {
+        # EC2 agent box (aarch64-linux, playground account, us-west-2).
+        # Infra lives in infra/launchpad/; bring-up runbook in
+        # infra/launchpad/README.md.
+        launchpad = nixpkgs.lib.nixosSystem {
+          system = "aarch64-linux";
+          modules = [
+            ./hosts/nixos/launchpad/default.nix
+
+            {
+              nixpkgs.overlays = [
+                llm-agents.overlays.shared-nixpkgs
+                mattware.overlays.default
+                llmAgentsRtkOverlay
+              ];
+            }
+
+            home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                users.matt = import ./hosts/nixos/launchpad/home.nix;
+                extraSpecialArgs = { inherit inputs; };
+              };
+            }
+          ];
+        };
+
         # OrbStack VM (aarch64-linux, shares filesystem with Mac)
         orbstack = nixpkgs.lib.nixosSystem {
           system = "aarch64-linux";

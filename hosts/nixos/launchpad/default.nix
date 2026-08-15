@@ -1,0 +1,94 @@
+{ pkgs, ... }:
+
+let
+  nixSettings = import ../../../common/nix-settings.nix;
+
+  # matt's daily key, served by the 1Password agent on the Mac.
+  mattMainKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG matt@ydekproductions.com";
+  bootstrapKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJz8zsFy2vUN9wDFGLSV5dZw1vNQ9IwIHQF4yIhVxTa0 launchpad-bootstrap";
+in
+{
+  imports = [ ./hardware.nix ];
+
+  time.timeZone = "America/Los_Angeles";
+  system.stateVersion = "26.05";
+
+  networking = {
+    hostName = "launchpad";
+    # The VPC has no IPv6 CIDR; disable it in the kernel too, so nothing
+    # attempts link-local v6. The Corefile also sinks AAAA answers.
+    enableIPv6 = false;
+    # Everything goes through the local coredns; keep dhcpcd's learned
+    # VPC resolver out of resolv.conf (coredns already forwards there).
+    nameservers = [ "127.0.0.1" ];
+    dhcpcd.extraConfig = "nohook resolv.conf";
+  };
+
+  services = {
+    coredns = {
+      enable = true;
+      config = builtins.readFile ./files/Corefile;
+    };
+    # Never. coredns owns :53.
+    resolved.enable = false;
+  };
+
+  environment.systemPackages = with pkgs; [
+    curl
+    file
+    git
+    neovim
+    nixfmt
+    strace
+    wget
+  ];
+
+  programs.zsh.enable = true;
+
+  users.users = {
+    # Break-glass + nixos-rebuild target. The AMI also injects the EC2
+    # keypair (launchpad-bootstrap) for root at boot.
+    root.openssh.authorizedKeys.keys = [
+      mattMainKey
+    ];
+
+    matt = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" ];
+      shell = pkgs.zsh;
+      openssh.authorizedKeys.keys = [
+        mattMainKey
+        # launchpad-bootstrap: break-glass key, also the EC2 keypair
+        # (var.ssh_public_key in infra/launchpad).
+        bootstrapKey
+      ];
+    };
+  };
+
+  security.sudo.wheelNeedsPassword = false;
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+    };
+  };
+
+  nix = {
+    settings = {
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
+      extra-substituters = nixSettings.substituters;
+      extra-trusted-public-keys = nixSettings.trustedPublicKeys;
+      trusted-users = nixSettings.trustedUsers;
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 14d";
+    };
+  };
+}

@@ -1,20 +1,9 @@
 { pkgs, ... }:
 {
+  # Shared NixOS layer (home-common.nix + linux package set) lives in
+  # hosts/nixos/home.nix. This file keeps only the desktop/GUI specifics.
   imports = [
-    ../../../../common/atuin.nix
-    ../../../../common/bat.nix
-    ../../../../common/btop.nix
-    ../../../../common/delta.nix
-    ../../../../common/direnv.nix
-    ../../../../common/eza.nix
-    ../../../../common/git.nix
-    ../../../../common/htop.nix
-    ../../../../common/neovim.nix
-    ../../../../common/starship.nix
-    ../../../../common/yazi.nix
-    ../../../../common/zellij.nix
-    ../../../../common/zoxide.nix
-    ../../../../common/zsh.nix
+    ../../home.nix
     ./ghostty.nix
     ./git.nix
     ./hypridle.nix
@@ -29,38 +18,17 @@
 
   home = {
     stateVersion = "26.05";
-    username = "matt";
-    homeDirectory = "/home/matt";
-    sessionPath = [ "$HOME/.local/bin" ];
 
     packages = with pkgs; [
-      curl
-      fastfetch
-      fd
-      file
-      hexyl
-      gh
+      helium
       hypridle
       hyprlock
       hyprpolkitagent
       hyprshutdown
       hyprsunset
-      jq
-      just
-      nixd
-      nixfmt
-      psmisc
-      ripgrep
-      ruff
-      strace
-      uv
-      wget
+      pulseaudio
       wl-clip-persist
       wl-clipboard
-      pulseaudio
-      claude-code
-      codex
-      helium
       zed-preview
     ];
 

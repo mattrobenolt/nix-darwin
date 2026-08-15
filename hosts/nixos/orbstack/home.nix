@@ -76,13 +76,12 @@ let
 in
 
 {
-  imports = [ ../../../home-common.nix ];
+  # Shared NixOS layer (home-common.nix + linux package set) lives in
+  # hosts/nixos/home.nix.
+  imports = [ ../home.nix ];
 
   home = {
-    username = "matt";
-    homeDirectory = "/home/matt";
     stateVersion = "26.05";
-    sessionPath = [ "$HOME/.local/bin" ];
 
     sessionVariables = {
       DOCKER_HOST = "unix:///run/podman/podman.sock";
@@ -108,55 +107,20 @@ in
       }) codexShared
     );
 
-    packages = with pkgs; [
-      (ast-grep {
-        languages.zig = {
-          grammar = tree-sitter-grammars.tree-sitter-zig;
-          extensions = [ "zig" ];
-        };
-      })
-      btop
-      bun
-      fastfetch
-      fd
-      gh
-      hexyl
-      htop
-      jq
-      llm-agents.claude-code
-      llm-agents.codex
-      nixd
-      nixfmt
-      nodejs
+    # orbstack-specific: pi runs from the Mac's ~/.pi/agent via symlink.
+    packages = [
       piBaseWrapper
       piWrapper
       piWorkWrapper
       piPersonalWrapper
       piProfileWrapper
-      ripgrep
-      rtk
-      uv
     ];
   };
 
   programs = {
-    home-manager.enable = true;
-
     zsh = {
-      enable = true;
-      defaultKeymap = "emacs";
       shellAliases = {
         nixos-update = "sudo nixos-rebuild switch --flake /mnt/mac/Users/matt/.config/nix-darwin#${osConfig.networking.hostName}";
-      };
-    };
-
-    ssh = {
-      enable = true;
-      enableDefaultConfig = false;
-      settings = {
-        "github.com" = {
-          User = "git";
-        };
       };
     };
   };

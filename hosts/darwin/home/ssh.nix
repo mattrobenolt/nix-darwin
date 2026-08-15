@@ -37,6 +37,13 @@ _:
         User = "matt";
         ForwardAgent = true;
       };
+
+      # EC2 agent box. EIP is stable across stop/retype resizes;
+      # the tailscale hostname replaces this once the box joins the tailnet.
+      "launchpad" = {
+        HostName = "52.25.100.5";
+        User = "matt";
+      };
     };
   };
 }

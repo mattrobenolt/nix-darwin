@@ -1,0 +1,65 @@
+# Local recursive DNS, replicating the Mac's setup (hosts/darwin/files/Corefile)
+# with a VPC-resolver upstream instead of the home LAN resolver.
+#
+# - `.` forwards to the EC2 VPC DNS (link-local, CIDR-independent; handles
+#   AWS-internal names), falling back to Cloudflare over DoT.
+# - `ts.net.` forwards to Tailscale MagicDNS. Inert until the box joins the
+#   tailnet; then tailnet names resolve box-side.
+# - `svc.cluster.local.` forwards to the home LAN k8s resolver. Inert until
+#   tailscale gives the box a route to the LAN.
+# - AAAA queries get an empty NOERROR; the kernel has IPv6 disabled, so
+#   nothing can use an AAAA answer anyway.
+.:53 {
+  bind 127.0.0.1
+
+  forward . 169.254.169.253 tls://1.1.1.1 tls://1.0.0.1 {
+    policy sequential
+    tls_servername one.one.one.one
+    max_fails 1
+    health_check 5s
+  }
+
+  hosts {
+    ttl 30
+    fallthrough
+  }
+
+  template ANY AAAA {
+    rcode NOERROR
+  }
+
+  cache
+  local
+  loadbalance
+  log . "{proto} {name} {type} {rcode} {duration}"
+}
+
+ts.net.:53 {
+  bind 127.0.0.1
+
+  forward . 100.100.100.100:53 {
+    max_fails 1
+  }
+
+  hosts {
+    ttl 30
+    fallthrough
+  }
+
+  cache 30
+  log . "{proto} {name} {type} {rcode} {duration}"
+}
+
+# Home LAN k8s. Needs a tailscale route to 192.168.194.0/24 to answer.
+svc.cluster.local.:53 {
+  bind 127.0.0.1
+
+  forward . 192.168.194.138:53 {
+    force_tcp
+    health_check 60s
+  }
+
+  cache
+  loadbalance
+  log . "{proto} {name} {type} {rcode} {duration}"
+}
