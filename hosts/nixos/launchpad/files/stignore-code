@@ -41,3 +41,14 @@
 (?d).terraform
 (?d).gradle
 (?d).DS_Store
+
+// Volume trash & OS junk (e.g. freedesktop .Trash-<uid> written by tools
+// inside the orbstack VM treating the bind mount as a volume root).
+(?d).Trash-*
+(?d).Trashes
+(?d)$RECYCLE.BIN
+(?d).recycle
+(?d)System Volume Information
+(?d).fseventsd
+(?d).Spotlight-V100
+(?d).TemporaryItems

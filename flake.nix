@@ -157,6 +157,9 @@
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
+                # Agent tools write their own config files into HM-managed
+                # paths (herdr did); back up rather than fail activation.
+                backupFileExtension = "backup";
                 users.matt = import ./hosts/nixos/launchpad/home.nix;
                 extraSpecialArgs = { inherit inputs; };
               };
