@@ -49,17 +49,3 @@ ts.net.:53 {
   cache 30
   log . "{proto} {name} {type} {rcode} {duration}"
 }
-
-# Home LAN k8s. Needs a tailscale route to 192.168.194.0/24 to answer.
-svc.cluster.local.:53 {
-  bind 127.0.0.1
-
-  forward . 192.168.194.138:53 {
-    force_tcp
-    health_check 60s
-  }
-
-  cache
-  loadbalance
-  log . "{proto} {name} {type} {rcode} {duration}"
-}
