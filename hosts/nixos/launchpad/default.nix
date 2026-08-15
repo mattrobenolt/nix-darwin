@@ -1,13 +1,26 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   nixSettings = import ../../../common/nix-settings.nix;
+  sshKeys = import ../../../common/ssh-keys.nix { inherit lib; };
 
-  # matt's daily key, served by the 1Password agent on the Mac. Also the
-  # EC2 keypair (var.ssh_public_key in infra/launchpad), so a fresh AMI
-  # birth injects this same key for root. There is no separate bootstrap
-  # key.
-  mattMainKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG matt@ydekproductions.com";
+  # matt's daily key (canonical source: https://mattrobenolt.com/id_ed25519.pub).
+  # Also the EC2 keypair, so a fresh AMI birth injects this same key for
+  # root. There is no separate bootstrap key.
+  mattMainKey = sshKeys.mattMainWithComment;
+
+  # PATH for the qmd systemd units: the bun wrapper bootstraps qmd into
+  # $HOME and node-llama-cpp compiles its backend on first model load.
+  qmdUnitPath = lib.mkForce (
+    lib.makeBinPath [
+      pkgs.nodejs # qmd spawns node subprocesses even when run under bun
+      pkgs.bun
+      pkgs.cmake
+      pkgs.gnumake
+      pkgs.gcc
+      pkgs.coreutils
+    ]
+  );
 in
 {
   imports = [ ./hardware.nix ];
@@ -79,17 +92,46 @@ in
   # owns it. Foreground mode — no --daemon flag, systemd supervises.
   # Localhost only (8181); no SG/firewall exposure. State and models live
   # in matt's ~/.cache/qmd (box-local, deliberately unsynced).
+  #
+  # NOTE: uses the bun-installed qmd wrapper (~/.local/bin/qmd), not
+  # pkgs.qmd — see home.nix for why (node-llama-cpp linux-aarch64 gap).
+  # PATH includes build tools: the wrapper's first model use compiles
+  # llama.cpp from source (one-time).
   systemd.services.qmd = {
     description = "qmd MCP daemon (pi memory search)";
     after = [ "network.target" ];
     wantedBy = [ "multi-user.target" ];
+    environment.PATH = qmdUnitPath;
     serviceConfig = {
       Type = "simple";
       User = "matt";
       Group = "users";
-      ExecStart = "${pkgs.qmd}/bin/qmd mcp --http";
+      ExecStart = "/Users/matt/.local/bin/qmd mcp --http";
       Restart = "on-failure";
       RestartSec = 5;
+    };
+  };
+
+  # Keep the box's search index fresh as syncthing lands new memory.
+  # Incremental; reads synced memory/, writes only the box-local index.
+  systemd.services.qmd-embed = {
+    description = "qmd incremental re-index";
+    environment.PATH = qmdUnitPath;
+    serviceConfig = {
+      Type = "oneshot";
+      User = "matt";
+      Group = "users";
+      ExecStart = "/Users/matt/.local/bin/qmd embed";
+    };
+  };
+
+  systemd.timers.qmd-embed = {
+    description = "qmd re-index every 15min";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*:0/15";
+      # Box stops and starts; run missed embeds at boot.
+      Persistent = true;
     };
   };
 

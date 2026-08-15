@@ -1,4 +1,8 @@
-_:
+{ lib, ... }:
+
+let
+  sshKeys = import ./ssh-keys.nix { inherit lib; };
+in
 
 {
   programs.git = {
@@ -7,7 +11,8 @@ _:
     signing = {
       signByDefault = true;
       format = "ssh";
-      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINTuvuCDtmFBcTEkfOyx1NlUJZPcCJ76cChOt8ACBGKG";
+      # Same key as the SSH identity; canonical source: common/ssh-keys.nix.
+      key = sshKeys.mattMain;
     };
 
     settings = {
