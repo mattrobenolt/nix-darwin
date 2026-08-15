@@ -110,6 +110,16 @@ in
     aws-login = "aws sso login --use-device-code --no-browser";
   };
 
+  # 1Password service account token lives ONLY on disk (0600), never in the
+  # nix store. Loaded per shell when present. See README "Secrets" — and
+  # note systemd services do not get this; if one ever needs op, give the
+  # unit an EnvironmentFile pointing at the same file.
+  home.sessionVariablesExtra = ''
+    if [ -r "$HOME/.config/op/service-account-token" ]; then
+      export OP_SERVICE_ACCOUNT_TOKEN="$(cat "$HOME/.config/op/service-account-token")"
+    fi
+  '';
+
   programs.git = {
     # The box signs with its own key, registered on GitHub as a signing key
     # (the shared config points at matt's Mac key, which does not exist here).
