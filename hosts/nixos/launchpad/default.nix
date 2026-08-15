@@ -74,6 +74,25 @@ in
     "d /Users 0755 root root -"
   ];
 
+  # qmd MCP daemon (memory search backend for pi). On the Mac this is
+  # started lazily by the hourly curation script; here the service manager
+  # owns it. Foreground mode — no --daemon flag, systemd supervises.
+  # Localhost only (8181); no SG/firewall exposure. State and models live
+  # in matt's ~/.cache/qmd (box-local, deliberately unsynced).
+  systemd.services.qmd = {
+    description = "qmd MCP daemon (pi memory search)";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "simple";
+      User = "matt";
+      Group = "users";
+      ExecStart = "${pkgs.qmd}/bin/qmd mcp --http";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     curl
     file
