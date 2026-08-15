@@ -206,6 +206,8 @@ in
           strict_env = true;
           warn_timeout = "1m";
         };
+
+        whitelist.prefix = [ "/" ];
       };
     };
     zsh.enable = true;

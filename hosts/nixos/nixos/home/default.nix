@@ -31,6 +31,7 @@
     stateVersion = "26.05";
     username = "matt";
     homeDirectory = "/home/matt";
+    sessionPath = [ "$HOME/.local/bin" ];
 
     packages = with pkgs; [
       curl

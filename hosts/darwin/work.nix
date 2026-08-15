@@ -152,11 +152,7 @@ in
       zizmor
       zls_0_15
       zoxide
-    ]
-    ++ (with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
-      amp
-      claude-code
-    ]);
+    ];
 
   # Homebrew integration (macOS GUI apps)
   homebrew = {
@@ -184,13 +180,15 @@ in
         name = "sst/tap";
         trusted = true;
       }
+      {
+        name = "manaflow-ai/cmux";
+        trusted = true;
+      }
     ];
 
     brews = [
       "jundot/omlx/omlx"
       "mole"
-      "sniffnet"
-      "sst/tap/opencode"
       "syncthing"
       "tailscale"
       "tracy"
@@ -202,8 +200,6 @@ in
       "audacity"
       "chatgpt"
       "claude"
-      "codex"
-      "codex-app"
       "discord"
       "helium-browser"
       "imageoptim"
@@ -212,7 +208,6 @@ in
       "macshot"
       "notion"
       "obsidian"
-      "opencode-desktop"
       "orbstack"
       "plexamp"
       "proton-pass"
@@ -225,6 +220,7 @@ in
       "todoist-app"
       "utm"
       "canon-eos-utility"
+      "cmux"
     ];
   };
 
@@ -496,6 +492,9 @@ in
             StartInterval = 3600;
             StandardOutPath = "/Users/matt/.pi/agent/memory/curation.log";
             StandardErrorPath = "/Users/matt/.pi/agent/memory/curation.log";
+            # launchd defaults to cwd=/ and pi's find/ls tools default to cwd —
+            # without this, the curation agent walks the whole disk (TCC prompts).
+            WorkingDirectory = "/Users/matt/.pi/agent";
             RunAtLoad = false;
           };
       };

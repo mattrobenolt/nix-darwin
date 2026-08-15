@@ -82,6 +82,7 @@ in
     username = "matt";
     homeDirectory = "/home/matt";
     stateVersion = "26.05";
+    sessionPath = [ "$HOME/.local/bin" ];
 
     sessionVariables = {
       DOCKER_HOST = "unix:///run/podman/podman.sock";
