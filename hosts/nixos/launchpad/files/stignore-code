@@ -13,6 +13,7 @@
 
 // JS/TS build output
 (?d)node_modules
+(?d).pnpm-store
 (?d)dist
 (?d).next
 (?d).turbo

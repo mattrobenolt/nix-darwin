@@ -21,6 +21,7 @@ sessions-index
 // Machine-local build artifacts. .direnv holds symlinks into the Mac's
 // /nix/store; meaningless on the box. node_modules is one pnpm install away.
 node_modules
+.pnpm-store
 .direnv
 
 // qmd cache: models + embeddings. Local per machine.
