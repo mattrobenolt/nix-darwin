@@ -75,8 +75,29 @@ in
           # Sync permission bits so auth.json keeps 0600.
           ignorePerms = false;
         };
+
+        folders."bjkky-xjf6r" = {
+          # The existing ~/code share (id is fixed by the mesh, do not
+          # rename). ~/code/.stignore is a one-line include of the synced
+          # .stignore-shared on every node.
+          path = "/Users/matt/code";
+          label = "code";
+          devices = [ "Matts-MBP" ];
+          # Match the Mac's folder: sync permission bits. Builds run from
+          # this tree; scripts need their +x.
+          ignorePerms = false;
+        };
       };
     };
+  };
+
+  # Tailscale daemon. Auth is a manual one-time step: the box joins the
+  # corp tailnet as a tagged device (auth key via 1Password) — once that
+  # lands, the SG's port 22 rule can go. coredns already forwards ts.net.
+  # to 100.100.100.100 in anticipation.
+  services.tailscale = {
+    enable = true;
+    openFirewall = true;
   };
 
   # The syncthing module only creates its state dir for the default

@@ -15,9 +15,11 @@ Scaffolding landed with these deviations from the text below:
 - Local tofu state first; S3 backend documented but not enabled.
 - Bring-up runbook that reflects reality lives in `infra/launchpad/README.md`.
 
-2026-08-16: syncthing daemon + `pi-agent` share are live and complete
-(4.25GB, compression=always both sides). Still pending: ~/code share to the
-box, diskstation ignore parity + junk sweep, identity pinning via 1Password.
+2026-08-16: syncthing daemon + `pi-agent` share live (4.25GB); ~/code
+share joined and pulling (tens of GB, hours). tailscaled installed;
+awaiting corp-tailnet tagged-device key (Matt). Still pending: diskstation
+ignore parity + junk sweep, identity pinning via 1Password, curation
+cutover (one-writer).
 
 ## Decisions already made
 

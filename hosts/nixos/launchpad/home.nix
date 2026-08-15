@@ -85,6 +85,13 @@ in
   # the same file from this repo checkout.
   home.file.".pi/agent/.stignore".source = ./files/stignore-pi-agent;
 
+  # ~/code share: same include pattern as the Mac — the shared list arrives
+  # with the sync itself; pull direction is pre-filtered by the Mac anyway.
+  home.file."code/.stignore".text = ''
+    // Shared list is synced as .stignore-shared (same as every node).
+    #include .stignore-shared
+  '';
+
   programs.git = {
     # The box signs with its own key, registered on GitHub as a signing key
     # (the shared config points at matt's Mac key, which does not exist here).

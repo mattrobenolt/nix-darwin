@@ -57,6 +57,16 @@ resource "aws_security_group" "main" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # WireGuard/tailscale: direct connections instead of DERP relays.
+  # Mutual-auth protocol; fine to expose.
+  ingress {
+    description = "tailscale WireGuard"
+    from_port   = 41641
+    to_port     = 41641
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
