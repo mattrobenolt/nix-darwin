@@ -29,7 +29,12 @@ in
   # synced pi state (trust.json, sessions, skills) resolves correctly.
   home.homeDirectory = lib.mkForce "/Users/matt";
 
-  home.packages = [ piWrapper ];
+  home.packages = [
+    piWrapper
+    # Secrets get seeded from 1Password. (awscli2 comes from the shared
+    # NixOS layer.)
+    pkgs._1password-cli
+  ];
 
   # Canonical ignore set for the pi-agent syncthing folder. The folder is
   # created by syncthing itself on first share; this symlink pre-exists so
@@ -38,8 +43,13 @@ in
   home.file.".pi/agent/.stignore".source = ./files/stignore-pi-agent;
 
   programs.git = {
-    # The shared config signs with matt's Mac key, which does not exist
-    # here. The box gets its own signing key in the auth iteration.
-    signing.signByDefault = lib.mkForce false;
+    # The box signs with its own key, registered on GitHub as a signing key
+    # (the shared config points at matt's Mac key, which does not exist here).
+    signing = {
+      # Private key path, not the pubkey: with no ssh agent on the box,
+      # git/ssh-keygen signs with the file directly.
+      key = lib.mkForce "/Users/matt/.ssh/id_ed25519";
+      signByDefault = lib.mkForce true;
+    };
   };
 }

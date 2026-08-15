@@ -128,14 +128,20 @@ Phase 2 — NixOS:
 3. Verify `herdr --remote launchpad` attaches from the laptop.
 4. Remove the SG inbound-22 rule.
 
-Phase 3 — auth:
-1. Seed `~/.pi/agent/auth.json` and extension tokens via `op read`.
-2. Copy `~/.aws/config`. Smoke test:
-   `aws sso login --profile prod-ops --use-device-code --no-browser`.
-3. Generate box SSH key + signing key. Register both on GitHub.
-   `gh auth login` on the box.
-4. Adjust `~/.gitconfig`: drop `op-ssh-sign`, point signing at the box key.
-5. Deploy the box SSH key to internal hosts that agents touch.
+Phase 3 — auth: (done 2026-08-16, except 5)
+1. ~~Seed `auth.json`~~ — the pi-agent syncthing share covers it.
+2. ~~Copy `~/.aws/config`~~ — rsynced one-time. SSO device-code login done;
+   one login covers all profiles (shared `planetscale` sso_session).
+3. ~~Box SSH key + signing key~~ — one ed25519 keypair, registered on
+   GitHub as both authentication and signing key. `gh auth` done.
+4. ~~gitconfig~~ — signing.key = the box's private key path (no agent
+   headless); op-ssh-sign never applied (darwin-only module).
+5. Deploy the box SSH key to internal hosts that agents touch. [waits on
+   tailscale]
+
+Home directory note: the box's home IS /Users/matt (not /home/matt), so
+synced absolute paths (trust.json, qmd index.yml, session keys) are valid
+as-is. Most of the old Phase 5.3 papercut list evaporated.
 
 Phase 4 — state: (partially done 2026-08-16)
 1. Bulk re-clone ~/code from origin URLs (script over the Mac's remotes);
@@ -147,7 +153,9 @@ Phase 4 — state: (partially done 2026-08-16)
 4. ~~`pnpm install` in the agent repo; verify `pi` runs~~ — done. `pi` is a
    home-manager wrapper (no pi-profile on the box); install with
    `pnpm install --frozen-lockfile` (never mutate the synced lockfile).
-5. `qmd embed` on the box to rebuild the memory index. [pending]
+5. ~~`qmd embed` on the box~~ — done; index built, search verified.
+   (node-llama-cpp has no linux-aarch64 CPU prebuilt; it falls back to a
+   packaged backend and works anyway. No GPU required.)
 
 Phase 5 — cutover:
 1. Add the curate-memory systemd timer on the box.
