@@ -104,6 +104,11 @@ in
   # blocks that sync (chicken-and-egg, learned the hard way).
   home.file."code/.stignore".source = ./files/stignore-code;
 
+  # aws-login: device-code SSO login for the box (see infra/launchpad/README.md).
+  programs.zsh.shellAliases = {
+    aws-login = "aws sso login --profile playground --use-device-code --no-browser";
+  };
+
   programs.git = {
     # The box signs with its own key, registered on GitHub as a signing key
     # (the shared config points at matt's Mac key, which does not exist here).

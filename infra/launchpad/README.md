@@ -85,6 +85,29 @@ tofu apply -var instance_type=m8g.xlarge
 Tofu stops the instance, changes the type, and starts it again. The EIP
 keeps the public IP stable across resizes.
 
+## Day-2 auth: AWS SSO on the box
+
+The box holds no instance role; AWS access is matt's SSO creds, cached in
+`~/.aws/sso/cache` on the box. `~/.aws/config` was rsynced once — if
+profiles change on the Mac, re-rsync it.
+
+When aws calls fail with "Token has expired and refresh failed":
+
+1. On the box, run: `aws-login` (alias for
+   `aws sso login --profile playground --use-device-code --no-browser`).
+2. It prints a URL and a code. Open the URL in any browser and approve.
+3. Done — one login covers every profile, because they all share
+   `sso_session = planetscale`.
+
+Why these flags: the default flow is PKCE with a localhost callback, which
+cannot complete on a headless box. `--no-browser` alone still waits on that
+callback. `--use-device-code` switches to the device-authorization flow,
+which only needs a browser somewhere, not on the box.
+
+The access token lives ~1h and the CLI auto-refreshes it until the corp
+SSO session cap; then re-login. Failure mode for agents mid-run is a plain
+expired-token error, recoverable by logging in and re-running.
+
 ## Later iterations
 
 - Tailscale: box joins the tailnet as a tagged device; then delete the SG
