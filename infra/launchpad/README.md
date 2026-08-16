@@ -85,6 +85,45 @@ tofu apply -var instance_type=m8g.xlarge
 Tofu stops the instance, changes the type, and starts it again. The EIP
 keeps the public IP stable across resizes.
 
+## Secrets: 1Password service account
+
+The box reads secrets headlessly via a 1Password service account. The
+token is a bearer credential: scoped, revocable, stored only on the box at
+`~/.config/op/service-account-token` (0600), never in the nix store or git.
+Shells load it as OP_SERVICE_ACCOUNT_TOKEN (see launchpad home.nix).
+
+One-time setup (Mac):
+
+1. Create a shared vault named `launchpad` (service accounts cannot read
+   Personal/Private vaults). Put box-relevant items there.
+2. Create the service account (token prints exactly once):
+
+   ```
+   op service-account create launchpad --vault launchpad:read_items
+   ```
+
+   If the Mac's op CLI is not signed in, `eval $(op signin)` first, or use
+   the web UI: 1password.com > Developer Tools > Service Accounts.
+
+3. Copy the token to the clipboard, then plant it on the box without it
+   touching the Mac's disk:
+
+   ```
+   pbpaste | ssh matt@<ip> 'umask 077 && mkdir -p ~/.config/op && cat > ~/.config/op/service-account-token'
+   ```
+
+4. Verify from a fresh shell on the box:
+
+   ```
+   op whoami
+   op item list --vault launchpad
+   ```
+
+Usage on the box: `op read op://launchpad/<item>/<field>`.
+
+Rotation: create a new service account, plant the new token the same way,
+delete the old one in 1Password. No other state depends on it.
+
 ## Day-2 auth: AWS SSO on the box
 
 The box holds no instance role; AWS access is matt's SSO creds, cached in
