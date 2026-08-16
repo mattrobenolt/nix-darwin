@@ -114,6 +114,17 @@ in
     mode = "0444";
   };
 
+  # The box's user SSH keypair (git push + signing identity). Decrypted
+  # straight into place; the pub half is not secret and ships as text.
+  age.secrets.launchpad-id-ed25519 = {
+    file = ../../../secrets/launchpad-id-ed25519.age;
+    path = "/Users/matt/.ssh/id_ed25519";
+    owner = "matt";
+    group = "users";
+    mode = "0600";
+    symlink = false;
+  };
+
   # Tailscale daemon. Auth is a manual one-time step: the box joins the
   # corp tailnet as a tagged device (auth key via 1Password) — once that
   # lands, the SG's port 22 rule can go. coredns already forwards ts.net.

@@ -204,3 +204,9 @@ Everything on the box is either reproducible from the flake or seeded from
 
 Open: the bootstrap script (step 3) does not exist yet — it lands with the
 secrets iteration, once the vault items do.
+
+Update 2026-08-16: it exists — `scripts/launchpad-bootstrap <ip>`. It only
+installs the pinned host key; the box's user keypair and syncthing identity
+are agenix secrets and land with the first remote-apply. Re-auth gh
+(`gh auth login`, device flow) is manual — the oauth token is deliberately
+not vaulted. ~/code and ~/.pi/agent re-pull from the mesh (hours for code).

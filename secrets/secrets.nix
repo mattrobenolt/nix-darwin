@@ -19,4 +19,9 @@ in
     matt
     launchpad
   ];
+  # The box's own user keypair (git/ssh identity on GitHub).
+  "launchpad-id-ed25519.age".publicKeys = [
+    matt
+    launchpad
+  ];
 }

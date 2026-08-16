@@ -86,8 +86,12 @@
             nushell
             opentofu
             statix
-            agenix
             awscli2
+          ]
+          ++ [
+            # the nixpkgs attr doesn't exist under this name; use the input's
+            # own package so CLI and module versions match.
+            inputs.agenix.packages.${system}.default
           ];
         };
       });

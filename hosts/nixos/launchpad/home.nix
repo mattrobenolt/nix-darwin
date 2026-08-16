@@ -104,6 +104,11 @@ in
   # blocks that sync (chicken-and-egg, learned the hard way).
   home.file."code/.stignore".source = ./files/stignore-code;
 
+  # Public half of the box's keypair (the private half is an agenix secret,
+  # see default.nix).
+  home.file.".ssh/id_ed25519.pub".text =
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII13XL4pqymylPqF41vFZP74+91X5O017M/Tu7Jb6MR3 matt@launchpad\n";
+
   # aws-login: headless SSO login flags (see infra/launchpad/README.md).
   # Usage: aws-login --profile <name>
   programs.zsh.shellAliases = {
