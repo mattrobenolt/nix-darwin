@@ -84,6 +84,11 @@ ssh "root@$ip" '
   shred -u /root/.config/op/service-account-token
 '
 
+# networking.hostName only applies at boot; set it live so a reborn box
+# stops wearing the EC2 DHCP hostname until its first reboot.
+echo "==> setting hostname"
+ssh "root@$ip" 'hostnamectl set-hostname launchpad'
+
 echo "==> done."
 echo "Manual steps left (device-code approvals on the Mac):"
 echo "  ssh matt@$ip 'aws-login --profile playground'"
