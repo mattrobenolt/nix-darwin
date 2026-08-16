@@ -13,19 +13,6 @@ let
   # Also the EC2 keypair, so a fresh AMI birth injects this same key for
   # root. There is no separate bootstrap key.
   mattMainKey = sshKeys.mattMainWithComment;
-
-  # PATH for the qmd systemd units: the bun wrapper bootstraps qmd into
-  # $HOME and node-llama-cpp compiles its backend on first model load.
-  qmdUnitPath = lib.mkForce (
-    lib.makeBinPath [
-      pkgs.nodejs # qmd spawns node subprocesses even when run under bun
-      pkgs.bun
-      pkgs.cmake
-      pkgs.gnumake
-      pkgs.gcc
-      pkgs.coreutils
-    ]
-  );
 in
 {
   imports = [ ./hardware.nix ];
@@ -101,28 +88,29 @@ in
     };
   };
 
-  age.secrets.syncthing-key = {
-    file = ../../../secrets/syncthing-key.pem.age;
-    owner = "matt";
-    group = "users";
-    mode = "0400";
-  };
-  age.secrets.syncthing-cert = {
-    file = ../../../secrets/syncthing-cert.pem.age;
-    owner = "matt";
-    group = "users";
-    mode = "0444";
-  };
-
-  # The box's user SSH keypair (git push + signing identity). Decrypted
-  # straight into place; the pub half is not secret and ships as text.
-  age.secrets.launchpad-id-ed25519 = {
-    file = ../../../secrets/launchpad-id-ed25519.age;
-    path = "/Users/matt/.ssh/id_ed25519";
-    owner = "matt";
-    group = "users";
-    mode = "0600";
-    symlink = false;
+  age.secrets = {
+    syncthing-key = {
+      file = ../../../secrets/syncthing-key.pem.age;
+      owner = "matt";
+      group = "users";
+      mode = "0400";
+    };
+    syncthing-cert = {
+      file = ../../../secrets/syncthing-cert.pem.age;
+      owner = "matt";
+      group = "users";
+      mode = "0444";
+    };
+    # The box's user SSH keypair (git push + signing identity). Decrypted
+    # straight into place; the pub half is not secret and ships as text.
+    launchpad-id-ed25519 = {
+      file = ../../../secrets/launchpad-id-ed25519.age;
+      path = "/Users/matt/.ssh/id_ed25519";
+      owner = "matt";
+      group = "users";
+      mode = "0600";
+      symlink = false;
+    };
   };
 
   # Tailscale daemon. Auth is a manual one-time step: the box joins the
@@ -134,13 +122,58 @@ in
     openFirewall = true;
   };
 
-  # The syncthing module only creates its state dir for the default
-  # "syncthing" user; we run as matt, so make it ourselves.
-  systemd.tmpfiles.rules = [
-    "d /var/lib/syncthing 0700 matt users -"
-    # Parent of the unconventional home (see users.users.matt.home).
-    "d /Users 0755 root root -"
-  ];
+  systemd = {
+    # The syncthing module only creates its state dir for the default
+    # "syncthing" user; we run as matt, so make it ourselves.
+    tmpfiles.rules = [
+      "d /var/lib/syncthing 0700 matt users -"
+      # Parent of the unconventional home (see users.users.matt.home).
+      "d /Users 0755 root root -"
+    ];
+
+    # qmd MCP daemon (memory search backend for pi). On the Mac this is
+    # started lazily by the hourly curation script; here the service manager
+    # owns it. Foreground mode — no --daemon flag, systemd supervises.
+    # Localhost only (8181); no SG/firewall exposure. State and models live
+    # in matt's ~/.cache/qmd (box-local, deliberately unsynced).
+    # pkgs.qmd carries its llama.cpp backend (built at package time in
+    # mattware's qmd) — no runtime builds, no wrappers.
+    services.qmd = {
+      description = "qmd MCP daemon (pi memory search)";
+      after = [ "network.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "simple";
+        User = "matt";
+        Group = "users";
+        ExecStart = "${pkgs.qmd}/bin/qmd mcp --http";
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+    };
+
+    # Keep the box's search index fresh as syncthing lands new memory.
+    # Incremental; reads synced memory/, writes only the box-local index.
+    services.qmd-embed = {
+      description = "qmd incremental re-index";
+      serviceConfig = {
+        Type = "oneshot";
+        User = "matt";
+        Group = "users";
+        ExecStart = "${pkgs.qmd}/bin/qmd embed";
+      };
+    };
+
+    timers.qmd-embed = {
+      description = "qmd re-index every 15min";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*:0/15";
+        # Box stops and starts; run missed embeds at boot.
+        Persistent = true;
+      };
+    };
+  };
 
   # matt-owned dirs, created in an ACTIVATION SCRIPT (not tmpfiles):
   # activation scripts run before any unit (home-manager-matt.service) and
@@ -160,54 +193,6 @@ in
     };
     # Merged with the agenix module's own deps (specialfs): our dirs first.
     agenix.deps = [ "launchpad-dirs" ];
-  };
-
-  # qmd MCP daemon (memory search backend for pi). On the Mac this is
-  # started lazily by the hourly curation script; here the service manager
-  # owns it. Foreground mode — no --daemon flag, systemd supervises.
-  # Localhost only (8181); no SG/firewall exposure. State and models live
-  # in matt's ~/.cache/qmd (box-local, deliberately unsynced).
-  #
-  # NOTE: uses the bun-installed qmd wrapper (~/.local/bin/qmd), not
-  # pkgs.qmd — see home.nix for why (node-llama-cpp linux-aarch64 gap).
-  # PATH includes build tools: the wrapper's first model use compiles
-  # llama.cpp from source (one-time).
-  systemd.services.qmd = {
-    description = "qmd MCP daemon (pi memory search)";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-    environment.PATH = qmdUnitPath;
-    serviceConfig = {
-      Type = "simple";
-      User = "matt";
-      Group = "users";
-      ExecStart = "/Users/matt/.local/bin/qmd mcp --http";
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
-  };
-
-  # Keep the box's search index fresh as syncthing lands new memory.
-  # Incremental; reads synced memory/, writes only the box-local index.
-  systemd.services.qmd-embed = {
-    description = "qmd incremental re-index";
-    environment.PATH = qmdUnitPath;
-    serviceConfig = {
-      Type = "oneshot";
-      User = "matt";
-      Group = "users";
-      ExecStart = "/Users/matt/.local/bin/qmd embed";
-    };
-  };
-
-  systemd.timers.qmd-embed = {
-    description = "qmd re-index every 15min";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*:0/15";
-      # Box stops and starts; run missed embeds at boot.
-      Persistent = true;
-    };
   };
 
   environment.systemPackages = with pkgs; [

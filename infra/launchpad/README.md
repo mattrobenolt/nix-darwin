@@ -222,6 +222,5 @@ the mesh, or seeded from the `launchpad` 1Password vault. Tested live
 
 After that: syncthing re-pulls `~/.pi/agent` (minutes) and `~/code`
 (hours) from the mesh, then `pnpm install --frozen-lockfile` in
-`~/.pi/agent`. qmd re-embeds on its own timer once `memory/` lands. The
-qmd native builds (better-sqlite3 binding, llama.cpp backend) currently
-need a manual redo — see the note in hosts/nixos/launchpad/home.nix.
+`~/.pi/agent`. qmd re-embeds on its own timer once `memory/` lands — the
+package carries its llama.cpp backend, no manual native builds.
