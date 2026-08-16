@@ -1,40 +1,60 @@
 #!/usr/bin/env bash
-# launchpad rebirth bootstrap. Prereqs: tofu apply just completed, and the
-# 1Password service-account token is planted (see infra/launchpad/README.md
-# "Secrets"). Installs the box's pinned SSH host key from the vault, which
-# is also the agenix identity — after this, `just remote-apply` decrypts
-# everything else.
+# launchpad rebirth bootstrap. Run from the repo root after
+# `tofu apply -replace=aws_instance.main`.
+#
+# Usage: pbpaste | scripts/launchpad-bootstrap [ip]
+#   (pbpaste = the service-account token, copied from the launchpad
+#   1Password vault. Any source on stdin works; pbpaste is the Mac flow.)
+#
+# What it does, in order:
+#   1. plants the token on the fresh box (as root — the matt user does not
+#      exist until the first remote-apply)
+#   2. installs the pinned SSH host key from the vault (agenix identity;
+#      also keeps the box's fingerprint stable)
+#   3. runs the full remote-apply (builds on the box; first run is ~15min
+#      and prints progress as it goes)
+#   4. relocates the token into matt's home for op-as-matt
+#
+# Deliberately NOT done here (human steps, by design):
+#   aws sso login and gh auth login (device-code approvals on the Mac).
 set -euo pipefail
 
 ip="${1:-52.25.100.5}"
+repo="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "==> installing pinned SSH host key on $ip"
-# -o StrictHostKeyChecking=accept-new: a reborn box has a fresh (wrong) host
-# key until we install the pinned one; accept-and-replace for this session.
-ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null "root@$ip" bash -s <<'REMOTE'
+echo "==> reading service-account token from stdin"
+token="$(cat)"
+[ -n "$token" ] || { echo "error: expected the token on stdin" >&2; exit 1; }
+
+sshopts=(
+  -o StrictHostKeyChecking=accept-new
+  -o UserKnownHostsFile=/dev/null
+)
+
+echo "==> planting token and installing pinned host key on $ip"
+printf '%s' "$token" | ssh "${sshopts[@]}" "root@$ip" bash -s <<'REMOTE'
 set -euo pipefail
+umask 077
+mkdir -p /root/.config/op
+cat > /root/.config/op/service-account-token
 export OP_SERVICE_ACCOUNT_TOKEN
-# On a fresh AMI the matt user does not exist yet, so the token gets
-# planted under /root first and relocated after the first remote-apply.
-if [ -f /Users/matt/.config/op/service-account-token ]; then
-  OP_SERVICE_ACCOUNT_TOKEN="$(cat /Users/matt/.config/op/service-account-token)"
-else
-  OP_SERVICE_ACCOUNT_TOKEN="$(cat /root/.config/op/service-account-token)"
-fi
-# On a fresh AMI even op is not installed yet (it comes from the first
+OP_SERVICE_ACCOUNT_TOKEN="$(cat /root/.config/op/service-account-token)"
+
+# On a fresh AMI, op is not installed yet (it arrives with the first
 # remote-apply). Fall back to an ephemeral nix shell.
 op_read() {
   if [ -x /etc/profiles/per-user/matt/bin/op ]; then
     /etc/profiles/per-user/matt/bin/op read "$1"
   else
-    NIXPKGS_ALLOW_UNFREE=1 nix --extra-experimental-features 'nix-command flakes' shell --impure nixpkgs#_1password-cli --command op read "$1"
+    NIXPKGS_ALLOW_UNFREE=1 nix --extra-experimental-features 'nix-command flakes' \
+      shell --impure nixpkgs#_1password-cli --command op read "$1"
   fi
 }
 
-key="$(mktemp)"
-trap 'rm -f "$key"' EXIT
 # The SSH Key item's "private key" field is the raw OpenSSH PEM (not
 # base64 — verified).
+key="$(mktemp)"
+trap 'rm -f "$key"' EXIT
 op_read "op://launchpad/launchpad SSH host key/private key" > "$key"
 
 install -m 600 -o root -g root "$key" /etc/ssh/ssh_host_ed25519_key
@@ -44,4 +64,20 @@ systemctl restart sshd
 echo "host key installed; sshd restarted"
 REMOTE
 
-echo "==> done. Next: just remote-apply && ssh matt@$ip 'aws-login --profile playground'"
+echo "==> remote-apply (first build on the box; this takes a while)"
+cd "$repo"
+nixos-rebuild switch --flake .#launchpad --target-host "root@$ip" --build-host "root@$ip"
+
+echo "==> relocating the token to matt"
+ssh "root@$ip" '
+  set -euo pipefail
+  install -d -m 700 -o matt -g users /Users/matt/.config/op
+  install -m 600 -o matt -g users /root/.config/op/service-account-token /Users/matt/.config/op/service-account-token
+  shred -u /root/.config/op/service-account-token
+'
+
+echo "==> done."
+echo "Manual steps left (device-code approvals on the Mac):"
+echo "  ssh matt@$ip 'aws-login --profile playground'"
+echo "  ssh matt@$ip  # then: gh auth login"
+echo "The mesh re-pulls ~/.pi/agent and ~/code on its own (code takes hours)."

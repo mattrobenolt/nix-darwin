@@ -188,25 +188,40 @@ tofu destroy
 
 ## Rebirth (destroy -> recreate)
 
-Everything on the box is either reproducible from the flake or seeded from
-1Password. The bootstrap contract, in order:
+Everything on the box is either reproducible from the flake, synced from
+the mesh, or seeded from the `launchpad` 1Password vault. Tested live
+2026-08-16 (twice).
 
-1. `tofu apply` (the EIP survives in state if you only `-replace` the
-   instance; a full destroy recreates it).
-2. Plant the service-account token (see Secrets). This is the ONLY
-   irreplaceable manual secret step.
-3. Run the bootstrap (once written — see docs/ec2-agent-box.md): reads the
-   box SSH keypair and syncthing key/cert from the launchpad vault, runs
-   `pnpm install`, done. Identity keys coming from the vault means no
-   re-registering with GitHub and no syncthing re-pairing.
-4. `aws-login --profile playground` — intentionally manual. The box holding
-   no standing AWS power is the design, not a gap.
+1. Replace the instance. The EIP, VPC, and SG persist; the root volume
+   does not.
 
-Open: the bootstrap script (step 3) does not exist yet — it lands with the
-secrets iteration, once the vault items do.
+   ```
+   tofu apply -replace=aws_instance.main \
+     -var ssh_public_key="$(cat ~/.ssh/id_ed25519.pub)"
+   ```
 
-Update 2026-08-16: it exists — `scripts/launchpad-bootstrap <ip>`. It only
-installs the pinned host key; the box's user keypair and syncthing identity
-are agenix secrets and land with the first remote-apply. Re-auth gh
-(`gh auth login`, device flow) is manual — the oauth token is deliberately
-not vaulted. ~/code and ~/.pi/agent re-pull from the mesh (hours for code).
+2. Copy the service-account token in the 1Password app (launchpad vault →
+   "launchpad service account token"), then run the bootstrap with the
+   token on stdin:
+
+   ```
+   pbpaste | ./scripts/launchpad-bootstrap
+   ```
+
+   The script: plants the token, installs the pinned SSH host key, runs
+   the full first remote-apply (prints build progress), and moves the
+   token into matt's home. The first build takes ~15 minutes.
+
+3. Two approvals stay manual, on purpose — the box holding no standing
+   AWS power is the design, not a gap:
+
+   ```
+   ssh matt@<ip> 'aws-login --profile playground'
+   ssh matt@<ip>   # then: gh auth login
+   ```
+
+After that: syncthing re-pulls `~/.pi/agent` (minutes) and `~/code`
+(hours) from the mesh, then `pnpm install --frozen-lockfile` in
+`~/.pi/agent`. qmd re-embeds on its own timer once `memory/` lands. The
+qmd native builds (better-sqlite3 binding, llama.cpp backend) currently
+need a manual redo — see the note in hosts/nixos/launchpad/home.nix.
