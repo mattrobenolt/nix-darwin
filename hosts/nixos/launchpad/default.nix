@@ -224,6 +224,15 @@ in
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
     };
+    # ed25519 only. The key is pinned (private half lives in the launchpad
+    # 1Password vault, installed by scripts/launchpad-bootstrap on rebirth),
+    # which also makes it the agenix identity. Same fingerprint forever.
+    hostKeys = [
+      {
+        path = "/etc/ssh/ssh_host_ed25519_key";
+        type = "ed25519";
+      }
+    ];
   };
 
   nix = {

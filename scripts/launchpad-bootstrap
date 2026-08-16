@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# launchpad rebirth bootstrap. Prereqs: tofu apply just completed, and the
+# 1Password service-account token is planted (see infra/launchpad/README.md
+# "Secrets"). Installs the box's pinned SSH host key from the vault, which
+# is also the agenix identity — after this, `just remote-apply` decrypts
+# everything else.
+set -euo pipefail
+
+ip="${1:-52.25.100.5}"
+
+echo "==> installing pinned SSH host key on $ip"
+# -o StrictHostKeyChecking=accept-new: a reborn box has a fresh (wrong) host
+# key until we install the pinned one; accept-and-replace for this session.
+ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null "root@$ip" bash -s <<'REMOTE'
+set -euo pipefail
+export OP_SERVICE_ACCOUNT_TOKEN
+OP_SERVICE_ACCOUNT_TOKEN="$(cat /Users/matt/.config/op/service-account-token)"
+OP="/etc/profiles/per-user/matt/bin/op"
+
+key="$(mktemp)"
+trap 'rm -f "$key"' EXIT
+"$OP" read "op://launchpad/launchpad SSH host key/private key" | base64 -d > "$key"
+
+install -m 600 -o root -g root "$key" /etc/ssh/ssh_host_ed25519_key
+ssh-keygen -y -f /etc/ssh/ssh_host_ed25519_key > /etc/ssh/ssh_host_ed25519_key.pub
+chmod 644 /etc/ssh/ssh_host_ed25519_key.pub
+systemctl restart sshd
+echo "host key installed; sshd restarted"
+REMOTE
+
+echo "==> done. Next: just remote-apply && ssh matt@$ip 'aws-login --profile playground'"
