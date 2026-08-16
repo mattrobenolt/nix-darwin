@@ -14,12 +14,28 @@ echo "==> installing pinned SSH host key on $ip"
 ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null "root@$ip" bash -s <<'REMOTE'
 set -euo pipefail
 export OP_SERVICE_ACCOUNT_TOKEN
-OP_SERVICE_ACCOUNT_TOKEN="$(cat /Users/matt/.config/op/service-account-token)"
-OP="/etc/profiles/per-user/matt/bin/op"
+# On a fresh AMI the matt user does not exist yet, so the token gets
+# planted under /root first and relocated after the first remote-apply.
+if [ -f /Users/matt/.config/op/service-account-token ]; then
+  OP_SERVICE_ACCOUNT_TOKEN="$(cat /Users/matt/.config/op/service-account-token)"
+else
+  OP_SERVICE_ACCOUNT_TOKEN="$(cat /root/.config/op/service-account-token)"
+fi
+# On a fresh AMI even op is not installed yet (it comes from the first
+# remote-apply). Fall back to an ephemeral nix shell.
+op_read() {
+  if [ -x /etc/profiles/per-user/matt/bin/op ]; then
+    /etc/profiles/per-user/matt/bin/op read "$1"
+  else
+    NIXPKGS_ALLOW_UNFREE=1 nix --extra-experimental-features 'nix-command flakes' shell --impure nixpkgs#_1password-cli --command op read "$1"
+  fi
+}
 
 key="$(mktemp)"
 trap 'rm -f "$key"' EXIT
-"$OP" read "op://launchpad/launchpad SSH host key/private key" | base64 -d > "$key"
+# The SSH Key item's "private key" field is the raw OpenSSH PEM (not
+# base64 — verified).
+op_read "op://launchpad/launchpad SSH host key/private key" > "$key"
 
 install -m 600 -o root -g root "$key" /etc/ssh/ssh_host_ed25519_key
 ssh-keygen -y -f /etc/ssh/ssh_host_ed25519_key > /etc/ssh/ssh_host_ed25519_key.pub

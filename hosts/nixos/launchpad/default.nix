@@ -140,13 +140,27 @@ in
     "d /var/lib/syncthing 0700 matt users -"
     # Parent of the unconventional home (see users.users.matt.home).
     "d /Users 0755 root root -"
-    # syncthing refuses to adopt a directory that exists without its
-    # marker dir (safety check). HM already pre-creates these dirs for the
-    # .stignore symlinks, so on a fresh volume both folders would error
-    # until the marker exists. Pre-create them.
-    "d /Users/matt/.pi/agent/.stfolder 0755 matt users -"
-    "d /Users/matt/code/.stfolder 0755 matt users -"
   ];
+
+  # matt-owned dirs, created in an ACTIVATION SCRIPT (not tmpfiles):
+  # activation scripts run before any unit (home-manager-matt.service) and
+  # before agenix, so HM's symlinks and the agenix id_ed25519 write always
+  # find matt-owned parents. tmpfiles runs as a unit — after activation —
+  # and raced/lost this on the fresh-volume rebuild (learned the hard way).
+  # syncthing refuses to adopt a dir without its .stfolder marker, hence
+  # the marker dirs.
+  system.activationScripts = {
+    launchpad-dirs = {
+      deps = [ "users" ]; # matt must exist for install -o
+      text = ''
+        install -d -m 700 -o matt -g users /Users/matt/.ssh
+        install -d -m 755 -o matt -g users /Users/matt/.pi /Users/matt/.pi/agent /Users/matt/.pi/agent/.stfolder
+        install -d -m 755 -o matt -g users /Users/matt/code /Users/matt/code/.stfolder
+      '';
+    };
+    # Merged with the agenix module's own deps (specialfs): our dirs first.
+    agenix.deps = [ "launchpad-dirs" ];
+  };
 
   # qmd MCP daemon (memory search backend for pi). On the Mac this is
   # started lazily by the hourly curation script; here the service manager
