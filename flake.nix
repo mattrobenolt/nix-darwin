@@ -10,6 +10,11 @@
     llm-agents.url = "github:numtide/llm-agents.nix";
     herdr.url = "github:herdrdev/herdr/v0.8.0";
 
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
     nixvim = {
       url = "github:nix-community/nixvim";
@@ -81,6 +86,7 @@
             nushell
             opentofu
             statix
+            agenix
             awscli2
           ];
         };
@@ -142,6 +148,7 @@
         launchpad = nixpkgs.lib.nixosSystem {
           system = "aarch64-linux";
           modules = [
+            inputs.agenix.nixosModules.default
             ./hosts/nixos/launchpad/default.nix
 
             {

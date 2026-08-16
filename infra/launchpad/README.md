@@ -124,6 +124,25 @@ Usage on the box: `op read op://launchpad/<item>/<field>`.
 Rotation: create a new service account, plant the new token the same way,
 delete the old one in 1Password. No other state depends on it.
 
+## Secrets: agenix (box-consumed)
+
+Secrets the box's NixOS config consumes live encrypted in `secrets/`.
+Recipients (`secrets/secrets.nix`): matt's daily key (editing on the Mac)
+and launchpad's SSH host key (decryption at activation, `/run/agenix/`).
+
+Add or edit a secret from the devShell on the Mac:
+
+```
+agenix -e secrets/<name>.age        # editor flow; rules from secrets.nix
+agenix -r                           # rekey everything after recipient changes
+```
+
+Then reference in the box config: `age.secrets.<name>.file =
+../../secrets/<name>.age` and use `config.age.secrets.<name>.path`.
+
+The host key is pinned: its private half is a `launchpad` vault item, so
+the agenix recipient (and the box's SSH fingerprint) survives rebirths.
+
 ## Day-2 auth: AWS SSO on the box
 
 The box holds no instance role; AWS access is matt's SSO creds, cached in

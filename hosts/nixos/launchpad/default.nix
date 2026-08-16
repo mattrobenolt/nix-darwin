@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 let
   nixSettings = import ../../../common/nix-settings.nix;
@@ -53,6 +53,11 @@ in
       # run as. State lives in /var/lib/syncthing (module default).
       user = "matt";
       group = "users";
+      # Pinned device identity, decrypted by agenix from the repo at
+      # activation. Rebirths keep the same syncthing device ID — no
+      # re-pairing. Recipients in secrets/secrets.nix.
+      key = config.age.secrets.syncthing-key.path;
+      cert = config.age.secrets.syncthing-cert.path;
       # Opens the NixOS firewall for 22000 tcp/udp; the SG allows it from
       # anywhere. Within syncthing's security model. The GUI stays on
       # 127.0.0.1:8384 — reach it with ssh -L 8384:localhost:8384.
@@ -89,6 +94,19 @@ in
         };
       };
     };
+  };
+
+  age.secrets.syncthing-key = {
+    file = ../../../secrets/syncthing-key.pem.age;
+    owner = "matt";
+    group = "users";
+    mode = "0400";
+  };
+  age.secrets.syncthing-cert = {
+    file = ../../../secrets/syncthing-cert.pem.age;
+    owner = "matt";
+    group = "users";
+    mode = "0444";
   };
 
   # Tailscale daemon. Auth is a manual one-time step: the box joins the
