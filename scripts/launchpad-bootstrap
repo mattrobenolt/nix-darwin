@@ -31,12 +31,14 @@ sshopts=(
   -o UserKnownHostsFile=/dev/null
 )
 
-echo "==> planting token and installing pinned host key on $ip"
-printf '%s' "$token" | ssh "${sshopts[@]}" "root@$ip" bash -s <<'REMOTE'
+echo "==> planting token on $ip"
+# Separate call: the token rides stdin, so this one cannot share a heredoc.
+printf '%s' "$token" | ssh "${sshopts[@]}" "root@$ip" \
+  'umask 077 && mkdir -p /root/.config/op && cat > /root/.config/op/service-account-token'
+
+echo "==> installing pinned host key on $ip"
+ssh "${sshopts[@]}" "root@$ip" bash -s <<'REMOTE'
 set -euo pipefail
-umask 077
-mkdir -p /root/.config/op
-cat > /root/.config/op/service-account-token
 export OP_SERVICE_ACCOUNT_TOKEN
 OP_SERVICE_ACCOUNT_TOKEN="$(cat /root/.config/op/service-account-token)"
 
@@ -66,7 +68,13 @@ REMOTE
 
 echo "==> remote-apply (first build on the box; this takes a while)"
 cd "$repo"
-nixos-rebuild switch --flake .#launchpad --target-host "root@$ip" --build-host "root@$ip"
+# KNOWN WART: on a fresh volume, qmd.service fails until the native builds
+# (better-sqlite3 binding, llama.cpp backend) get redone — that is a
+# manual step for now (see home.nix). Don't abort the bootstrap for it.
+if ! nixos-rebuild switch --flake .#launchpad --target-host "root@$ip" --build-host "root@$ip"; then
+  echo "warning: remote-apply reported failures (expected on fresh boxes until" >&2
+  echo "         the qmd native builds are redone); continuing anyway." >&2
+fi
 
 echo "==> relocating the token to matt"
 ssh "root@$ip" '
