@@ -140,6 +140,12 @@ in
     "d /var/lib/syncthing 0700 matt users -"
     # Parent of the unconventional home (see users.users.matt.home).
     "d /Users 0755 root root -"
+    # syncthing refuses to adopt a directory that exists without its
+    # marker dir (safety check). HM already pre-creates these dirs for the
+    # .stignore symlinks, so on a fresh volume both folders would error
+    # until the marker exists. Pre-create them.
+    "d /Users/matt/.pi/agent/.stfolder 0755 matt users -"
+    "d /Users/matt/code/.stfolder 0755 matt users -"
   ];
 
   # qmd MCP daemon (memory search backend for pi). On the Mac this is
