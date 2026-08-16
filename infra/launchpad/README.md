@@ -166,3 +166,22 @@ expired-token error, recoverable by logging in and re-running.
 ```
 tofu destroy
 ```
+
+## Rebirth (destroy -> recreate)
+
+Everything on the box is either reproducible from the flake or seeded from
+1Password. The bootstrap contract, in order:
+
+1. `tofu apply` (the EIP survives in state if you only `-replace` the
+   instance; a full destroy recreates it).
+2. Plant the service-account token (see Secrets). This is the ONLY
+   irreplaceable manual secret step.
+3. Run the bootstrap (once written — see docs/ec2-agent-box.md): reads the
+   box SSH keypair and syncthing key/cert from the launchpad vault, runs
+   `pnpm install`, done. Identity keys coming from the vault means no
+   re-registering with GitHub and no syncthing re-pairing.
+4. `aws-login --profile playground` — intentionally manual. The box holding
+   no standing AWS power is the design, not a gap.
+
+Open: the bootstrap script (step 3) does not exist yet — it lands with the
+secrets iteration, once the vault items do.
