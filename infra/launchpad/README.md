@@ -23,6 +23,12 @@ inside it.
   design — one fewer secret, and the key that births the box is the key that
   daily-drives it.
 
+Variable files: `terraform.tfvars` is tracked (pubkey only — safe to
+commit). `local.auto.tfvars` is gitignored and machine-local — this repo
+is PUBLIC, so the home-IP SSH restriction lives there, not in git. On a
+fresh clone, copy `allowed_ssh_cidrs` back in or port 22 defaults to open
+during bring-up.
+
 ## Bring up the box
 
 1. Log in to AWS SSO:

@@ -4,4 +4,5 @@
 crash.log
 crash.*.log
 *.tfvars
+!terraform.tfvars
 !*.tfvars.example
