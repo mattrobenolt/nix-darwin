@@ -38,9 +38,14 @@ _:
         ForwardAgent = true;
       };
 
-      # EC2 agent box. EIP is stable across stop/retype resizes;
-      # the tailscale hostname replaces this once the box joins the tailnet.
+      # EC2 agent box, over the tailnet. launchpad-direct is the
+      # break-glass path (EIP; only reachable from the home CIDR per the SG).
       "launchpad" = {
+        HostName = "launchpad.tail45c3.ts.net";
+        User = "matt";
+      };
+
+      "launchpad-direct" = {
         HostName = "52.25.100.5";
         User = "matt";
       };

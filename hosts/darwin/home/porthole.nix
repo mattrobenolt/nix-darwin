@@ -10,8 +10,5 @@
   programs.porthole = {
     enable = true;
     hosts = [ "launchpad" ];
-    # The module's default package uses builtins.currentSystem, which does
-    # not exist in pure (flake) eval. Pin the build.
-    package = inputs.porthole.packages.aarch64-darwin.porthole;
   };
 }

@@ -82,13 +82,7 @@ in
   programs = {
     # porthole client: xdg-open/$BROWSER/open route URLs to the daemon on
     # the Mac (hosts/darwin/home/porthole.nix) over the ssh RemoteForward.
-    porthole = {
-      enable = true;
-      # The module's default package uses builtins.currentSystem, which
-      # does not exist in pure (flake) eval (and would be the darwin
-      # build anyway: `just remote-apply` evals on the Mac). Pin it.
-      package = inputs.porthole.packages.aarch64-linux.porthole-remote;
-    };
+    porthole.enable = true;
 
     # aws-login: headless SSO login flags (see infra/launchpad/README.md).
     # Usage: aws-login --profile <name>

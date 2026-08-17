@@ -2,9 +2,11 @@
 default:
     @just --list
 
-# launchpad EC2 box. EIP is stable across stop/retype; swap for the
-# tailscale hostname once the box joins the tailnet.
-launchpad_host := "52.25.100.5"
+# launchpad EC2 box, reached over the tailnet (MagicDNS). The EIP stays
+# the bootstrap/break-glass path (a fresh box is not on the tailnet until
+# the first apply restores its pinned tailscale identity).
+launchpad_host := "launchpad.tail45c3.ts.net"
+launchpad_eip := "52.25.100.5"
 aws_profile := "playground"
 aws_region := "us-west-2"
 
