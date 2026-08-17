@@ -13,6 +13,7 @@
     ./common/bat.nix
     ./common/delta.nix
     ./common/direnv.nix
+    ./common/herdr.nix
     ./common/btop.nix
     ./common/eza.nix
     ./common/htop.nix

@@ -105,7 +105,7 @@ resource "aws_instance" "main" {
     # every new AMI would force instance replacement on the next apply. The
     # AMI only matters at creation; nixos-rebuild owns the box afterwards.
     # To rebirth onto a newer AMI: tofu apply -replace=aws_instance.main
-    ignore_changes = [ami]
+    ignore_changes = [ami, tags]
   }
 
   tags = {

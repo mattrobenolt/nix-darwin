@@ -71,19 +71,6 @@ in
     '';
   };
 
-  # Box-side herdr server config. Client-side rendering settings stay in
-  # the Mac's config — in --remote mode the local client owns them.
-  xdg.configFile."herdr/config.toml".text = ''
-    onboarding = false
-
-    [update]
-    version_check = false
-    manifest_check = false
-
-    [session]
-    resume_agents_on_restore = true
-  '';
-
   programs = {
     # aws-login: headless SSO login flags (see infra/launchpad/README.md).
     # Usage: aws-login --profile <name>

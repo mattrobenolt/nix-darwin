@@ -31,11 +31,11 @@ inside it.
    aws sso login --profile playground
    ```
 
-2. Apply:
+2. Apply (variables auto-load from `terraform.tfvars`):
 
    ```
    tofu init
-   tofu apply -var ssh_public_key="$(cat ~/.ssh/id_ed25519.pub)"
+   tofu apply
    ```
 
 3. Note the `public_ip` output. Verify the stock AMI works:
@@ -196,8 +196,7 @@ the mesh, or seeded from the `launchpad` 1Password vault. Tested live
    does not.
 
    ```
-   tofu apply -replace=aws_instance.main \
-     -var ssh_public_key="$(cat ~/.ssh/id_ed25519.pub)"
+   tofu apply -replace=aws_instance.main
    ```
 
 2. Copy the service-account token in the 1Password app (launchpad vault →

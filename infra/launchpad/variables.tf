@@ -19,7 +19,7 @@ variable "profile" {
 variable "instance_type" {
   description = "Instance type. Full size now for fast bootstraps, resize down later once measured."
   type        = string
-  default     = "c9g.2xlarge"
+  default     = "c9g.xlarge"
 }
 
 variable "root_volume_size" {
@@ -46,7 +46,7 @@ variable "nixos_release" {
 }
 
 variable "ssh_public_key" {
-  description = "SSH public key installed as the EC2 keypair; the NixOS AMI injects it for root at boot. Matt's daily key — the same one in hosts/nixos/launchpad/default.nix. There is deliberately no separate bootstrap key."
+  description = "SSH public key installed as the EC2 keypair; the NixOS AMI injects it for root at boot. Matt's daily key — the same one in hosts/nixos/launchpad/default.nix. There is deliberately no separate bootstrap key. Auto-loaded from terraform.tfvars."
   type        = string
 }
 

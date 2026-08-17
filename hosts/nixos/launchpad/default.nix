@@ -62,6 +62,14 @@ in
           # is cheap on both ends.
           compression = "always";
         };
+        # The NAS on the home LAN (reaches us via the EIP). Only shares
+        # the code folder — pi-agent stays Mac<->box.
+        devices.diskstation = {
+          id = "A7WIK2G-FOFTUBX-DQPOHTW-VP2CCSG-6HMRSWU-DDF26HB-X2VL5OH-QXMBBQG";
+          # Remote link over a home upload; everything bulky is text. LZ4
+          # is cheap on both ends.
+          compression = "always";
+        };
         folders."pi-agent" = {
           # ~/.pi/agent, scoped per docs/ec2-agent-box.md. Ignore patterns:
           # files/stignore-pi-agent, symlinked into place on both sides.
@@ -79,7 +87,10 @@ in
           # .stignore-shared on every node.
           path = "/Users/matt/code";
           label = "code";
-          devices = [ "Matts-MBP" ];
+          devices = [
+            "Matts-MBP"
+            "diskstation"
+          ];
           # Match the Mac's folder: sync permission bits. Builds run from
           # this tree; scripts need their +x.
           ignorePerms = false;
