@@ -293,6 +293,10 @@ in
       extra-substituters = nixSettings.substituters;
       extra-trusted-public-keys = nixSettings.trustedPublicKeys;
       trusted-users = nixSettings.trustedUsers;
+      # 8GB box: the kernel OOM-killed nix (6GB+ anon) realizing a big
+      # generation. Everything SHOULD substitute from cache; when it
+      # doesn't, build gently rather than die.
+      max-jobs = 2;
     };
     gc = {
       automatic = true;
@@ -300,4 +304,12 @@ in
       options = "--delete-older-than 14d";
     };
   };
+
+  # Same story for memory: zram alone wasn't enough on the smaller box.
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 16384;
+    }
+  ];
 }
