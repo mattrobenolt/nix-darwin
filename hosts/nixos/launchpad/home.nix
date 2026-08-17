@@ -38,6 +38,9 @@ in
     # synced pi state (trust.json, sessions, skills) resolves correctly.
     homeDirectory = lib.mkForce "/Users/matt";
 
+    # Appended after the shared layer's ~/.local/bin.
+    sessionPath = lib.mkAfter [ "$HOME/.ps-toolbox/bin" ];
+
     packages = [
       piWrapper
       # Secrets get seeded from 1Password. (awscli2 comes from the shared

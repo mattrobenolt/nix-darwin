@@ -1594,11 +1594,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1787004344,
-        "narHash": "sha256-Sq02A7D6HAlHfYdnakbLllfgTHYzqn5JLVh8bhNrs7M=",
+        "lastModified": 1787007708,
+        "narHash": "sha256-t2mSe9biab4Z+a14t/IefMl5QOFgGJbBU10H5hld9CM=",
         "owner": "mattrobenolt",
         "repo": "porthole",
-        "rev": "cca7a2c657052a853b72c632bff660c7c23a1262",
+        "rev": "970a5b9e8c5ff54b748f403917a55d1605ef03af",
         "type": "github"
       },
       "original": {
