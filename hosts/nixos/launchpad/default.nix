@@ -29,6 +29,10 @@ in
     # VPC resolver out of resolv.conf (coredns already forwards there).
     nameservers = [ "127.0.0.1" ];
     dhcpcd.extraConfig = "nohook resolv.conf";
+    # Tailnet MagicDNS search domain (tailscale runs with
+    # --accept-dns=false, so it does not manage this for us). The ts.net.
+    # zone in the Corefile does the actual resolution.
+    search = [ "tail45c3.ts.net" ];
   };
 
   services = {
