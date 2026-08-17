@@ -126,6 +126,12 @@ in
       mode = "0600";
       symlink = false;
     };
+    # The box's tailnet node identity, restored into place at activation
+    # (see system.activationScripts). Rebirths rejoin as the same node.
+    tailscaled-state = {
+      file = ../../../secrets/tailscaled-state.age;
+      mode = "0400";
+    };
   };
 
   # Tailscale daemon. The box is on the tailnet (manual `tailscale up`
@@ -212,6 +218,17 @@ in
     };
     # Merged with the agenix module's own deps (specialfs): our dirs first.
     agenix.deps = [ "launchpad-dirs" ];
+
+    # Restore the pinned tailscale node identity after agenix decrypts it,
+    # before tailscaled starts. Rebirths rejoin the tailnet as the same
+    # node (launchpad, same 100.x IP) with no auth key ceremony.
+    launchpad-tailscale-state = {
+      deps = [ "agenix" ];
+      text = ''
+        install -d -m 700 /var/lib/tailscale
+        install -m 600 /run/agenix/tailscaled-state /var/lib/tailscale/tailscaled.state
+      '';
+    };
   };
 
   environment.systemPackages = with pkgs; [
@@ -276,6 +293,9 @@ in
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
+      # porthole's RemoteForward re-binds ~/.porthole.sock on every new
+      # ssh session; unlink the stale socket instead of refusing.
+      StreamLocalBindUnlink = true;
     };
     # ed25519 only. The key is pinned (private half lives in the launchpad
     # 1Password vault, installed by scripts/launchpad-bootstrap on rebirth),

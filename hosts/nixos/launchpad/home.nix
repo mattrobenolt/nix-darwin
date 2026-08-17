@@ -1,4 +1,9 @@
-{ pkgs, lib, ... }:
+{
+  pkgs,
+  lib,
+  inputs,
+  ...
+}:
 
 let
   # On the Mac, `pi` goes through pi-profile (default/work/personal). The
@@ -21,7 +26,10 @@ in
 {
   # Shared NixOS layer (home-common.nix + linux package set) lives in
   # hosts/nixos/home.nix.
-  imports = [ ../home.nix ];
+  imports = [
+    ../home.nix
+    inputs.porthole.homeModules.porthole-remote
+  ];
 
   home = {
     stateVersion = "26.05";
@@ -72,6 +80,16 @@ in
   };
 
   programs = {
+    # porthole client: xdg-open/$BROWSER/open route URLs to the daemon on
+    # the Mac (hosts/darwin/home/porthole.nix) over the ssh RemoteForward.
+    porthole = {
+      enable = true;
+      # The module's default package uses builtins.currentSystem, which
+      # does not exist in pure (flake) eval (and would be the darwin
+      # build anyway: `just remote-apply` evals on the Mac). Pin it.
+      package = inputs.porthole.packages.aarch64-linux.porthole-remote;
+    };
+
     # aws-login: headless SSO login flags (see infra/launchpad/README.md).
     # Usage: aws-login --profile <name>
     zsh.shellAliases = {

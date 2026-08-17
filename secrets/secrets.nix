@@ -24,4 +24,11 @@ in
     matt
     launchpad
   ];
+  # The box's tailnet node identity (machine key + registration).
+  # Restoring this at activation = rebirths rejoin as the SAME node,
+  # no auth key needed.
+  "tailscaled-state.age".publicKeys = [
+    matt
+    launchpad
+  ];
 }
