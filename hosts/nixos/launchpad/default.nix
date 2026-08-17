@@ -124,13 +124,17 @@ in
     };
   };
 
-  # Tailscale daemon. Auth is a manual one-time step: the box joins the
-  # corp tailnet as a tagged device (auth key via 1Password) — once that
-  # lands, the SG's port 22 rule can go. coredns already forwards ts.net.
-  # to 100.100.100.100 in anticipation.
+  # Tailscale daemon. The box is on the tailnet (manual `tailscale up`
+  # once). Once the corp-tailnet tagged-device auth key exists, it becomes
+  # an agenix secret + services.tailscale.authKeyFile and the manual step
+  # goes away.
   services.tailscale = {
     enable = true;
     openFirewall = true;
+    # Never let tailscaled take over DNS: coredns owns :53 on this box and
+    # the Corefile already forwards ts.net. to 100.100.100.100. The default
+    # accept-dns rewrote /etc/resolv.conf once — never again.
+    extraUpFlags = [ "--accept-dns=false" ];
   };
 
   systemd = {
