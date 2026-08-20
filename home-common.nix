@@ -14,6 +14,9 @@
     ./common/delta.nix
     ./common/direnv.nix
     ./common/herdr.nix
+    ./common/herdr-plugins.nix
+    ./common/herdr-plugin-hunk-diff.nix
+    ./common/herdr-plugin-tab-smart-rename.nix
     ./common/btop.nix
     ./common/eza.nix
     ./common/htop.nix

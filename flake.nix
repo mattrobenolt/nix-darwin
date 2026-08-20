@@ -9,7 +9,7 @@
     porthole.url = "github:mattrobenolt/porthole";
     home-manager.url = "github:nix-community/home-manager";
     llm-agents.url = "github:numtide/llm-agents.nix";
-    herdr.url = "github:herdrdev/herdr/v0.8.0";
+    herdr.url = "github:herdrdev/herdr/v0.8.2";
 
     agenix = {
       url = "github:ryantm/agenix";
