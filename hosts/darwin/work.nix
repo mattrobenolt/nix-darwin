@@ -46,6 +46,14 @@ let
   piPersonalWrapper = pkgs.writeShellScriptBin "pi-personal" ''
     exec ${piProfileWrapper}/bin/pi-profile run personal -- "$@"
   '';
+
+  # mosh bundles nixpkgs' vanilla OpenSSH to bootstrap the session, which
+  # rejects Apple's UseKeychain option in ~/.ssh/config. Route through the
+  # system /usr/bin/ssh instead — it understands the macOS keychain opts and
+  # the 1Password IdentityAgent. The user can still pass --ssh= to override.
+  moshWrapper = pkgs.writeShellScriptBin "mosh" ''
+    exec ${pkgs.mosh}/bin/mosh --ssh=/usr/bin/ssh "$@"
+  '';
 in
 
 {
@@ -112,6 +120,7 @@ in
     less
     luarocks
     mariadb.client
+    moshWrapper
     mtr
     nghttp2
     nixd
@@ -376,12 +385,19 @@ in
   # LaunchD services
   launchd = {
     # DNS enforcement daemon
-    # Ensures DNS stays pointed to coredns even when DHCP tries to override
+    # Ensures DNS stays pointed at coredns (127.0.0.1) even when DHCP or
+    # Tailscale try to override it. Tailscale's default --accept-dns=true
+    # injects 100.100.100.100 as a supplemental resolver that wins the
+    # scutil ordering and rewrites /etc/resolv.conf — coredns already
+    # forwards ts.net. to 100.100.100.100 in the Corefile, so we keep
+    # accept-dns off (mirrors the NixOS launchpad --accept-dns=false).
     daemons.enforce-dns = {
       script = ''
         if /usr/sbin/networksetup -getinfo "Wi-Fi" &>/dev/null 2>&1; then
           /usr/sbin/networksetup -setdnsservers "Wi-Fi" 127.0.0.1 2>/dev/null || true
         fi
+        # Keep Tailscale from re-injecting its MagicDNS resolver.
+        /opt/homebrew/bin/tailscale set --accept-dns=false 2>/dev/null || true
       '';
       serviceConfig = {
         RunAtLoad = true;

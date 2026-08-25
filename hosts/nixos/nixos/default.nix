@@ -42,8 +42,8 @@ in
     ];
     openssh.authorizedKeys.keyFiles = [
       (builtins.fetchurl {
-        url = "https://github.com/mattrobenolt.keys";
-        sha256 = "1r9mdknkblj86zp5kzc6mw4a8c2qwwymik86wfgfzynlh6hq49fi";
+        url = "https://mattrobenolt.com/id_ed25519.pub";
+        sha256 = "sha256-seWKBEqvkd+YNtWUJjLkuR69SNDQ+3H1JayfbzTrB2M=";
       })
     ];
   };

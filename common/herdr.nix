@@ -9,8 +9,30 @@ _:
     manifest_check = false
 
     [ui]
-    agent_panel_sort = "spaces"
+    agent_panel_sort = "priority"
     show_agent_labels_on_pane_borders = false
+    status_indicators = "symbols"
+
+    # Sidebar row layouts — tuned for running many pi agents at once.
+    # Drop the redundant `agent` token (always pi) in favor of state_text
+    # for triage and terminal_title_stripped so each row shows what the
+    # agent is actually doing. Pi emits a title like
+    #   "π · nix-darwin · accounts/fireworks/models/glm-5p2"
+    # so line 2 is the live activity. status_indicators = "symbols" above
+    # makes the state_icon a distinct shape, not just a color.
+    [ui.sidebar.agents]
+    row_gap = 0
+    rows = [
+      ["state_icon", "workspace", "pane"],
+      ["terminal_title_stripped"],
+    ]
+
+    [ui.sidebar.spaces]
+    row_gap = 0
+    rows = [
+      ["state_icon", "workspace"],
+      ["branch", "git_status"],
+    ]
 
     [ui.toast]
     delivery = "herdr"

@@ -13,12 +13,26 @@ let
   # Also the EC2 keypair, so a fresh AMI birth injects this same key for
   # root. There is no separate bootstrap key.
   mattMainKey = sshKeys.mattMainWithComment;
+
+  # iotop-c is maintained, but its executable includes the -c suffix.
+  iotop = pkgs.writeShellScriptBin "iotop" ''
+    exec ${pkgs.iotop-c}/bin/iotop-c "$@"
+  '';
 in
 {
   imports = [ ./hardware.nix ];
 
   time.timeZone = "America/Los_Angeles";
   system.stateVersion = "26.05";
+
+  boot = {
+    kernelPackages = pkgs.linuxPackages_7_1;
+    kernel.sysctl."kernel.task_delayacct" = 1;
+    # Match the GC posture below: only current + previous is kept, so
+    # there's no point offering 5 boot entries that point to collected
+    # store paths.
+    loader.grub.configurationLimit = 2;
+  };
 
   networking = {
     hostName = "launchpad";
@@ -148,6 +162,15 @@ in
   };
 
   systemd = {
+    # Pin CoreDNS to a single OS thread. The box's DNS load is trivial
+    # (one local forwarder), and this is the ONLY way to land GOMAXPROCS=1
+    # here: since Go 1.25 the runtime derives GOMAXPROCS from the cgroup
+    # CPU quota by default and floors it at 2 on a multi-core box, so a
+    # quota can never yield 1. Setting the env var explicitly forces 1 and
+    # also disables the runtime's automatic (periodic) updates. Merges onto
+    # the services.coredns module's unit (DynamicUser, owns :53).
+    services.coredns.environment.GOMAXPROCS = "1";
+
     # The syncthing module only creates its state dir for the default
     # "syncthing" user; we run as matt, so make it ourselves.
     tmpfiles.rules = [
@@ -233,17 +256,47 @@ in
 
   environment.systemPackages = with pkgs; [
     curl
+    ethtool
     file
     git
+    iftop
+    iotop
+    lsof
+    net-tools
     neovim
     nixfmt
+    patchelf
     strace
+    sysstat
+    tcpdump
+    traceroute
+    tree
+    unzip
     wget
+    zip
   ];
 
   nixpkgs.config.allowUnfree = true;
 
-  programs.zsh.enable = true;
+  programs = {
+    # mosh: roaming shell that survives the laptop sleeping or switching
+    # networks. Reached over the tailnet (launchpad.tail45c3.ts.net), so the
+    # UDP 60000-61000 flow rides inside the existing WireGuard tunnel (SG
+    # 41641) — no security-group change needed. programs.mosh also opens
+    # that range in the NixOS firewall for the decapsulated packets arriving
+    # on tailscale0. The mosh *client* lives on the Mac, not on this box.
+    mosh.enable = true;
+
+    nix-ld = {
+      enable = true;
+      libraries = with pkgs; [
+        xz
+        openssl
+        libcap
+      ];
+    };
+    zsh.enable = true;
+  };
 
   # Pin GitHub's host keys (source: https://api.github.com/meta) so the
   # box's outbound ssh never hits an interactive first-connect prompt —
@@ -317,19 +370,26 @@ in
       extra-substituters = nixSettings.substituters;
       extra-trusted-public-keys = nixSettings.trustedPublicKeys;
       trusted-users = nixSettings.trustedUsers;
-      # 8GB box: the kernel OOM-killed nix (6GB+ anon) realizing a big
-      # generation. Everything SHOULD substitute from cache; when it
-      # doesn't, build gently rather than die.
+      # Set when the box was 8GB (c9g.xlarge): the kernel OOM-killed nix
+      # (6GB+ anon) realizing a big generation. Now 16GB (m9g.xlarge), so
+      # this is conservative but harmless — everything SHOULD substitute
+      # from cache; when it doesn't, build gently rather than die.
       max-jobs = 2;
     };
+    # Aggressive GC: this is an ephemeral agent box, not a workstation.
+    # We only need current + previous for a rollback window; anything older
+    # is dead weight on EBS. Daily run with 1d retention means stale store
+    # paths are freed within a day of a rebuild. persistent = true (the
+    # module default) catches up missed runs on boot — important since the
+    # box stops and starts on demand.
     gc = {
       automatic = true;
-      dates = "weekly";
-      options = "--delete-older-than 14d";
+      dates = "daily";
+      options = "--delete-older-than 1d";
     };
   };
 
-  # Same story for memory: zram alone wasn't enough on the smaller box.
+  # Same story for memory: zram alone wasn't enough when the box was 8GB.
   swapDevices = [
     {
       device = "/swapfile";

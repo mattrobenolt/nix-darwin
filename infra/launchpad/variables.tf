@@ -17,15 +17,27 @@ variable "profile" {
 }
 
 variable "instance_type" {
-  description = "Instance type. Full size now for fast bootstraps, resize down later once measured."
+  description = "Instance type."
   type        = string
-  default     = "c9g.xlarge"
+  default     = "m9g.xlarge"
 }
 
 variable "root_volume_size" {
   description = "Root EBS volume size in GiB (encrypted gp3)."
   type        = number
   default     = 200
+}
+
+variable "root_volume_iops" {
+  description = "Provisioned IOPS for the root gp3 volume."
+  type        = number
+  default     = 6000
+}
+
+variable "root_volume_throughput" {
+  description = "Provisioned throughput for the root gp3 volume in MiB/s."
+  type        = number
+  default     = 250
 }
 
 variable "arch" {
