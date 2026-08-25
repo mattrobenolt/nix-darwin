@@ -71,7 +71,7 @@ let
       if pkgs.stdenv.hostPlatform.isDarwin then
         "sha256-+SNmcslCanC9zjLA25dlhNx41h0JULdM0V4fAv6+NRg="
       else
-        "sha256-9d1EEXqL5hjJpKy0lgRC58B2etU6DaA+hSCdACY5pxA=";
+        "sha256-f5gTMHyPg9P+laKTfnobL2GywEhyz4onSQ587AErj60=";
   };
 
   herdrHunkDiff = pkgs.stdenv.mkDerivation {
