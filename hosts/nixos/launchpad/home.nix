@@ -28,6 +28,7 @@ in
   # hosts/nixos/home.nix.
   imports = [
     ../home.nix
+    ../../../common/luvus.nix
     inputs.porthole.homeModules.porthole-remote
   ];
 
@@ -69,6 +70,12 @@ in
       # see default.nix).
       ".ssh/id_ed25519.pub".text =
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII13XL4pqymylPqF41vFZP74+91X5O017M/Tu7Jb6MR3 matt@launchpad\n";
+    };
+
+    sessionVariables = {
+      PYTHONDONTWRITEBYTECODE = "1";
+      KUBECTL_EXTERNAL_DIFF = "delta";
+      PSKUBE_NO_COLOR = "1";
     };
 
     # 1Password service account token lives ONLY on disk (0600), never in the

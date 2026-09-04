@@ -12,6 +12,11 @@ _:
       # Global settings for all hosts
       "*" = {
         AddKeysToAgent = "yes";
+        # UseKeychain is Apple-specific (not in vanilla OpenSSH). IgnoreUnknown
+        # makes nixpkgs' ssh silently skip it instead of erroring out, while
+        # Apple's /usr/bin/ssh still honors it. Nix sorts attrset keys
+        # alphabetically, so IgnoreUnknown precedes UseKeychain in the output.
+        IgnoreUnknown = "UseKeychain";
         UseKeychain = "yes";
         IdentityAgent = "\"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock\"";
       };

@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ../../common/luvus.nix
     ./home/ghostty.nix
     ./home/git.nix
     ./home/lazygit.nix

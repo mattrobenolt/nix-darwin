@@ -5,6 +5,7 @@
 
   imports = [
     inputs.mattware.homeModules.hunk
+    inputs.nix-index-database.homeModules.default
     ./common/git.nix
     ./common/hunk.nix
     ./common/starship.nix
@@ -27,4 +28,16 @@
     ./common/qmd.nix
     ./common/npm.nix
   ];
+
+  # command-not-found (flake-native): comma intercepts missing commands and
+  # runs them via `nix shell nixpkgs#$attr -c $cmd` — no legacy nix-env /
+  # nix-shell / <nixpkgs> (which on Determinate Nix resolves to flakehub's
+  # nixpkgs-weekly, not your pinned flake input). Uses nix-index-database's
+  # prebuilt weekly index for lookups. The legacy nix-index zsh hook is
+  # disabled in favor of comma's handler (wired in common/zsh.nix).
+  programs.nix-index = {
+    enable = true;
+    enableZshIntegration = false;
+  };
+  programs.nix-index-database.comma.enable = true;
 }

@@ -65,13 +65,26 @@ let
 
     outputHashMode = "flat";
     outputHashAlgo = "sha256";
-    # node_modules differ per platform (hunkdiff-darwin-arm64 vs
-    # hunkdiff-linux-arm64, etc.), so the tarball hash differs too.
+    # Two things make the hash per-system: hunkdiff ships native
+    # platform binaries (hunkdiff-darwin-arm64 vs -linux-arm64/-x64),
+    # and the tarball bytes embed the platform's stdenv tar/gzip +
+    # nodejs build — a nixpkgs bump that rebuilds those re-flips the
+    # hash with zero dep changes (2026-08-31 bump: darwin +SNm… →
+    # 5o2c…, aarch64-linux held). On mismatch, nix prints the actual
+    # hash — paste it in.
     outputHash =
-      if pkgs.stdenv.hostPlatform.isDarwin then
-        "sha256-+SNmcslCanC9zjLA25dlhNx41h0JULdM0V4fAv6+NRg="
-      else
-        "sha256-f5gTMHyPg9P+laKTfnobL2GywEhyz4onSQ587AErj60=";
+      {
+        # captured 2026-09-01, post-nixpkgs-bump darwin rebuild
+        "aarch64-darwin" = "sha256-5o2c/3qdP3TmXBzHPcJEmJ/bKW9StZAJ1vRYVekJUx4=";
+        # fresh-built on launchpad 2026-09-01 with the current lock
+        "aarch64-linux" = "sha256-9d1EEXqL5hjJpKy0lgRC58B2etU6DaA+hSCdACY5pxA=";
+        # captured pre-2026-08-19 with an older lock, not built since.
+        # Likely stale after the 2026-08-31 bump — recapture from the
+        # got-hash when the nixos box next applies.
+        "x86_64-linux" = "sha256-f5gTMHyPg9P+laKTfnobL2GywEhyz4onSQ587AErj60=";
+      }
+      .${pkgs.stdenv.hostPlatform.system}
+        or (throw "herdr-hunk-diff: no npmDeps hash for ${pkgs.stdenv.hostPlatform.system}");
   };
 
   herdrHunkDiff = pkgs.stdenv.mkDerivation {

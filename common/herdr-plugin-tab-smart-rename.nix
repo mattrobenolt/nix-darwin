@@ -53,13 +53,28 @@ let
 
     outputHashMode = "flat";
     outputHashAlgo = "sha256";
-    # node_modules differ per platform (platform-specific native deps),
-    # so the tarball hash differs too.
+    # One entry per system — not because the deps are platform-specific
+    # (they're pure JS; node_modules content is byte-identical across
+    # darwin/linux), but because the tarball bytes embed each platform's
+    # stdenv tar/gzip build, and those are separate nixpkgs derivations.
+    # A nixpkgs bump that rebuilds a platform's stdenv re-flips that
+    # platform's hash with zero dep changes (2026-08-31 bump: darwin
+    # stdenv rebuilt, o0LI… → X/pOm…; linux untouched, f84q… held). When
+    # an entry goes stale, the FOD error prints the actual hash — paste
+    # it in.
     outputHash =
-      if pkgs.stdenv.hostPlatform.isDarwin then
-        "sha256-o0LICcwGjk1y6kIlU6C2usCemMYxmA/g1nScJtMYmaU="
-      else
-        "sha256-f84q24yLwTzQ8+JK8lSqJTTOEerci1WLMv+N67zhqi0=";
+      {
+        # captured 2026-09-01, post-nixpkgs-bump darwin stdenv rebuild
+        "aarch64-darwin" = "sha256-X/pOmMF7K9urNEavZ5glXs8LyN9VRewyZ7qw13O4HBY=";
+        # fresh-built on launchpad 2026-09-01 with the current lock
+        "aarch64-linux" = "sha256-f84q24yLwTzQ8+JK8lSqJTTOEerci1WLMv+N67zhqi0=";
+        # carried over from the old non-darwin branch, never built on
+        # x86_64-linux. If the nixos box hits a mismatch, paste the
+        # got-hash here.
+        "x86_64-linux" = "sha256-f84q24yLwTzQ8+JK8lSqJTTOEerci1WLMv+N67zhqi0=";
+      }
+      .${pkgs.stdenv.hostPlatform.system}
+        or (throw "herdr-tab-smart-rename: no bunDeps hash for ${pkgs.stdenv.hostPlatform.system}");
   };
 
   herdrTabSmartRename = pkgs.stdenv.mkDerivation {

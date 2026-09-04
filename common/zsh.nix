@@ -41,6 +41,12 @@
     '';
 
     initContent = ''
+      # Herdr sets HERDR_ENV; advertise ourselves as ghostty so terminal
+      # detection (e.g. truecolor, clipboard) works inside the multiplexer.
+      if [ -n "$HERDR_ENV" ]; then
+        export TERM_PROGRAM=ghostty
+      fi
+
       # Use terminfo for portable key bindings, with hardcoded fallbacks
       # for terminals that don't set terminfo correctly
       typeset -A key
@@ -66,6 +72,15 @@
 
       geoip() { curl -s http://ip-api.com/json/$1?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query | jq . }
       bq() { jq "$@" | bat -l json }
+
+      # command-not-found: comma runs missing commands via
+      # `nix shell nixpkgs#$attr -c $cmd` (flake-native, no nix-env /
+      # nix-shell / <nixpkgs>). --ask prompts before running; multiple
+      # matches get a fuzzy picker.
+      command_not_found_handler() {
+        comma --ask "$@"
+        return $?
+      }
 
       ${pkgs.fortune}/bin/fortune | ${pkgs.cowsay}/bin/cowsay -f hellokitty | ${
         inputs.mattware.packages.${pkgs.stdenv.hostPlatform.system}.prismacat

@@ -26,7 +26,7 @@ in
   system.stateVersion = "26.05";
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_7_1;
+    kernelPackages = pkgs.linuxPackages_latest;
     kernel.sysctl."kernel.task_delayacct" = 1;
     # Match the GC posture below: only current + previous is kept, so
     # there's no point offering 5 boot entries that point to collected
@@ -162,14 +162,55 @@ in
   };
 
   systemd = {
-    # Pin CoreDNS to a single OS thread. The box's DNS load is trivial
-    # (one local forwarder), and this is the ONLY way to land GOMAXPROCS=1
-    # here: since Go 1.25 the runtime derives GOMAXPROCS from the cgroup
-    # CPU quota by default and floors it at 2 on a multi-core box, so a
-    # quota can never yield 1. Setting the env var explicitly forces 1 and
-    # also disables the runtime's automatic (periodic) updates. Merges onto
-    # the services.coredns module's unit (DynamicUser, owns :53).
-    services.coredns.environment.GOMAXPROCS = "1";
+    services = {
+      # Pin CoreDNS to a single OS thread. The box's DNS load is trivial
+      # (one local forwarder), and this is the ONLY way to land GOMAXPROCS=1
+      # here: since Go 1.25 the runtime derives GOMAXPROCS from the cgroup
+      # CPU quota by default and floors it at 2 on a multi-core box, so a
+      # quota can never yield 1. Setting the env var explicitly forces 1 and
+      # also disables the runtime's automatic (periodic) updates. Merges onto
+      # the services.coredns module's unit (DynamicUser, owns :53).
+      coredns.environment.GOMAXPROCS = "1";
+
+      # Syncthing is the background tenant on this box: agents, qmd, and
+      # shells win CPU under contention. Nice only — no IOSchedulingClass,
+      # EBS/nvme runs mq-deadline/none and ignores ioprio classes. Merges
+      # onto the services.syncthing module's unit (same trick as coredns).
+      syncthing.serviceConfig.Nice = 10;
+
+      # qmd MCP daemon (memory search backend for pi). On the Mac this is
+      # started lazily by the hourly curation script; here the service manager
+      # owns it. Foreground mode — no --daemon flag, systemd supervises.
+      # Localhost only (8181); no SG/firewall exposure. State and models live
+      # in matt's ~/.cache/qmd (box-local, deliberately unsynced).
+      # pkgs.qmd carries its llama.cpp backend (built at package time in
+      # mattware's qmd) — no runtime builds, no wrappers.
+      qmd = {
+        description = "qmd MCP daemon (pi memory search)";
+        after = [ "network.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "simple";
+          User = "matt";
+          Group = "users";
+          ExecStart = "${pkgs.qmd}/bin/qmd mcp --http";
+          Restart = "on-failure";
+          RestartSec = 5;
+        };
+      };
+
+      # Keep the box's search index fresh as syncthing lands new memory.
+      # Incremental; reads synced memory/, writes only the box-local index.
+      qmd-embed = {
+        description = "qmd incremental re-index";
+        serviceConfig = {
+          Type = "oneshot";
+          User = "matt";
+          Group = "users";
+          ExecStart = "${pkgs.qmd}/bin/qmd embed";
+        };
+      };
+    };
 
     # The syncthing module only creates its state dir for the default
     # "syncthing" user; we run as matt, so make it ourselves.
@@ -178,39 +219,6 @@ in
       # Parent of the unconventional home (see users.users.matt.home).
       "d /Users 0755 root root -"
     ];
-
-    # qmd MCP daemon (memory search backend for pi). On the Mac this is
-    # started lazily by the hourly curation script; here the service manager
-    # owns it. Foreground mode — no --daemon flag, systemd supervises.
-    # Localhost only (8181); no SG/firewall exposure. State and models live
-    # in matt's ~/.cache/qmd (box-local, deliberately unsynced).
-    # pkgs.qmd carries its llama.cpp backend (built at package time in
-    # mattware's qmd) — no runtime builds, no wrappers.
-    services.qmd = {
-      description = "qmd MCP daemon (pi memory search)";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      serviceConfig = {
-        Type = "simple";
-        User = "matt";
-        Group = "users";
-        ExecStart = "${pkgs.qmd}/bin/qmd mcp --http";
-        Restart = "on-failure";
-        RestartSec = 5;
-      };
-    };
-
-    # Keep the box's search index fresh as syncthing lands new memory.
-    # Incremental; reads synced memory/, writes only the box-local index.
-    services.qmd-embed = {
-      description = "qmd incremental re-index";
-      serviceConfig = {
-        Type = "oneshot";
-        User = "matt";
-        Group = "users";
-        ExecStart = "${pkgs.qmd}/bin/qmd embed";
-      };
-    };
 
     timers.qmd-embed = {
       description = "qmd re-index every 15min";
@@ -261,9 +269,10 @@ in
     git
     iftop
     iotop
+    lazygit
     lsof
-    net-tools
     neovim
+    net-tools
     nixfmt
     patchelf
     strace

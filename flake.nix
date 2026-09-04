@@ -8,8 +8,18 @@
     mattware.url = "github:mattrobenolt/nixpkgs";
     porthole.url = "github:mattrobenolt/porthole";
     home-manager.url = "github:nix-community/home-manager";
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     llm-agents.url = "github:numtide/llm-agents.nix";
     herdr.url = "github:herdrdev/herdr/v0.8.2";
+    # Agent mission-control terminal (luvus.dev). Tracks upstream main;
+    # `just update` bumps it. Upstream's darwin sqlite fix landed
+    # (RizRiyz/luvus#196), so their flake package builds on both hosts.
+    # `luvus update` never overwrites a nix-installed binary — it reports
+    # the package-manager action instead.
+    luvus.url = "github:RizRiyz/luvus/v0.13.4";
 
     agenix = {
       url = "github:ryantm/agenix";
@@ -70,6 +80,12 @@
       llmAgentsRtkOverlay = final: _prev: {
         inherit (final.llm-agents) rtk;
       };
+      # luvus (luvus.dev) from the upstream flake input (tracks main).
+      # Their packaging wraps git/gh/ssh/procps into the binary's PATH —
+      # matters on NixOS hosts with no global PATH.
+      luvusOverlay = _final: prev: {
+        luvus = inputs.luvus.packages.${prev.stdenv.hostPlatform.system}.default;
+      };
     in
     {
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-tree);
@@ -114,6 +130,7 @@
               nixpkgs.overlays = [
                 llm-agents.overlays.shared-nixpkgs
                 llmAgentsRtkOverlay
+                luvusOverlay
               ];
             }
 
@@ -163,6 +180,7 @@
                 llm-agents.overlays.shared-nixpkgs
                 mattware.overlays.default
                 llmAgentsRtkOverlay
+                luvusOverlay
               ];
             }
 
