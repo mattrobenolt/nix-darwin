@@ -37,12 +37,14 @@ apply:
 [doc("Build launchpad without activation. Pass a flake reference to build a committed revision.")]
 [group("remote")]
 remote-check flake=".":
-    nixos-rebuild build --flake "{{ flake }}#launchpad" --build-host root@{{ launchpad_host }}
+    # Short temporary paths keep SSH control sockets below the macOS path limit.
+    # The target host keeps the Linux closure off the Mac.
+    TMPDIR=/tmp nixos-rebuild build --flake "{{ flake }}#launchpad" --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
 
 [doc("Rebuild and switch launchpad. Pass a flake reference to exclude uncommitted changes.")]
 [group("remote")]
 remote-apply flake=".":
-    nixos-rebuild switch --flake "{{ flake }}#launchpad" --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
+    TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#launchpad" --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
 
 [doc("Start the launchpad instance and wait for SSH")]
 [group("remote")]
