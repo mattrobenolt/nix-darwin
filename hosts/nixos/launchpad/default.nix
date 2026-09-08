@@ -36,25 +36,23 @@ in
 
   networking = {
     hostName = "launchpad";
-    # The VPC has no IPv6 CIDR; disable it in the kernel too, so nothing
-    # attempts link-local v6. The Corefile also sinks AAAA answers.
+    # The VPC has no IPv6 CIDR. z53 also returns empty AAAA answers.
     enableIPv6 = false;
-    # Everything goes through the local coredns; keep dhcpcd's learned
-    # VPC resolver out of resolv.conf (coredns already forwards there).
+    # z53 forwards to the VPC resolver. Keep DHCP from bypassing it.
     nameservers = [ "127.0.0.1" ];
     dhcpcd.extraConfig = "nohook resolv.conf";
     # Tailnet MagicDNS search domain (tailscale runs with
     # --accept-dns=false, so it does not manage this for us). The ts.net.
-    # zone in the Corefile does the actual resolution.
+    # zone in z53 does the actual resolution.
     search = [ "tail45c3.ts.net" ];
   };
 
   services = {
-    coredns = {
+    z53 = {
       enable = true;
-      config = builtins.readFile ./files/Corefile;
+      config = builtins.readFile ./files/z53.zon;
     };
-    # Never. coredns owns :53.
+    # z53 owns port 53.
     resolved.enable = false;
 
     syncthing = {
@@ -155,27 +153,23 @@ in
   services.tailscale = {
     enable = true;
     openFirewall = true;
-    # Never let tailscaled take over DNS: coredns owns :53 on this box and
-    # the Corefile already forwards ts.net. to 100.100.100.100. The default
-    # accept-dns rewrote /etc/resolv.conf once — never again.
+    # z53 already forwards ts.net. queries to Tailscale.
+    # Keep tailscaled from replacing the local resolver.
     extraUpFlags = [ "--accept-dns=false" ];
   };
 
   systemd = {
     services = {
-      # Pin CoreDNS to a single OS thread. The box's DNS load is trivial
-      # (one local forwarder), and this is the ONLY way to land GOMAXPROCS=1
-      # here: since Go 1.25 the runtime derives GOMAXPROCS from the cgroup
-      # CPU quota by default and floors it at 2 on a multi-core box, so a
-      # quota can never yield 1. Setting the env var explicitly forces 1 and
-      # also disables the runtime's automatic (periodic) updates. Merges onto
-      # the services.coredns module's unit (DynamicUser, owns :53).
-      coredns.environment.GOMAXPROCS = "1";
+      # Stop the previous resolver before z53 binds the same port.
+      z53 = {
+        conflicts = [ "coredns.service" ];
+        after = [ "coredns.service" ];
+      };
 
       # Syncthing is the background tenant on this box: agents, qmd, and
       # shells win CPU under contention. Nice only — no IOSchedulingClass,
       # EBS/nvme runs mq-deadline/none and ignores ioprio classes. Merges
-      # onto the services.syncthing module's unit (same trick as coredns).
+      # onto the services.syncthing module's unit.
       syncthing.serviceConfig.Nice = 10;
 
       # qmd MCP daemon (memory search backend for pi). On the Mac this is
@@ -263,6 +257,9 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    config.services.z53.package
+    # Keep the previous resolver available for rollback.
+    coredns
     curl
     ethtool
     file

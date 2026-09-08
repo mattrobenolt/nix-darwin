@@ -34,10 +34,15 @@ apply:
 apply:
     sudo nixos-rebuild switch --flake .
 
-[doc("Rebuild and switch the launchpad box (evals locally, builds on the box)")]
+[doc("Build launchpad without activation. Pass a flake reference to build a committed revision.")]
 [group("remote")]
-remote-apply:
-    nixos-rebuild switch --flake .#launchpad --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
+remote-check flake=".":
+    nixos-rebuild build --flake "{{ flake }}#launchpad" --build-host root@{{ launchpad_host }}
+
+[doc("Rebuild and switch launchpad. Pass a flake reference to exclude uncommitted changes.")]
+[group("remote")]
+remote-apply flake=".":
+    nixos-rebuild switch --flake "{{ flake }}#launchpad" --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
 
 [doc("Start the launchpad instance and wait for SSH")]
 [group("remote")]

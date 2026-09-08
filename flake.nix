@@ -174,6 +174,7 @@
           system = "aarch64-linux";
           modules = [
             inputs.agenix.nixosModules.default
+            inputs.z53.nixosModules.default
             ./hosts/nixos/launchpad/default.nix
 
             {
