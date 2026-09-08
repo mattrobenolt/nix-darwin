@@ -25,6 +25,11 @@ in
   time.timeZone = "America/Los_Angeles";
   system.stateVersion = "26.05";
 
+  # Agents treat /tmp as a scratch space (nix-shell, zig, bun, node-gyp) and
+  # ~100G accumulated before anyone noticed. EBS persists across stop/start,
+  # so nothing ever cleaned it. Wipe /tmp at every boot.
+  boot.tmp.cleanOnBoot = true;
+
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
     kernel.sysctl."kernel.task_delayacct" = 1;

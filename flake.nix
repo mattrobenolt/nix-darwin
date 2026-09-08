@@ -14,7 +14,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    herdr.url = "github:herdrdev/herdr/v0.8.2";
+    herdr.url = "github:herdrdev/herdr/v0.9.0";
     # Agent mission-control terminal (luvus.dev). Tracks upstream main;
     # `just update` bumps it. Upstream's darwin sqlite fix landed
     # (RizRiyz/luvus#196), so their flake package builds on both hosts.
