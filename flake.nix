@@ -7,6 +7,7 @@
     };
     mattware.url = "github:mattrobenolt/nixpkgs";
     porthole.url = "github:mattrobenolt/porthole";
+    z53.url = "github:mattrobenolt/z53";
     home-manager.url = "github:nix-community/home-manager";
     nix-index-database = {
       url = "github:nix-community/nix-index-database";

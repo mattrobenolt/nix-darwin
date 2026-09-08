@@ -8,6 +8,7 @@
 
 let
   herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  z53 = inputs.z53.packages.${pkgs.stdenv.hostPlatform.system}.default;
   nixSettings = import ../../common/nix-settings.nix;
   piBaseWrapper = pkgs.writeShellScriptBin "pi-base" ''
     set -euo pipefail
@@ -60,8 +61,14 @@ in
   # Work MacBook Pro specific configuration
 
   imports = [
+    inputs.z53.darwinModules.default
     ./disable-bloat.nix
   ];
+
+  services.z53 = {
+    enable = true;
+    config = builtins.readFile ./files/z53.zon;
+  };
 
   # 1Password GUI - installs to /Applications
   # programs._1password-gui.enable = true;
@@ -95,6 +102,7 @@ in
     btop
     bun
     clang
+    # Keep the previous resolver available for rollback.
     coredns
     deadnix
     delta
@@ -154,6 +162,7 @@ in
     yazi
     yj
     yq
+    z53
     zig_0_15
     zizmor
     zls_0_15
@@ -360,7 +369,7 @@ in
     knownNetworkServices = [ "Wi-Fi" ];
     wakeOnLan.enable = false;
 
-    # Point to local coredns instance
+    # Keep DNS on the local resolver.
     dns = [ "127.0.0.1" ];
 
     # DNS search domains (Tailscale MagicDNS + mDNS)
@@ -380,21 +389,14 @@ in
       trusted-users = ${lib.concatStringsSep " " nixSettings.trustedUsers}
     '';
 
-    # CoreDNS configuration - Place Corefile in /etc
-    # Use .text instead of .source so nix creates a dedicated store derivation
-    # that's properly tracked in the closure and won't get GC'd.
+    # Keep the previous configuration available for rollback.
     "coredns/Corefile".text = builtins.readFile ./files/Corefile;
   };
 
   # LaunchD services
   launchd = {
-    # DNS enforcement daemon
-    # Ensures DNS stays pointed at coredns (127.0.0.1) even when DHCP or
-    # Tailscale try to override it. Tailscale's default --accept-dns=true
-    # injects 100.100.100.100 as a supplemental resolver that wins the
-    # scutil ordering and rewrites /etc/resolv.conf — coredns already
-    # forwards ts.net. to 100.100.100.100 in the Corefile, so we keep
-    # accept-dns off (mirrors the NixOS launchpad --accept-dns=false).
+    # Keep DNS on 127.0.0.1 when DHCP or Tailscale changes network settings.
+    # z53 already forwards ts.net. queries to Tailscale.
     daemons.enforce-dns = {
       script = ''
         if /usr/sbin/networksetup -getinfo "Wi-Fi" &>/dev/null 2>&1; then
@@ -406,22 +408,6 @@ in
       serviceConfig = {
         RunAtLoad = true;
         StartInterval = 3600; # Check every hour
-      };
-    };
-
-    # Run coredns as a system daemon
-    daemons.coredns = {
-      script = ''
-        exec ${pkgs.coredns}/bin/coredns -conf /etc/coredns/Corefile
-      '';
-      serviceConfig = {
-        KeepAlive = true;
-        RunAtLoad = true;
-        StandardOutPath = "/var/log/coredns.log";
-        StandardErrorPath = "/var/log/coredns.log";
-        EnvironmentVariables = {
-          "GOMAXPROCS" = "2";
-        };
       };
     };
 
@@ -518,13 +504,18 @@ in
     }; # user.agents
   };
 
+  # nix-darwin loads new daemons before it removes obsolete daemons.
+  system.activationScripts.launchd.text = lib.mkBefore ''
+    if /bin/launchctl print system/org.nixos.coredns >/dev/null 2>&1; then
+      echo "Stopping CoreDNS before z53 takes port 53..."
+      /bin/launchctl bootout system/org.nixos.coredns
+    fi
+  '';
+
   # Restart services after configuration changes
   system.activationScripts.postActivation.text = ''
     echo "Restarting nix daemon..."
     /bin/launchctl kickstart -k system/systems.determinate.nix-daemon 2>/dev/null || true
-
-    echo "Restarting coredns..."
-    /bin/launchctl kickstart -k system/org.nixos.coredns 2>/dev/null || true
 
     echo "Clearing icon cache..."
     /usr/bin/find /private/var/folders/ -name com.apple.dock.iconcache -exec rm -f {} \; 2>/dev/null || true
