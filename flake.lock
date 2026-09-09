@@ -2130,11 +2130,11 @@
         "nixpkgs": "nixpkgs_12"
       },
       "locked": {
-        "lastModified": 1788825455,
-        "narHash": "sha256-qLrjVQGI2AfkvXJNor1m6lxUFrmAWSqqj2HfEIF8rM0=",
+        "lastModified": 1788930541,
+        "narHash": "sha256-cvcUo8T39atsUTzO4YSYfYrkdzO9XeAW6tEs4w+dQfQ=",
         "owner": "mattrobenolt",
         "repo": "z53",
-        "rev": "9a7c2c48c80f584c9f7950cea568dfbedcd5869c",
+        "rev": "78cbcac308f1006d0d3b57002286d6e6361efa61",
         "type": "github"
       },
       "original": {

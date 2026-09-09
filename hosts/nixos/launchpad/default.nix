@@ -261,6 +261,22 @@ in
     };
   };
 
+  # Containers: podman as a docker drop-in, same story as the orbstack
+  # host — no Docker Inc daemon. `dockerCompat` aliases `docker` straight
+  # to the podman binary; `dockerSocket` symlinks /run/docker.sock to the
+  # root podman socket for tools that hardcode the docker path. Both
+  # sockets are root-podman, gated by the `podman` group (see
+  # users.users.matt).
+  virtualisation = {
+    containers.enable = true;
+    podman = {
+      enable = true;
+      dockerCompat = true;
+      dockerSocket.enable = true;
+      defaultNetwork.settings.dns_enabled = true;
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     config.services.z53.package
     # Keep the previous resolver available for rollback.
@@ -336,8 +352,25 @@ in
 
     matt = {
       isNormalUser = true;
-      extraGroups = [ "wheel" ];
+      extraGroups = [
+        "wheel"
+        "podman"
+      ];
       shell = pkgs.zsh;
+      # Rootless podman needs a uid/gid map; the podman module creates the
+      # group but not the ranges (same numbers as the orbstack host).
+      subUidRanges = [
+        {
+          startUid = 100000;
+          count = 65536;
+        }
+      ];
+      subGidRanges = [
+        {
+          startGid = 100000;
+          count = 65536;
+        }
+      ];
       # Deliberately /Users/matt, not /home/matt: the synced pi state is
       # full of absolute Mac paths (trust.json, session keys, skills).
       # Matching the Mac's home path makes the synced tree correct by
