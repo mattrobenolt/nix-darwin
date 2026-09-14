@@ -531,9 +531,15 @@ in
   '';
 
   # Security configuration
-  # NOTE: /etc/pam.d must stay untouched by Nix on macOS 26.6+ (see the note
-  # in the environment.etc block). sudo runs Apple's stock stack; the biometric
-  # modules are gone because security.pam.services.sudo_local is unset.
+  # NOTE: /etc/pam.d/sudo stays Apple's stock file (macOS 26.6 TCC blocks
+  # activation from writing there — see the environment.etc note). The
+  # /etc/pam.d/sudo_local symlink predates the protection and its target
+  # path never changes, so activation only swaps /etc/static underneath it
+  # and never writes inside /etc/pam.d. Re-enable biometric auth one module
+  # at a time: pam_tid is Apple's own module and goes first. reattach and
+  # watchid follow only after sudo proves stable across a few days, because
+  # a hung auth chain means another Recovery trip to remove the symlink.
+  security.pam.services.sudo_local.touchIdAuth = true;
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=86400
     Defaults timestamp_type=tty
