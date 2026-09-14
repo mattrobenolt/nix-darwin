@@ -391,6 +391,20 @@ in
 
     # Keep the previous configuration available for rollback.
     "coredns/Corefile".text = builtins.readFile ./files/Corefile;
+
+    # Minimal sudo PAM stack: password auth via pam_opendirectory only.
+    # The biometric modules (pam_reattach, pam_tid, pam_watchid) are parked
+    # until re-validated against macOS 26: after the 26.6.2 update the auth
+    # chain hung with no password prompt, leaving no path to root while
+    # launchd's system domain was wedged. Re-enable Touch ID and Watch one
+    # module at a time afterwards, testing sudo between each.
+    "pam.d/sudo".text = ''
+      # sudo: auth account password session
+      auth       required       pam_opendirectory.so
+      account    required       pam_permit.so
+      password   required       pam_deny.so
+      session    required       pam_permit.so
+    '';
   };
 
   # LaunchD services
@@ -522,11 +536,8 @@ in
   '';
 
   # Security configuration
-  security.pam.services.sudo_local = {
-    touchIdAuth = true;
-    watchIdAuth = true;
-    reattach = true;
-  };
+  # NOTE: the minimal pam.d/sudo stack lives in the environment.etc block
+  # above, with the rationale for parking the biometric modules.
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=86400
     Defaults timestamp_type=tty
