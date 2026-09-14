@@ -539,7 +539,11 @@ in
   # at a time: pam_tid is Apple's own module and goes first. reattach and
   # watchid follow only after sudo proves stable across a few days, because
   # a hung auth chain means another Recovery trip to remove the symlink.
-  security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    watchIdAuth = true;
+    reattach = true;
+  };
   security.sudo.extraConfig = ''
     Defaults timestamp_timeout=86400
     Defaults timestamp_type=tty
