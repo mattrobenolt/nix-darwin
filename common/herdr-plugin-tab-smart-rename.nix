@@ -21,8 +21,15 @@ let
     hash = "sha256-Jzw+uvDm4vBnDsTYGtu+moIh9806rxu8oZGBRWKbIh8=";
   };
 
-  # FOD: bun install with network access. Outputs a tarball of
-  # node_modules to avoid FOD store-path reference restrictions.
+  # FOD: bun install with network access. Outputs node_modules as a
+  # directory. outputHashMode = "recursive" NAR-hashes the tree, so
+  # the hash pins the dep CONTENT — NAR is nix's own canonical
+  # serialization, immune to stdenv/tar/gzip rebuilds. The old flat
+  # tar+gzip hash instead fingerprinted the platform's stdenv
+  # tar/gzip build and re-flipped on every stdenv rebuild with zero
+  # dep changes (2026-08-19, 2026-08-31, 2026-09-13). Now only a
+  # lockfile change or a bun version that lays out node_modules
+  # differently can move this hash.
   bunDeps = pkgs.stdenv.mkDerivation {
     pname = "herdr-tab-smart-rename-bun-deps";
     version = "0.1.1";
@@ -48,33 +55,17 @@ let
     '';
 
     installPhase = ''
-      tar --mtime='@0' --sort=name -czf $out node_modules
+      mkdir -p $out
+      cp -a node_modules $out/
     '';
 
-    outputHashMode = "flat";
+    outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    # One entry per system — not because the deps are platform-specific
-    # (they're pure JS; node_modules content is byte-identical across
-    # darwin/linux), but because the tarball bytes embed each platform's
-    # stdenv tar/gzip build, and those are separate nixpkgs derivations.
-    # A nixpkgs bump that rebuilds a platform's stdenv re-flips that
-    # platform's hash with zero dep changes (2026-08-31 bump: darwin
-    # stdenv rebuilt, o0LI… → X/pOm…; linux untouched, f84q… held). When
-    # an entry goes stale, the FOD error prints the actual hash — paste
-    # it in.
-    outputHash =
-      {
-        # captured 2026-09-01, post-nixpkgs-bump darwin stdenv rebuild
-        "aarch64-darwin" = "sha256-X/pOmMF7K9urNEavZ5glXs8LyN9VRewyZ7qw13O4HBY=";
-        # fresh-built on launchpad 2026-09-01 with the current lock
-        "aarch64-linux" = "sha256-f84q24yLwTzQ8+JK8lSqJTTOEerci1WLMv+N67zhqi0=";
-        # carried over from the old non-darwin branch, never built on
-        # x86_64-linux. If the nixos box hits a mismatch, paste the
-        # got-hash here.
-        "x86_64-linux" = "sha256-f84q24yLwTzQ8+JK8lSqJTTOEerci1WLMv+N67zhqi0=";
-      }
-      .${pkgs.stdenv.hostPlatform.system}
-        or (throw "herdr-tab-smart-rename: no bunDeps hash for ${pkgs.stdenv.hostPlatform.system}");
+    # node_modules is pure JS and byte-identical on every platform
+    # (verified darwin vs linux 2026-09-01, and across the 2026-09-13
+    # stdenv rebuild: two store tarballs, identical trees, different
+    # gzip), so one hash covers all systems.
+    outputHash = "sha256-ZzRAA4fnpe8vFdzyO/du654eJ6CR5zzJIQCXW9/swSo=";
   };
 
   herdrTabSmartRename = pkgs.stdenv.mkDerivation {
@@ -86,8 +77,8 @@ let
     nativeBuildInputs = [ bun ];
 
     buildPhase = ''
-      # Extract pre-built node_modules from the FOD tarball
-      tar -xzf ${bunDeps}
+      # Pre-built node_modules from the deps FOD
+      cp -a ${bunDeps}/node_modules .
     '';
 
     installPhase = ''

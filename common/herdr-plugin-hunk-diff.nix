@@ -12,8 +12,7 @@
 # hunkdiff → @pierre/diffs → hast-util-to-html → zwitch) in this
 # lockfile v3 tree. Instead, we use a fixed-output derivation (FOD)
 # to run `npm ci` with network access — FODs are not sandboxed, so
-# npm can reach the registry. The output is a tarball (not a
-# directory) to avoid FOD store-path reference restrictions.
+# npm can reach the registry.
 {
   pkgs,
   lib,
@@ -29,9 +28,14 @@ let
     hash = "sha256-P54w2JoIY1OI3Yvhn2g8aAmFeFdxbg49C27lZpU6+pI=";
   };
 
-  # FOD: npm ci with network access. Outputs a tarball of node_modules
-  # (not a directory) to avoid FOD store-path reference restrictions.
-  # The output hash pins the entire dep closure.
+  # FOD: npm ci with network access. Outputs node_modules as a
+  # directory; outputHashMode = "recursive" NAR-hashes the tree, so
+  # the hash pins the dep CONTENT. The old flat tar+gzip hash
+  # fingerprinted the platform's stdenv tar/gzip build instead and
+  # re-flipped on every stdenv rebuild with zero dep changes
+  # (2026-08-31, 2026-09-13). NAR is nix's own canonical
+  # serialization, so only a lockfile change or an npm version that
+  # lays out node_modules differently can move the hash now.
   npmDeps = pkgs.stdenv.mkDerivation {
     pname = "herdr-hunk-diff-npm-deps";
     version = "0.1.0";
@@ -50,7 +54,8 @@ let
 
     impureEnvVars = lib.fetchers.proxyImpureEnvVars;
 
-    # Pack as tarball so the FOD output can't reference store paths.
+    # Keep stdenv fixup out of the tree: patchShebangs would rewrite
+    # #!/usr/bin/env shebangs to nix store paths and change the hash.
     dontPatchShebangs = true;
     dontStrip = true;
 
@@ -60,27 +65,24 @@ let
     '';
 
     installPhase = ''
-      tar --mtime='@0' --sort=name -czf $out node_modules
+      mkdir -p $out
+      cp -a node_modules $out/
     '';
 
-    outputHashMode = "flat";
+    outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    # Two things make the hash per-system: hunkdiff ships native
-    # platform binaries (hunkdiff-darwin-arm64 vs -linux-arm64/-x64),
-    # and the tarball bytes embed the platform's stdenv tar/gzip +
-    # nodejs build — a nixpkgs bump that rebuilds those re-flips the
-    # hash with zero dep changes (2026-08-31 bump: darwin +SNm… →
-    # 5o2c…, aarch64-linux held). On mismatch, nix prints the actual
-    # hash — paste it in.
+    # hunkdiff ships native per-platform binaries (hunkdiff-darwin-arm64
+    # vs -linux-arm64/-x64), so node_modules content is genuinely
+    # per-system. The entries below are pre-NAR-conversion flat hashes,
+    # stale by definition — the first build on each system fails with a
+    # mismatch and prints the real NAR got-hash; paste it in.
     outputHash =
       {
-        # captured 2026-09-01, post-nixpkgs-bump darwin rebuild
-        "aarch64-darwin" = "sha256-5o2c/3qdP3TmXBzHPcJEmJ/bKW9StZAJ1vRYVekJUx4=";
-        # fresh-built on launchpad 2026-09-01 with the current lock
-        "aarch64-linux" = "sha256-9d1EEXqL5hjJpKy0lgRC58B2etU6DaA+hSCdACY5pxA=";
-        # captured pre-2026-08-19 with an older lock, not built since.
-        # Likely stale after the 2026-08-31 bump — recapture from the
-        # got-hash when the nixos box next applies.
+        # NAR hash, captured 2026-09-13 post-stdenv-rebuild
+        "aarch64-darwin" = "sha256-0Eza8AkXVBrlBoLeOzl5UItsKHG2NkdhC3T70VBkeEw=";
+        # NAR hash, captured on launchpad 2026-09-13
+        "aarch64-linux" = "sha256-TDAEolPRILrNW9qDV0ls20v4f5O5y6QYPIKlRV4A4IU=";
+        # stale flat hash — recapture on next x86_64 nixos build
         "x86_64-linux" = "sha256-f5gTMHyPg9P+laKTfnobL2GywEhyz4onSQ587AErj60=";
       }
       .${pkgs.stdenv.hostPlatform.system}
@@ -96,8 +98,8 @@ let
     nativeBuildInputs = [ nodejs ];
 
     buildPhase = ''
-      # Extract pre-built node_modules from the FOD tarball
-      tar -xzf ${npmDeps}
+      # Pre-built node_modules from the deps FOD
+      cp -a ${npmDeps}/node_modules .
 
       # Compile TypeScript — invoke tsc directly with nix's node to
       # avoid #!/usr/bin/env shebang issues in the Linux sandbox.

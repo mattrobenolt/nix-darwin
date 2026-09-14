@@ -227,16 +227,7 @@ in
       "session-manager-plugin"
       "slack"
       "telegram-desktop"
-      {
-        name = "thaw";
-        # thaw 2.0.0 requires macOS >= 26 (Tahoe) and this machine runs
-        # Sequoia. Stay on 1.2.0: `greedy = false` stops `brew bundle` from
-        # force-upgrading this auto_updates cask (nix-darwin defaults every
-        # cask to greedy: true, which is why apply failed). Additionally
-        # pinned once via `brew pin thaw` so a manual `brew upgrade` also
-        # skips it — re-run that if the pin ever disappears.
-        greedy = false;
-      }
+      "thaw"
       "todoist-app"
       "utm"
       "canon-eos-utility"
