@@ -5,7 +5,6 @@ default:
 # launchpad EC2 box, reached over the tailnet (MagicDNS). The EIP stays
 # the bootstrap/break-glass path (a fresh box is not on the tailnet until
 # the first apply restores its pinned tailscale identity).
-launchpad_host := "launchpad.tail45c3.ts.net"
 launchpad_eip := "52.25.100.5"
 aws_profile := "playground"
 aws_region := "us-west-2"
@@ -39,12 +38,14 @@ apply:
 remote-check flake=".":
     # Short temporary paths keep SSH control sockets below the macOS path limit.
     # The target host keeps the Linux closure off the Mac.
-    TMPDIR=/tmp nixos-rebuild build --flake "{{ flake }}#launchpad" --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
+    TMPDIR=/tmp nixos-rebuild build --flake "{{ flake }}#launchpad" --target-host root@{{
+    launchpad_eip }} --build-host root@{{ launchpad_eip }}
 
 [doc("Rebuild and switch launchpad. Pass a flake reference to exclude uncommitted changes.")]
 [group("remote")]
 remote-apply flake=".":
-    TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#launchpad" --target-host root@{{ launchpad_host }} --build-host root@{{ launchpad_host }}
+    TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#launchpad" --target-host root@{{
+    launchpad_eip }} --build-host root@{{ launchpad_eip }}
 
 [doc("Start the launchpad instance and wait for SSH")]
 [group("remote")]
@@ -59,9 +60,9 @@ remote-up:
       "${aws[@]}" ec2 start-instances --instance-ids "$id" --output text > /dev/null
       "${aws[@]}" ec2 wait instance-running --instance-ids "$id"
       echo "instance running; waiting for sshd..."
-      until ssh -o BatchMode=yes -o ConnectTimeout=5 matt@{{ launchpad_host }} true 2>/dev/null; do sleep 3; done
+      until ssh -o BatchMode=yes -o ConnectTimeout=5 matt@{{ launchpad_eip }} true 2>/dev/null; do sleep 3; done
     fi
-    echo "up: ssh matt@{{ launchpad_host }}"
+    echo "up: ssh matt@{{ launchpad_eip }}"
 
 [doc("Stop the launchpad instance (EBS + config persist; EIP keeps the IP)")]
 [group("remote")]

@@ -41,7 +41,7 @@ if ($choices | is-empty) {
 
 if ($choices | any { str starts-with "core" }) {
   print "Updating core inputs..."
-  nix flake update nixpkgs mattware nix-darwin home-manager llm-agents nixvim helium
+  nix flake update nixpkgs mattware nix-darwin home-manager llm-agents nixvim helium z53 porthole
 }
 
 if ($choices | any { str starts-with "ghostty" }) {

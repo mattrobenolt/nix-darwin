@@ -195,6 +195,10 @@ in
         name = "sst/tap";
         trusted = true;
       }
+      {
+        name = "abue-ammar/tinycast";
+        trusted = true;
+      }
     ];
 
     brews = [
@@ -222,12 +226,11 @@ in
       "orbstack"
       "plexamp"
       "proton-pass"
-      "raycast"
       "scroll-reverser"
       "session-manager-plugin"
       "slack"
       "telegram-desktop"
-      "thaw"
+      "tinycast@beta"
       "todoist-app"
       "utm"
       "canon-eos-utility"
