@@ -47,6 +47,9 @@ in
       # Secrets get seeded from 1Password. (awscli2 comes from the shared
       # NixOS layer.)
       pkgs._1password-cli
+      # TR-100 machine report (login banner, matt.loginBanner below); also
+      # on PATH for direct runs.
+      inputs.usgc-machine-report.packages.${pkgs.stdenv.hostPlatform.system}.usgc-machine-report
     ];
 
     # qmd is pkgs.qmd everywhere: the mattware package now builds the
@@ -92,6 +95,16 @@ in
       fi
     '';
   };
+
+  # TR-100 machine report through prismacat, replacing the shared
+  # fortune|cowsay banner from common/zsh.nix.
+  matt.loginBanner = ''
+    ${
+      inputs.usgc-machine-report.packages.${pkgs.stdenv.hostPlatform.system}.usgc-machine-report
+    }/bin/usgc_machine_report | ${
+      inputs.mattware.packages.${pkgs.stdenv.hostPlatform.system}.prismacat
+    }/bin/prismacat --theme "Dracula"
+  '';
 
   programs = {
     # porthole client: xdg-open/$BROWSER/open route URLs to the daemon on

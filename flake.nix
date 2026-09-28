@@ -8,6 +8,13 @@
     mattware.url = "github:mattrobenolt/nixpkgs";
     porthole.url = "github:mattrobenolt/porthole";
     z53.url = "github:mattrobenolt/z53";
+    # TR-100 machine report (launchpad login banner). aarch64-linux only,
+    # matching the one host that uses it.
+    usgc-machine-report = {
+      url = "github:mattrobenolt/usgc-machine-report";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.mattware.follows = "mattware";
+    };
     home-manager.url = "github:nix-community/home-manager";
     nix-index-database = {
       url = "github:nix-community/nix-index-database";

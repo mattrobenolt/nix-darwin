@@ -433,6 +433,63 @@ in
     };
   };
 
+  # .direnv/ dirs are pure cache, but the symlinks inside them
+  # (flake-profile-*, flake-inputs/, nix-profile-*) are registered gcroots
+  # pinning each project's devshell closure in the store — and gcroots never
+  # age out, so nix.gc above reclaims none of it. Agents abandon worktrees
+  # without deleting them, so the pins accumulate. nix-direnv touch(1)s those
+  # symlinks on every cache hit, so the newest symlink mtime tracks last
+  # actual use. Prune .direnv dirs idle past the cutoff: that dangles the
+  # gcroots, the next daily nix-gc reclaims the closures, and the next
+  # direnv entry in that project rebuilds from scratch.
+  systemd.services.direnv-prune = {
+    description = "Prune idle .direnv dirs (drops their devshell gcroots)";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "matt";
+    };
+    script = ''
+      set -euo pipefail
+      # users.users.matt.home (unconventional on purpose; see above)
+      home="/Users/matt"
+      idle=$((14 * 24 * 60 * 60))
+      now=$(${pkgs.coreutils}/bin/date +%s)
+      cutoff=$((now - idle))
+
+      # --no-ignore: .direnv is gitignored in every repo. --hidden: it is
+      # dot-prefixed. The excludes only save walk time: dependency, build,
+      # and container trees can never hold a .direnv.
+      while IFS= read -r d; do
+        newest=0
+        for link in "$d"/flake-profile-* "$d"/flake-inputs/* "$d"/nix-profile-* "$d"/flake-tmp-profile.*; do
+          [[ -L "$link" ]] || continue
+          m=$(${pkgs.coreutils}/bin/stat -c %Y "$link")
+          if ((m > newest)); then
+            newest=$m
+          fi
+        done
+        # newest=0 means no nix gcroots (e.g. a layout-python-only dir):
+        # nothing is pinned, so leave it alone.
+        if ((newest > 0 && newest < cutoff)); then
+          age=$(((now - newest) / 86400))
+          echo "pruned $d (gcroots last refreshed $age days ago)"
+          ${pkgs.coreutils}/bin/rm -rf "$d"
+        fi
+      done < <(${pkgs.fd}/bin/fd --hidden --no-ignore --exclude .git --exclude node_modules --exclude target --exclude containers '^\.direnv$' "$home")
+    '';
+  };
+
+  systemd.timers.direnv-prune = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      # Ahead of nix.gc's midnight daily run, so a day's pruning is
+      # reclaimed by the immediately following GC.
+      OnCalendar = "*-*-* 23:00:00";
+      # The box stops and starts on demand; catch up missed runs on boot.
+      Persistent = true;
+    };
+  };
+
   # Same story for memory: zram alone wasn't enough when the box was 8GB.
   swapDevices = [
     {

@@ -1,90 +1,110 @@
-{ pkgs, inputs, ... }:
+{
+  pkgs,
+  inputs,
+  lib,
+  config,
+  ...
+}:
 
 {
-  home.sessionVariables = {
-    HWATCH = "--no-title --color --no-help-banner";
+  # Login banner printed at interactive zsh startup. Hosts override it
+  # (launchpad swaps fortune for the TR-100 machine report).
+  options.matt.loginBanner = lib.mkOption {
+    type = lib.types.lines;
+    description = "Shell snippet printed at the top of interactive zsh startup";
   };
 
-  programs.zsh = {
-    enable = true;
-    defaultKeymap = "emacs";
-
-    history = {
-      path = "$HOME/.zsh_history";
-      size = 50000;
-      save = 10000;
-      expireDuplicatesFirst = true;
-      extended = true;
-      ignoreAllDups = true;
-      ignoreDups = true;
-      ignoreSpace = true;
-      share = true;
-    };
-
-    setOptions = [
-      "auto_pushd"
-      "hist_find_no_dups"
-      "hist_save_no_dups"
-      "hist_verify"
-      "nonomatch"
-      "pushd_ignore_dups"
-      "pushdminus"
-    ];
-
-    localVariables = {
-      TIMEFMT = "%U user / %S system / %P cpu %*E total / %Mk maxmem";
-    };
-
-    completionInit = ''
-      autoload -Uz compinit
-      compinit -u
-    '';
-
-    initContent = ''
-      # Herdr sets HERDR_ENV; advertise ourselves as ghostty so terminal
-      # detection (e.g. truecolor, clipboard) works inside the multiplexer.
-      if [ -n "$HERDR_ENV" ]; then
-        export TERM_PROGRAM=ghostty
-      fi
-
-      # Use terminfo for portable key bindings, with hardcoded fallbacks
-      # for terminals that don't set terminfo correctly
-      typeset -A key
-      key[Home]="''${terminfo[khome]}"
-      key[End]="''${terminfo[kend]}"
-      key[Delete]="''${terminfo[kdch1]}"
-      key[Insert]="''${terminfo[kich1]}"
-
-      [[ -n "''${key[Home]}"   ]] && bindkey "''${key[Home]}"   beginning-of-line
-      [[ -n "''${key[End]}"    ]] && bindkey "''${key[End]}"    end-of-line
-      [[ -n "''${key[Delete]}" ]] && bindkey "''${key[Delete]}" delete-char
-      [[ -n "''${key[Insert]}" ]] && bindkey "''${key[Insert]}" overwrite-mode
-
-      # Fallbacks for common terminal escape sequences
-      bindkey "^[[H"  beginning-of-line  # xterm
-      bindkey "^[OH"  beginning-of-line  # xterm application mode
-      bindkey "^[[1~" beginning-of-line  # rxvt/linux console
-      bindkey "^[[F"  end-of-line        # xterm
-      bindkey "^[OF"  end-of-line        # xterm application mode
-      bindkey "^[[4~" end-of-line        # rxvt/linux console
-      bindkey "^[[3~" delete-char
-      bindkey "^[[2~" overwrite-mode
-
-      geoip() { curl -s http://ip-api.com/json/$1?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query | jq . }
-      bq() { jq "$@" | bat -l json }
-
-      # command-not-found: comma runs missing commands via
-      # `nix shell nixpkgs#$attr -c $cmd` (flake-native, no nix-env /
-      # nix-shell / <nixpkgs>). --ask prompts before running; multiple
-      # matches get a fuzzy picker.
-      command_not_found_handler() {
-        comma --ask "$@"
-        return $?
-      }
-
+  config = {
+    matt.loginBanner = lib.mkDefault ''
       ${pkgs.fortune}/bin/fortune | ${pkgs.cowsay}/bin/cowsay -f hellokitty | ${
         inputs.mattware.packages.${pkgs.stdenv.hostPlatform.system}.prismacat
       }/bin/prismacat --theme "Dracula"
     '';
+
+    home.sessionVariables = {
+      HWATCH = "--no-title --color --no-help-banner";
+    };
+
+    programs.zsh = {
+      enable = true;
+      defaultKeymap = "emacs";
+
+      history = {
+        path = "$HOME/.zsh_history";
+        size = 50000;
+        save = 10000;
+        expireDuplicatesFirst = true;
+        extended = true;
+        ignoreAllDups = true;
+        ignoreDups = true;
+        ignoreSpace = true;
+        share = true;
+      };
+
+      setOptions = [
+        "auto_pushd"
+        "hist_find_no_dups"
+        "hist_save_no_dups"
+        "hist_verify"
+        "nonomatch"
+        "pushd_ignore_dups"
+        "pushdminus"
+      ];
+
+      localVariables = {
+        TIMEFMT = "%U user / %S system / %P cpu %*E total / %Mk maxmem";
+      };
+
+      completionInit = ''
+        autoload -Uz compinit
+        compinit -u
+      '';
+
+      initContent = ''
+        # Herdr sets HERDR_ENV; advertise ourselves as ghostty so terminal
+        # detection (e.g. truecolor, clipboard) works inside the multiplexer.
+        if [ -n "$HERDR_ENV" ]; then
+          export TERM_PROGRAM=ghostty
+        fi
+
+        # Use terminfo for portable key bindings, with hardcoded fallbacks
+        # for terminals that don't set terminfo correctly
+        typeset -A key
+        key[Home]="''${terminfo[khome]}"
+        key[End]="''${terminfo[kend]}"
+        key[Delete]="''${terminfo[kdch1]}"
+        key[Insert]="''${terminfo[kich1]}"
+
+        [[ -n "''${key[Home]}"   ]] && bindkey "''${key[Home]}"   beginning-of-line
+        [[ -n "''${key[End]}"    ]] && bindkey "''${key[End]}"    end-of-line
+        [[ -n "''${key[Delete]}" ]] && bindkey "''${key[Delete]}" delete-char
+        [[ -n "''${key[Insert]}" ]] && bindkey "''${key[Insert]}" overwrite-mode
+
+        # Fallbacks for common terminal escape sequences
+        bindkey "^[[H"  beginning-of-line  # xterm
+        bindkey "^[OH"  beginning-of-line  # xterm application mode
+        bindkey "^[[1~" beginning-of-line  # rxvt/linux console
+        bindkey "^[[F"  end-of-line        # xterm
+        bindkey "^[OF"  end-of-line        # xterm application mode
+        bindkey "^[[4~" end-of-line        # rxvt/linux console
+        bindkey "^[[3~" delete-char
+        bindkey "^[[2~" overwrite-mode
+
+        geoip() { curl -s http://ip-api.com/json/$1?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query | jq . }
+        bq() { jq "$@" | bat -l json }
+
+        # command-not-found: comma runs missing commands via
+        # `nix shell nixpkgs#$attr -c $cmd` (flake-native, no nix-env /
+        # nix-shell / <nixpkgs>). --ask prompts before running; multiple
+        # matches get a fuzzy picker.
+        command_not_found_handler() {
+          comma --ask "$@"
+          return $?
+        }
+
+        # Login banner (matt.loginBanner; hosts override)
+        ${config.matt.loginBanner}
+      '';
+    };
   };
 }
