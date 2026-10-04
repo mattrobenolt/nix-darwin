@@ -79,10 +79,9 @@ in
       PYTHONDONTWRITEBYTECODE = "1";
       KUBECTL_EXTERNAL_DIFF = "delta";
       PSKUBE_NO_COLOR = "1";
-      # Same socket story as the orbstack host: the root podman socket,
-      # reachable via the podman group. Compose and docker-API tooling pick
-      # this up; `docker` itself is the podman alias from dockerCompat.
-      DOCKER_HOST = "unix:///run/podman/podman.sock";
+      # Docker: deliberately no DOCKER_HOST. The rootful daemon owns
+      # /var/run/docker.sock, reachable via the docker group — the path
+      # every tool hardcodes, so per-tool socket overrides are gone.
     };
 
     # 1Password service account token lives ONLY on disk (0600), never in the

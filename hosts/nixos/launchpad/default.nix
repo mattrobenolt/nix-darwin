@@ -261,19 +261,28 @@ in
     };
   };
 
-  # Containers: podman as a docker drop-in, same story as the orbstack
-  # host — no Docker Inc daemon. `dockerCompat` aliases `docker` straight
-  # to the podman binary; `dockerSocket` symlinks /run/docker.sock to the
-  # root podman socket for tools that hardcode the docker path. Both
-  # sockets are root-podman, gated by the `podman` group (see
-  # users.users.matt).
+  # Containers: Docker proper. The podman docker-compat drop-in
+  # (dockerCompat + dockerSocket, podman group gating the root socket)
+  # kept failing real-world tooling: testcontainers-go resolved
+  # /var/run/docker.sock into permission walls and needed rootless
+  # DOCKER_HOST overrides, and compose exec/down had alias quirks
+  # (wormhole `just demo`). Rootful dockerd behind /var/run/docker.sock,
+  # gated by the `docker` group — same access model as the podman group
+  # before it — is the path every tool hardcodes, so per-tool socket
+  # overrides stop being a thing.
   virtualisation = {
-    containers.enable = true;
-    podman = {
+    docker = {
       enable = true;
-      dockerCompat = true;
-      dockerSocket.enable = true;
-      defaultNetwork.settings.dns_enabled = true;
+      # Containers survive daemon restarts (nixos-rebuild switch).
+      liveRestore = true;
+      # Same hygiene posture as the rest of the box (boot.tmp,
+      # direnv-prune, nix.gc): weekly prune of dangling images, build
+      # cache, and stopped containers. Volumes are never pruned — the
+      # demo postgres data lives in one.
+      autoPrune = {
+        enable = true;
+        dates = "weekly";
+      };
     };
   };
 
@@ -282,6 +291,9 @@ in
     # Keep the previous resolver available for rollback.
     coredns
     curl
+    # Compose binary; demo tooling shells out to `docker-compose`, not
+    # `docker compose`.
+    docker-compose
     ethtool
     file
     git
@@ -352,25 +364,13 @@ in
 
     matt = {
       isNormalUser = true;
+      # `docker` gates /var/run/docker.sock (module-created group), same
+      # access model as the old podman group.
       extraGroups = [
         "wheel"
-        "podman"
+        "docker"
       ];
       shell = pkgs.zsh;
-      # Rootless podman needs a uid/gid map; the podman module creates the
-      # group but not the ranges (same numbers as the orbstack host).
-      subUidRanges = [
-        {
-          startUid = 100000;
-          count = 65536;
-        }
-      ];
-      subGidRanges = [
-        {
-          startGid = 100000;
-          count = 65536;
-        }
-      ];
       # Deliberately /Users/matt, not /home/matt: the synced pi state is
       # full of absolute Mac paths (trust.json, session keys, skills).
       # Matching the Mac's home path makes the synced tree correct by
