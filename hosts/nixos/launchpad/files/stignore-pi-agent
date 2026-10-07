@@ -1,31 +1,42 @@
 // Canonical ignore set for the pi-agent syncthing folder.
-// Both sides symlink this file to ~/.pi/agent/.stignore.
-//
-// GOTCHA (box side): the symlink target lives in the nix store, where all
-// mtimes are epoch 0. Syncthing detects .stignore changes by mtime, so it
-// never notices an update. After changing this file, restart syncthing on
-// the box: sudo systemctl restart syncthing (the Mac side is a real file
-// and reloads on its own).
+// Both sides symlink this file to ~/.pi/agent/.stignore:
+//   - Mac: symlink straight to this repo file. Its mtime is real, so
+//     syncthing reloads edits on its own.
+//   - box: symlink to the nix store copy, where all mtimes are epoch 0.
+//     Syncthing detects .stignore changes by mtime, so it never notices
+//     an update. After changing this file, restart syncthing on the box:
+//     sudo systemctl restart syncthing
 //
 // Syncs: the working tree, memory/, settings.json, auth.json, trust.json,
-// sessions/ (the box's curation writer reads Mac-side sessions), git/
-// (clones; ~/code has synced live git dirs for years without issue).
+// sessions/ (the box's curation writer reads Mac-side sessions), extensions/
+// (hand-written .ts), packages/ (installed plugins, minus their
+// node_modules).
+//
+// (?d) rationale: machine-local dirs must never block a remote delete.
+// A remote-deleted directory that still contains ignored files retries
+// forever until someone rm's the leftovers by hand (2026-10:
+// pi-mcp-adapter under git/ wedged the Mac side exactly so).
 
 // Conflict forks are noise; never index them, never block cleanup.
 (?d)*.sync-conflict-*
 
 // Derived session index: a live sqlite DB (shared sqlite + concurrent
 // writers = corruption). Each machine rebuilds its own via qmd embed.
-sessions-index
+(?d)sessions-index
 
 // Machine-local build artifacts. .direnv holds symlinks into the Mac's
 // /nix/store; meaningless on the box. node_modules is one pnpm install away.
-node_modules
-.pnpm-store
-.direnv
+(?d)node_modules
+(?d).pnpm-store
+(?d).direnv
+
+// pi's plugin clone dir (git/github.com/<org>/<repo>): where pi clones
+// installed plugins. Machine-local install state, same class as
+// node_modules — each machine's pi installs its own.
+/git
 
 // qmd cache: models + embeddings. Local per machine.
-.cache
+(?d).cache
 
 // Runtime subagent state (pids, sockets) — dead on arrival cross-machine.
-.pi-subagents
+(?d).pi-subagents
