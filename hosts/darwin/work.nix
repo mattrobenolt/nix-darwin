@@ -204,7 +204,6 @@ in
     brews = [
       "jundot/omlx/omlx"
       "mole"
-      "syncthing"
       "tailscale"
       "tracy"
     ];
@@ -503,6 +502,28 @@ in
             WorkingDirectory = "/Users/matt/.pi/agent";
             RunAtLoad = false;
           };
+      };
+
+      # Syncthing, moved off the homebrew formula. State and config live in
+      # ~/Library/Application Support/Syncthing (macOS default for any build),
+      # so the device ID and folders carry over untouched. Nice mirrors
+      # launchpad's syncthing unit (hosts/nixos/launchpad); LowPriorityIO is
+      # the ionice analog.
+      syncthing = {
+        serviceConfig = {
+          Label = "com.mattrobenolt.syncthing";
+          ProgramArguments = [
+            "${pkgs.syncthing}/bin/syncthing"
+            "--no-browser"
+            "--no-restart"
+          ];
+          RunAtLoad = true;
+          KeepAlive = true;
+          Nice = 10;
+          LowPriorityIO = true;
+          StandardOutPath = "/Users/matt/Library/Logs/syncthing.log";
+          StandardErrorPath = "/Users/matt/Library/Logs/syncthing.log";
+        };
       };
     }; # user.agents
   };
