@@ -1,111 +1,108 @@
 # AGENTS.md
 
-This file provides guidance to AI coding assistants when working with code in this repository.
+Guidance for AI coding assistants that work in this repository.
 
 ## Repository Overview
 
-This is a declarative macOS system configuration using nix-darwin and home-manager. It manages system packages, GUI applications (via Homebrew), system settings, and user dotfiles in a unified, reproducible way.
+Declarative system configuration for four hosts, all defined in one flake: a work Mac (nix-darwin) and three NixOS machines. The flake manages system packages, services, macOS settings, Homebrew GUI apps, and user dotfiles through home-manager. The launchpad EC2 host adds OpenTofu infra under `infra/` and agenix secrets under `secrets/`.
 
 ## Essential Commands
 
-Use the `just` recipes from the repo root instead of calling `darwin-rebuild` or `nixos-rebuild` directly. The recipes pick the right command for the current host.
+Run `just` recipes from the repo root. Do not call `darwin-rebuild` or `nixos-rebuild` directly. The recipes select the correct command for the current host.
 
 ```bash
-# Build the current host config without activating it
-just check
-
-# Format all Nix files
-just fmt
-
-# Lint Nix files
-just lint
-
-# Rebuild and switch to the current host config
-just apply
+just check    # build the current host config, no activation
+just apply    # rebuild and switch
+just fmt      # format all Nix files
+just lint     # statix + deadnix
+just fix      # auto-fix lint issues
+just update   # bump flake inputs (interactive gum picker)
 ```
 
-`just apply` may prompt for sudo when activation needs it. For validation-only work, prefer `just check`.
+`just apply` prompts for sudo when activation needs it. For validation work, prefer `just check`.
+
+`nix develop` provides the tooling: just, statix, deadnix, nixfmt, fd, gum, nushell, agenix, nixos-rebuild, tofu, awscli2. After the first apply, `just` is a system package on the Mac and a home package on the NixOS hosts.
+
+### launchpad recipes (remote EC2 box)
+
+```bash
+just remote-check  [ref]  # build on the box itself; the closure never lands on the Mac
+just remote-apply  [ref]  # switch the box; pass a committed ref to exclude uncommitted changes
+just remote-up            # start the EC2 instance, wait for ssh
+just remote-down          # stop the instance; EBS and config persist, the EIP keeps the IP
+```
+
+The recipes call `tofu` and `aws`. Both come from the devShell.
+
+## Hosts
+
+| Flake attr | Machine | Config |
+|---|---|---|
+| `darwinConfigurations."Matts-MacBook-Pro"` | work laptop, aarch64-darwin | `hosts/darwin/work.nix` |
+| `nixosConfigurations.launchpad` | EC2 agent box, aarch64-linux, us-west-2 | `hosts/nixos/launchpad/` |
+| `nixosConfigurations.orbstack` | OrbStack VM on the Mac, aarch64-linux | `hosts/nixos/orbstack/` |
+| `nixosConfigurations.nixos` | desktop PC, x86_64-linux | `hosts/nixos/nixos/` |
 
 ## Configuration Architecture
 
-### Flake Structure
-- **`flake.nix`**: Entry point defining system configurations
-  - `darwinConfigurations`: macOS system definitions
-  - `nixosConfigurations`: Linux system definitions (templates only)
-  - Integrates nix-darwin + home-manager
+### Layering
 
-### System-Level Configuration
-- **`common.nix`**: Shared packages and settings across all machines (macOS and Linux)
-  - Core CLI tools and system-wide packages
-  - Sets `nix.enable = false` for Determinate Nix compatibility on macOS
-- **`hosts/darwin/*.nix`**: Host-specific configurations
-  - Host-specific package sets
-  - Homebrew integration for GUI apps and casks
-  - macOS system defaults (dock, finder, trackpad, etc.)
-  - Custom launchd daemons (if any)
-  - Package overlays for fixing broken builds
+1. System layer: `common.nix` (shared packages and settings) plus each host's own config.
+2. Home-manager layer: `home.nix` (Darwin entry) and `hosts/nixos/home.nix` (Linux-shared entry) both import `home-common.nix`.
+3. Shared program modules: `common/*.nix`, imported by `home-common.nix`. Keep anything machine-specific in the host's home config.
+4. Per-host modules: `hosts/darwin/home/` and `hosts/nixos/<host>/home/` (or `home.nix`).
 
-### User-Level Configuration (home-manager)
-- **`home.nix`**: Base home-manager entry point
-  - Sets username and home directory
-  - Imports `home-common.nix` and `hosts/darwin/home.nix`
-- **`home-common.nix`**: Shared user config across all machines
-  - Imports common program configs from `common/`
-- **`hosts/darwin/home.nix`**: Darwin-specific user config
-  - Imports modular program configs from `hosts/darwin/home/`
-  - Platform-specific overrides (git signing, etc.)
-- **`hosts/darwin/home/*.nix`**: Per-program configurations
-  - Individual modules for each configured program
-  - May include subdirectories for complex configs (e.g., neovim)
+### Directory Map
 
-### Common Configuration Modules
-- **`common/*.nix`**: Shared program configurations across all machines
-
-## Key Architectural Patterns
-
-### Three-Layer Configuration Model
-1. **System layer** (`common.nix` + `hosts/darwin/*.nix`): System packages, services, macOS settings
-2. **Home-manager layer** (`home.nix` → `home-common.nix` + `hosts/*/home.nix`): User environment and dotfiles
-3. **Per-program modules** (`hosts/*/home/*.nix`): Fine-grained program-specific settings
-
-### Platform Separation
-- Darwin (macOS): Active configuration in `hosts/darwin/`
-- NixOS (Linux): Template examples only in `hosts/nixos/`
+| Path | Contents |
+|---|---|
+| `common.nix` | Shared system packages and settings. Sets `nix.enable = false`. NixOS hosts override it. |
+| `common/` | Shared home-manager program modules (herdr, neovim, zsh, ...). |
+| `home.nix`, `home-common.nix` | Home-manager entry points. |
+| `hosts/darwin/` | Mac: system config, Homebrew, launchd daemons (syncthing, coredns), z53 DNS. |
+| `hosts/nixos/launchpad/` | EC2 box: syncthing, tailscale, z53, agenix identity restore. |
+| `hosts/nixos/nixos/` | Desktop: Hyprland and the hypr* family. |
+| `hosts/nixos/orbstack/` | OrbStack VM: symlinks agent state from the Mac via `/mnt/mac`. |
+| `infra/launchpad/` | OpenTofu for the EC2 box. Boundary rule: tofu owns everything outside the guest. NixOS owns everything inside it. Bring-up runbook: `infra/launchpad/README.md`. |
+| `secrets/` | agenix `.age` files plus `secrets.nix` recipient rules. |
+| `scripts/` | `update.nu` behind `just update`. `launchpad-bootstrap` for box rebirths. |
+| `docs/` | `ec2-agent-box.md`, the launchpad design doc. |
 
 ### Package Management Strategy
-- **Nix packages**: CLI tools and development utilities (via `environment.systemPackages` or home-manager)
-- **Homebrew casks**: GUI applications that need macOS-specific integration
-- **Homebrew brews**: Services and specialized tools not available or better maintained in Homebrew
 
-### Custom System Services
-Custom launchd daemons can be defined in host-specific configs using `launchd.daemons.*`. Check host config files for current services.
+- Nix packages: CLI tools and development utilities.
+- Homebrew casks (Mac only): GUI apps that need macOS integration. Defined in `hosts/darwin/work.nix`.
+- Homebrew brews: services and tools that brew maintains better than nixpkgs.
+- Per-host overlays live in `flake.nix`: `llm-agents.overlays.shared-nixpkgs` on all hosts, `mattware` on Linux, ghostty and hypr* family pins on the desktop, `luvus` on the Mac and launchpad. Read `flake.nix` for the exact set per host.
+- Fix a broken package with `nixpkgs.overlays` in the host config. Read existing host configs for examples.
 
-## Determinates Nix Considerations
+### Secrets (agenix)
 
-This setup uses Determinate Nix installer, not the standard Nix installer:
-- `nix.enable = false` in `common.nix` prevents conflicts
-- System requires `/etc/nix-darwin` symlink pointing to `~/.config/nix-darwin`
-- Uses flakes by default
+- Edit a secret with `agenix -e secrets/<name>.age`. The private key must be present locally.
+- After you add a secret or change recipients, rekey with `agenix -r` and commit the updated `.age` files.
+- Never commit plaintext secret material.
+- Recipients: matt's daily key plus the launchpad host key. The launchpad key is pinned on purpose, because rebirths restore it. Do not rotate it casually, because everything rekeys.
 
-## Making Configuration Changes
+### Determinate Nix
 
-### Adding a New Package
-- **CLI tool for all machines**: Add to `common.nix` → `environment.systemPackages`
-- **CLI tool for specific host**: Add to `hosts/darwin/<hostname>.nix` → `environment.systemPackages`
-- **GUI app**: Add to host's `homebrew.casks` section
-- **User-specific tool**: Add via home-manager in relevant home config
+- The Mac uses the Determinate installer, so `common.nix` sets `nix.enable = false`. home-manager follows through `sharedModules`. NixOS hosts re-enable the Nix module.
+- `/etc/nix-darwin` symlinks to this repo. A bare `darwin-rebuild` finds the flake through that symlink when `--flake` is absent.
 
-### Adding a New Program Configuration
-1. Create new module in `hosts/darwin/home/<program>.nix`
-2. Import it in `hosts/darwin/home.nix`
-3. Use home-manager options (see https://nix-community.github.io/home-manager/options.xhtml)
+## Making Changes
 
-### Fixing Broken Packages
-Use `nixpkgs.overlays` in host config to override package builds. See existing host configs for examples of overriding broken builds.
+- CLI tool for all machines: add it to `common.nix` under `environment.systemPackages`. Add user-scoped tools to the shared home set in `hosts/nixos/home.nix`.
+- CLI tool for one host: add it to that host's config.
+- GUI app on the Mac: add a cask in `hosts/darwin/work.nix`.
+- Shared program config: create `common/<program>.nix` and import it in `home-common.nix`.
+- Host-specific program config: create `hosts/<platform>/<host>/home/<program>.nix` and import it in that host's home entry.
+
+Home-manager options reference: https://nix-community.github.io/home-manager/options.xhtml
 
 ## Development Practices
 
-Always format and lint before committing changes using `just fmt` and `just lint`.
+Run `just fmt` and `just lint` before you commit. Prefer `just check` over `just apply` for validation work.
+
+The repository is public domain under the Unlicense (`LICENSE`).
 
 ### Commits in this repo
 
@@ -113,4 +110,4 @@ This repository does not follow a strict "user must pre-stage changes" workflow.
 
 If Matt asks you to commit here, inspect the working tree, determine the intended scope from the conversation and diff, and stage those files yourself when the scope is clear. Do not stop just because nothing is staged yet.
 
-Only ask for clarification when the scope is genuinely ambiguous or there are unrelated changes you can't safely separate.
+Only ask for clarification when the scope is genuinely ambiguous or there are unrelated changes you cannot safely separate.
