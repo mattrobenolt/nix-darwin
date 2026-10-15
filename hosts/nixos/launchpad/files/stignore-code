@@ -32,6 +32,13 @@
 (?d)target
 (?d).zig-cache
 (?d)zig-out
+(?d)zig-pkg
+
+// Swift / JVM build output (bloop, SwiftPM)
+(?d).build
+
+// Scratch / tool temp dirs
+(?d).tmp
 
 // Nix
 (?d).direnv
