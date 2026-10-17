@@ -342,11 +342,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791807674,
-        "narHash": "sha256-QPBKvidB0hPHfrSX4QOGWmGW7yx60BWd/wW2Hs+cE74=",
+        "lastModified": 1792017905,
+        "narHash": "sha256-g7e/fH33cs/Et8ppLAFb2Xh2SYeb5jd7DZ8Os+KzK/U=",
         "owner": "amaanq",
         "repo": "helium-flake",
-        "rev": "7cd154929ef9746b186237a0bf3e1fffb94cdb5b",
+        "rev": "ae0f6aa2386da60f48ab8c5e12cfbc85159d53f7",
         "type": "github"
       },
       "original": {
@@ -401,11 +401,11 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1791642191,
-        "narHash": "sha256-0bK0A59rVUn1SRZzo4cNi4VSqAe7vR1gL2/MZl53Frw=",
+        "lastModified": 1792000010,
+        "narHash": "sha256-4jtkwQlReQdXsKJJfB9yT7nIf0TlwgZOk2XtxjUgDS8=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c58f54c733a7894d84fa2fdff26cc12088c4b78c",
+        "rev": "5a9d300bd619c03857521b50c8877a19dbad7078",
         "type": "github"
       },
       "original": {
@@ -1313,11 +1313,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1791895923,
-        "narHash": "sha256-XxGPHDTwN57LtQTFldjmJ8Riq3jE0tl3tdI0G1tQlL0=",
+        "lastModified": 1792016304,
+        "narHash": "sha256-AhqWIAUmfGlUFTvqXImJFAAdpV1xAZ7auvRdKq92MlU=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "174d851a8a4923e274aa49c44d2ba7853acb87f3",
+        "rev": "03c78d9ddce7c3e45775511de8a24c6af7aea462",
         "type": "github"
       },
       "original": {
@@ -1352,11 +1352,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1791861720,
-        "narHash": "sha256-9xYCSZ29hMG9TXtiwiweLMjk/0ibLJU8qI/2vBcHAbw=",
+        "lastModified": 1791936343,
+        "narHash": "sha256-c4GK0xaQDiIN1tIzMbhBDITTFjCGr3iOQ4ZWABy5e64=",
         "owner": "mattrobenolt",
         "repo": "nixpkgs",
-        "rev": "adebbf2ff24d6b0f85e4647efda2138608721828",
+        "rev": "2e158776d4cf5f80b996524f4f780f461fb045fa",
         "type": "github"
       },
       "original": {
@@ -1545,11 +1545,11 @@
     },
     "nixpkgs_10": {
       "locked": {
-        "lastModified": 1790360283,
-        "narHash": "sha256-Ffg9tVihtbzJZhFTDA7UZDORPA99q2w1xytxf69jKkg=",
+        "lastModified": 1791689350,
+        "narHash": "sha256-JwMUDZNi8oz5KUY23zGWeBz9XeMN07ILMnUES5d55yk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2a73714b4c73dbca7cfa860f8306349d7afd2106",
+        "rev": "8aa2baf1af6ca99131c979cbdadad7a08e2ca69a",
         "type": "github"
       },
       "original": {
@@ -1654,11 +1654,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1791487292,
-        "narHash": "sha256-tqM7xDEsaeK1p6VvRygeZ9LkQRpUUkbRT02BHv6hnTM=",
+        "lastModified": 1791637130,
+        "narHash": "sha256-TuvwvSjJrpqyIYdjhQ7Wu+ADVfeOpO2Um21/V7TOubw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "8edc0c72e3a38faf5434e40d1f19431125fe4b30",
+        "rev": "ca1659429c950a11a565b5764e37a1b704e17ec8",
         "type": "github"
       },
       "original": {
@@ -1725,11 +1725,11 @@
         "systems": "systems_9"
       },
       "locked": {
-        "lastModified": 1791769517,
-        "narHash": "sha256-OVx8OKPdW1fLfDi1oemFkfSvF354UwU5I0GXnNAGygw=",
+        "lastModified": 1792012326,
+        "narHash": "sha256-DApZIjaKdU4XzglZ56yrPYLhG/ajoyuQ4g4s8tkHqxU=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "84e901ee80e6523068dc3baf86cbf7cdcbf16902",
+        "rev": "8485794923eb406ce3728af320392226608f724b",
         "type": "github"
       },
       "original": {
@@ -1745,11 +1745,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1791414767,
-        "narHash": "sha256-pTYG/ut857bcZ5ZdWjKcY6XV/9GuZGoyEJ0mSD9o1F0=",
+        "lastModified": 1792193188,
+        "narHash": "sha256-amQoq+9WsTz32OkjnKURTpiaZw0SC/YOLPyqaYBOFyQ=",
         "owner": "mattrobenolt",
         "repo": "porthole",
-        "rev": "c0230000e90c53316e5165e2df42eaea7c511ca7",
+        "rev": "93ad8c3e0af1406fcdd4ed08f247a363abe82467",
         "type": "github"
       },
       "original": {

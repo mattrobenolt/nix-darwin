@@ -8,6 +8,7 @@
     "https://ghostty.cachix.org"
     "https://zed.cachix.org"
     "https://nix-community.cachix.org"
+    "https://baskingspot.cachix.org"
   ];
   trustedPublicKeys = [
     "mattrobenolt.cachix.org-1:sn1IDSC4OxQvWaOVD4RRcqyKlket5wgb11nd1QII6i8="
@@ -17,6 +18,7 @@
     "ghostty.cachix.org-1:QB389yTa6gTyneehvqG58y0WnHjQOqgnA+wBnpWWxns="
     "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
     "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    "baskingspot.cachix.org-1:4KDZc1xfJdL8VGAOZo1SkOgZlqMNH+thBzux9J66EjU="
   ];
   trustedUsers = [
     "root"

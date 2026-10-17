@@ -5,8 +5,16 @@ _:
     enable = true;
     enableDefaultConfig = false;
 
-    # Include OrbStack SSH config
-    includes = [ "~/.orbstack/ssh/config" ];
+    # Rex owns ~/.config/rex/ssh_config (written by `rex terminfo setup`,
+    # rewritten by Rex, so it stays out of this file). The Include must stay
+    # above any SetEnv: ssh keeps the first one it sees. The guard downgrades
+    # TERM=xterm-rex to xterm-256color for hosts without the terminfo entry.
+    # Remove with `rex terminfo remove`.
+    includes = [
+      "~/.config/rex/ssh_config"
+      # Include OrbStack SSH config
+      "~/.orbstack/ssh/config"
+    ];
 
     settings = {
       # Global settings for all hosts

@@ -67,6 +67,22 @@
           export TERM_PROGRAM=ghostty
         fi
 
+        # Rex sets TERM_PROGRAM=rex but embeds Ghostty's terminal
+        # (GhosttyRender/GhosttyVT in the app bundle), so the same
+        # advertisement applies.
+        if [ "$TERM_PROGRAM" = "rex" ]; then
+          export TERM_PROGRAM=ghostty
+        fi
+
+        # Rex prepends its bin dir to PATH when it spawns a shell, but
+        # nix-darwin's set-environment (/etc/zshenv) resets PATH wholesale
+        # before any rc file runs, wiping it. REX_BIN_DIR survives, so
+        # rebuild the entry from it. Idempotent for nested shells (no
+        # typeset -U path here).
+        if [[ -n "$REX_BIN_DIR" && ":$PATH:" != *":$REX_BIN_DIR:"* ]]; then
+          export PATH="$REX_BIN_DIR:$PATH"
+        fi
+
         # Use terminfo for portable key bindings, with hardcoded fallbacks
         # for terminals that don't set terminfo correctly
         typeset -A key
