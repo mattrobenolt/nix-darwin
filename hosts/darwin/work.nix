@@ -77,14 +77,6 @@ in
   nixpkgs.overlays = [
     # Use custom packaging from personal nixpkgs fork (matt_go, zlint, etc.)
     mattware.overlays.default
-
-    (_final: prev: {
-      # coredns build is broken in nixpkgs-unstable (bad patches), skip patches and tests
-      coredns = prev.coredns.overrideAttrs (_oldAttrs: {
-        postPatch = ""; # Skip broken patches
-        doCheck = false; # Skip tests
-      });
-    })
   ];
 
   environment.systemPackages = with pkgs; [
@@ -102,8 +94,6 @@ in
     btop
     bun
     clang
-    # Keep the previous resolver available for rollback.
-    coredns
     deadnix
     delta
     difftastic
@@ -382,9 +372,6 @@ in
       trusted-users = ${lib.concatStringsSep " " nixSettings.trustedUsers}
     '';
 
-    # Keep the previous configuration available for rollback.
-    "coredns/Corefile".text = builtins.readFile ./files/Corefile;
-
     # NOTE: do not manage /etc/pam.d/sudo here. The macOS 26.6.2 update blocks
     # nix-darwin activation from writing inside /etc/pam.d (ln -s fails with
     # EPERM, set -e aborts the whole activation, and nothing downstream —
@@ -527,14 +514,6 @@ in
       };
     }; # user.agents
   };
-
-  # nix-darwin loads new daemons before it removes obsolete daemons.
-  system.activationScripts.launchd.text = lib.mkBefore ''
-    if /bin/launchctl print system/org.nixos.coredns >/dev/null 2>&1; then
-      echo "Stopping CoreDNS before z53 takes port 53..."
-      /bin/launchctl bootout system/org.nixos.coredns
-    fi
-  '';
 
   # Restart services after configuration changes
   system.activationScripts.postActivation.text = ''

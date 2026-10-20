@@ -168,12 +168,6 @@ in
 
   systemd = {
     services = {
-      # Stop the previous resolver before z53 binds the same port.
-      z53 = {
-        conflicts = [ "coredns.service" ];
-        after = [ "coredns.service" ];
-      };
-
       # Syncthing is the background tenant on this box: agents, qmd, and
       # shells win CPU under contention. Nice only — no IOSchedulingClass,
       # EBS/nvme runs mq-deadline/none and ignores ioprio classes. Merges
@@ -291,8 +285,6 @@ in
 
   environment.systemPackages = with pkgs; [
     config.services.z53.package
-    # Keep the previous resolver available for rollback.
-    coredns
     curl
     # Compose binary; demo tooling shells out to `docker-compose`, not
     # `docker compose`.

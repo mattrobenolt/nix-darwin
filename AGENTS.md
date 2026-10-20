@@ -71,7 +71,7 @@ this repo — evaluation happens locally and the build runs on the box.
 | `common.nix` | Shared system packages and settings. Sets `nix.enable = false`. NixOS hosts override it. |
 | `common/` | Shared home-manager program modules (herdr, neovim, zsh, ...). |
 | `home.nix`, `home-common.nix` | Home-manager entry points. |
-| `hosts/darwin/` | Mac: system config, Homebrew, launchd daemons (syncthing, coredns), z53 DNS. |
+| `hosts/darwin/` | Mac: system config, Homebrew, launchd daemons (syncthing), z53 DNS. |
 | `hosts/nixos/launchpad/` | EC2 box: syncthing, tailscale, z53, agenix identity restore. |
 | `hosts/nixos/nixos/` | Desktop: pure terminal, no DE/WM. |
 | `hosts/nixos/orbstack/` | OrbStack VM: symlinks agent state from the Mac via `/mnt/mac`. |

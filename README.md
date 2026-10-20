@@ -19,7 +19,7 @@ common/           shared home-manager modules (all machines)
 home.nix          home-manager entry point (darwin)
 home-common.nix   shared home-manager imports (all machines)
 hosts/
-  darwin/         work laptop: system config, homebrew, launchd (syncthing, coredns), z53 DNS
+  darwin/         work laptop: system config, homebrew, launchd (syncthing), z53 DNS
   nixos/
     launchpad/    EC2 agent box (syncthing, tailscale, z53)
     nixos/        desktop PC (Hyprland)
