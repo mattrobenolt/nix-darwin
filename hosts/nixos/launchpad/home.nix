@@ -22,6 +22,9 @@ let
 
     exec "$PI_BIN" "$@"
   '';
+
+  # Canonical key sources (same module every other host reads from).
+  sshKeys = import ../../../common/ssh-keys.nix { inherit lib; };
 in
 {
   # Shared NixOS layer (home-common.nix + linux package set) lives in
@@ -77,9 +80,8 @@ in
       "code/.stignore".source = ./files/stignore-code;
 
       # Public half of the box's keypair (the private half is an agenix secret,
-      # see default.nix).
-      ".ssh/id_ed25519.pub".text =
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII13XL4pqymylPqF41vFZP74+91X5O017M/Tu7Jb6MR3 matt@launchpad\n";
+      # see default.nix). Canonical source: common/ssh-keys.nix.
+      ".ssh/id_ed25519.pub".text = sshKeys.launchpadMainWithComment + "\n";
     };
 
     sessionVariables = {

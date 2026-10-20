@@ -13,11 +13,16 @@ let
       }
     )
   );
+  # The launchpad box's own keypair (GitHub auth + signing key; the private
+  # half is secrets/launchpad-id-ed25519.age, see hosts/nixos/launchpad/).
+  launchpad = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII13XL4pqymylPqF41vFZP74+91X5O017M/Tu7Jb6MR3 matt@launchpad";
   # "ssh-ed25519 AAAA... comment" -> bare "algo base64" (some consumers,
   # e.g. git user.signingKey, don't want the comment).
-  parts = lib.strings.splitString " " raw;
+  bare = key: builtins.concatStringsSep " " (lib.lists.take 2 (lib.strings.splitString " " key));
 in
 {
-  mattMain = builtins.concatStringsSep " " (lib.lists.take 2 parts);
+  mattMain = bare raw;
   mattMainWithComment = raw;
+  launchpadMain = bare launchpad;
+  launchpadMainWithComment = launchpad;
 }

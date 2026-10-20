@@ -31,6 +31,12 @@ in
 
       gpg = {
         format = "ssh";
+        # Verification half of ssh signing: which keys may sign as which
+        # committer email. git matches the principal against the committer
+        # email of the object being verified, and every host signs as
+        # m@robenolt.com, so the file lists both keys under that one
+        # principal (matt's Mac key + the launchpad's own key).
+        ssh.allowedSignersFile = "~/.ssh/allowed_signers";
       };
 
       rebase = {
@@ -100,4 +106,13 @@ in
       ".pi-subagents/"
     ];
   };
+
+  # The allowed_signers trust list for the setting above. namespaces="git"
+  # scopes trust to git signatures (commits and tags both use the "git"
+  # sshsig namespace). Verification is plain ssh-keygen -Y verify, so it
+  # works headless everywhere — no agent, no 1Password.
+  home.file.".ssh/allowed_signers".text = ''
+    m@robenolt.com namespaces="git" ${sshKeys.mattMain}
+    m@robenolt.com namespaces="git" ${sshKeys.launchpadMain}
+  '';
 }
