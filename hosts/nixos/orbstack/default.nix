@@ -13,6 +13,7 @@ in
 
 {
   imports = [
+    ../common.nix
     "${modulesPath}/virtualisation/lxc-container.nix"
   ];
 

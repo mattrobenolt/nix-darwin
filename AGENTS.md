@@ -34,6 +34,18 @@ just remote-down          # stop the instance; EBS and config persist, the EIP k
 
 The recipes call `tofu` and `aws`. Both come from the devShell.
 
+### desktop PC recipes (LAN box, no checkout needed)
+
+```bash
+just desktop-check  [ref]  # build on the box itself; the closure never lands on the Mac
+just desktop-apply  [ref]  # switch the box; pass a committed ref to exclude uncommitted changes
+```
+
+The box is driven as `matt@nixos.local` (mDNS, published by avahi on the box).
+Root ssh is disabled on the box; activation elevates with its passwordless
+sudo. `nixos-rebuild` comes from the devShell. The box needs no checkout of
+this repo — evaluation happens locally and the build runs on the box.
+
 ## Hosts
 
 | Flake attr | Machine | Config |
@@ -61,7 +73,7 @@ The recipes call `tofu` and `aws`. Both come from the devShell.
 | `home.nix`, `home-common.nix` | Home-manager entry points. |
 | `hosts/darwin/` | Mac: system config, Homebrew, launchd daemons (syncthing, coredns), z53 DNS. |
 | `hosts/nixos/launchpad/` | EC2 box: syncthing, tailscale, z53, agenix identity restore. |
-| `hosts/nixos/nixos/` | Desktop: Hyprland and the hypr* family. |
+| `hosts/nixos/nixos/` | Desktop: pure terminal, no DE/WM. |
 | `hosts/nixos/orbstack/` | OrbStack VM: symlinks agent state from the Mac via `/mnt/mac`. |
 | `infra/launchpad/` | OpenTofu for the EC2 box. Boundary rule: tofu owns everything outside the guest. NixOS owns everything inside it. Bring-up runbook: `infra/launchpad/README.md`. |
 | `secrets/` | agenix `.age` files plus `secrets.nix` recipient rules. |
@@ -73,7 +85,7 @@ The recipes call `tofu` and `aws`. Both come from the devShell.
 - Nix packages: CLI tools and development utilities.
 - Homebrew casks (Mac only): GUI apps that need macOS integration. Defined in `hosts/darwin/work.nix`.
 - Homebrew brews: services and tools that brew maintains better than nixpkgs.
-- Per-host overlays live in `flake.nix`: `llm-agents.overlays.shared-nixpkgs` on all hosts, `mattware` on Linux, ghostty and hypr* family pins on the desktop, `luvus` on the Mac and launchpad. Read `flake.nix` for the exact set per host.
+- Per-host overlays live in `flake.nix`: `llm-agents.overlays.shared-nixpkgs` on all hosts, `mattware` on Linux, `luvus` on the Mac and launchpad. Read `flake.nix` for the exact set per host.
 - Fix a broken package with `nixpkgs.overlays` in the host config. Read existing host configs for examples.
 
 ### Secrets (agenix)

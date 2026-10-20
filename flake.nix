@@ -40,33 +40,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hyprland.url = "github:hyprwm/Hyprland";
-    hyprlock = {
-      url = "github:hyprwm/hyprlock";
-      inputs.nixpkgs.follows = "hyprland/nixpkgs";
-    };
-    hypridle = {
-      url = "github:hyprwm/hypridle";
-      inputs.nixpkgs.follows = "hyprland/nixpkgs";
-    };
-    hyprpolkitagent = {
-      url = "github:hyprwm/hyprpolkitagent";
-      inputs.nixpkgs.follows = "hyprland/nixpkgs";
-    };
-    hyprsunset = {
-      url = "github:hyprwm/hyprsunset";
-      inputs.nixpkgs.follows = "hyprland/nixpkgs";
-    };
-    hyprshell = {
-      url = "github:H3rmt/hyprshell";
-      inputs.hyprland.follows = "hyprland";
-    };
-
-    ghostty.url = "github:ghostty-org/ghostty";
-    helium = {
-      url = "github:amaanq/helium-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -246,15 +219,6 @@
               nixpkgs.overlays = [
                 llm-agents.overlays.shared-nixpkgs
                 mattware.overlays.default
-                (_final: prev: {
-                  ghostty = inputs.ghostty.packages.${prev.stdenv.hostPlatform.system}.default;
-                  helium = inputs.helium.packages.${prev.stdenv.hostPlatform.system}.default;
-                  hyprshell = inputs.hyprshell.packages.${prev.stdenv.hostPlatform.system}.default;
-                  hyprlock = inputs.hyprlock.packages.${prev.stdenv.hostPlatform.system}.default;
-                  hypridle = inputs.hypridle.packages.${prev.stdenv.hostPlatform.system}.default;
-                  hyprpolkitagent = inputs.hyprpolkitagent.packages.${prev.stdenv.hostPlatform.system}.default;
-                  hyprsunset = inputs.hyprsunset.packages.${prev.stdenv.hostPlatform.system}.default;
-                })
               ];
             }
 

@@ -32,6 +32,19 @@ let
   # dep changes (2026-08-19, 2026-08-31, 2026-09-13). Now only a
   # lockfile change or a bun version that lays out node_modules
   # differently can move this hash.
+  # Per-platform hashes: the dep tree pulls platform-conditional
+  # binaries (esbuild darwin-arm64 vs linux-arm64), so node_modules
+  # content is per system. One NAR hash per platform, like
+  # herdr-hunk-diff. To add a platform: set outputHash to a dummy
+  # sha256, build the FOD on that platform, read the `got: sha256-...`
+  # from the failure, and fill it in below.
+  bunDepsHashes = {
+    # NAR hash, captured 2026-10-08
+    "aarch64-darwin" = "sha256-E/WDN06j9vrFMxWu6fhWzsSU8yvkV+EzVmjG7obdHqQ=";
+    # NAR hash, captured on launchpad 2026-10-08
+    "aarch64-linux" = "sha256-KwMD6bk2VA5F8b/yt+Dz7iecqZxpV/EvU6FV65OzBaY=";
+  };
+
   bunDeps = pkgs.stdenv.mkDerivation {
     pname = "herdr-tab-smart-rename-bun-deps";
     version = "0.6.1";
@@ -63,17 +76,8 @@ let
 
     outputHashMode = "recursive";
     outputHashAlgo = "sha256";
-    # 0.6.1's dep tree pulls platform-conditional binaries (esbuild
-    # darwin-arm64 vs linux-arm64), so node_modules content is per
-    # system. One NAR hash per platform, like herdr-hunk-diff.
     outputHash =
-      {
-        # NAR hash, captured 2026-10-08
-        "aarch64-darwin" = "sha256-E/WDN06j9vrFMxWu6fhWzsSU8yvkV+EzVmjG7obdHqQ=";
-        # NAR hash, captured on launchpad 2026-10-08
-        "aarch64-linux" = "sha256-KwMD6bk2VA5F8b/yt+Dz7iecqZxpV/EvU6FV65OzBaY=";
-      }
-      .${pkgs.stdenv.hostPlatform.system}
+      bunDepsHashes.${pkgs.stdenv.hostPlatform.system}
         or (throw "herdr-tab-smart-rename: no bunDeps hash for ${pkgs.stdenv.hostPlatform.system}");
   };
 

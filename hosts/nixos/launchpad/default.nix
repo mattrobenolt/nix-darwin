@@ -20,7 +20,10 @@ let
   '';
 in
 {
-  imports = [ ./hardware.nix ];
+  imports = [
+    ../common.nix
+    ./hardware.nix
+  ];
 
   time.timeZone = "America/Los_Angeles";
   system.stateVersion = "26.05";

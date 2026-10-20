@@ -8,6 +8,10 @@ default:
 launchpad_eip := "52.25.100.5"
 aws_profile := "playground"
 aws_region := "us-west-2"
+# Desktop PC on the LAN. mDNS name published by avahi on the box (see
+# hosts/nixos/nixos/default.nix). Root ssh is disabled on the box, so
+# drive it as matt and elevate activation with passwordless sudo.
+desktop_host := "matt@192.168.2.10"
 
 [doc("Build the current host config without activating it")]
 [group("nix")]
@@ -79,6 +83,20 @@ remote-down:
       echo "already $state"
     fi
 
+[doc("Build the desktop PC without activation. Pass a flake reference to build a committed revision.")]
+[group("remote")]
+desktop-check flake=".":
+    # Short temporary paths keep SSH control sockets below the macOS path limit.
+    # The target host keeps the Linux closure off the Mac.
+    TMPDIR=/tmp nixos-rebuild build --flake "{{ flake }}#nixos" --target-host {{
+    desktop_host }} --build-host {{ desktop_host }}
+
+[doc("Rebuild and switch the desktop PC. Pass a flake reference to exclude uncommitted changes.")]
+[group("remote")]
+desktop-apply flake=".":
+    TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#nixos" --target-host {{
+    desktop_host }} --build-host {{ desktop_host }} --elevate=sudo
+
 [doc("Format all nix files")]
 [group("nix")]
 fmt:
@@ -96,7 +114,7 @@ fix:
     statix fix --ignore .direnv --ignore '**/hardware-configuration.nix' .
     fd --extension nix --exclude hardware-configuration.nix --exclude .direnv --exec-batch deadnix --edit
 
-[doc("Update flake inputs. Groups: core ghostty herdr hyprland neovim (omit for interactive picker)")]
+[doc("Update flake inputs. Groups: core herdr neovim (omit for interactive picker)")]
 [group("scripts")]
 update *groups:
     @nu scripts/update.nu {{ groups }}

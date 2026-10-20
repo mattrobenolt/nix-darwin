@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 
 # Shared home-manager layer for all NixOS hosts (orbstack, nixos, launchpad).
 # home-common.nix holds the cross-OS config (Mac included); this adds the
@@ -37,7 +37,6 @@
       hexyl
       hwatch
       hyperfine
-      inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
       jq
       just
       mtr

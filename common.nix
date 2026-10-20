@@ -34,6 +34,20 @@
   # Allow unfree packages (VS Code, etc.)
   nixpkgs.config.allowUnfree = true;
 
+  # nix-darwin builds /etc/ssl/certs/ca-certificates.crt from a blacklisted
+  # cacert bundle and exports it as NIX_SSL_CERT_FILE, which nixpkgs' OpenSSL
+  # honors. That is the bundle nix-built curl/git/openssl use, not macOS's
+  # /etc/ssl/cert.pem.
+  #
+  # Why: eMudhra's eight intermediate CA private keys were compromised
+  # (reported 2026-10-17). The affected intermediates chain to these roots.
+  # Blacklisting the roots blocks those chains on clients that do not process
+  # revocation data. https://emudhra.we-have-a-problem.com/
+  security.pki.caCertificateBlacklist = [
+    "Comodo AAA Services root"
+    "emSign ECC Root CA - G3"
+  ];
+
   # nix-darwin's generated HTML manual currently lags nixos-render-docs.
   # Keep manpages, skip the fragile HTML manual/darwin-help package.
   documentation.doc.enable = false;

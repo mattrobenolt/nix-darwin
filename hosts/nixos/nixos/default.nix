@@ -1,15 +1,13 @@
-{
-  config,
-  pkgs,
-  inputs,
-  ...
-}:
+{ pkgs, ... }:
 
 let
   nixSettings = import ../../../common/nix-settings.nix;
 in
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [
+    ../common.nix
+    ./hardware-configuration.nix
+  ];
 
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
@@ -64,43 +62,21 @@ in
       wget
       zsh
     ];
-
-    etc = {
-      "1password/custom_allowed_browsers" = {
-        text = ''
-          helium
-        '';
-        mode = "0755";
-      };
-    };
   };
 
-  fonts.packages = with pkgs; [
-    hack-font
-    inter
-    nerd-fonts.hack
-    nerd-fonts.jetbrains-mono
-    nerd-fonts.symbols-only
-  ];
-
-  security = {
-    sudo.wheelNeedsPassword = false;
-    polkit.enable = true;
-  };
-
-  hardware = {
-    graphics.enable = true;
-    nvidia = {
-      modesetting.enable = true;
-      open = false;
-      nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
-    };
-  };
+  security.sudo.wheelNeedsPassword = false;
 
   services = {
     getty.autologinUser = "matt";
-    xserver.videoDrivers = [ "nvidia" ];
+
+    # Publish nixos.local (mDNS) so the Mac can drive remote rebuilds by
+    # name (just desktop-check / desktop-apply).
+    avahi = {
+      enable = true;
+      openFirewall = true;
+      publish.enable = true;
+      publish.addresses = true;
+    };
 
     openssh = {
       enable = true;
@@ -111,29 +87,13 @@ in
       };
     };
 
-    pipewire = {
-      enable = true;
-      alsa.enable = true;
-      pulse.enable = true;
-    };
+    # Pure terminal host: no audio stack.
   };
 
   programs = {
     _1password.enable = true;
-    _1password-gui = {
-      enable = true;
-      polkitPolicyOwners = [ "matt" ];
-    };
 
     zsh.enable = true;
-    dconf.enable = true;
-
-    hyprland = {
-      enable = true;
-      package = inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.hyprland;
-      portalPackage =
-        inputs.hyprland.packages.${pkgs.stdenv.hostPlatform.system}.xdg-desktop-portal-hyprland;
-    };
 
     nix-ld = {
       enable = true;
