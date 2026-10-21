@@ -40,6 +40,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Rex Linux server (preview channel). The package repository is private;
+    # Nix reads the token from ~/.config/rex/packages.netrc on the Mac and from
+    # agenix at /etc/nix/netrc on launchpad. The launchpad package follows the
+    # host nixpkgs so its glibc and PAM match /etc/pam.d.
+    rex = {
+      url = "https://pkgs.superlogical.com/rex/nix/preview.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -152,9 +160,11 @@
         # infra/launchpad/README.md.
         launchpad = nixpkgs.lib.nixosSystem {
           system = "aarch64-linux";
+          specialArgs = { inherit inputs; };
           modules = [
             inputs.agenix.nixosModules.default
             inputs.z53.nixosModules.default
+            inputs.rex.nixosModules.default
             ./hosts/nixos/launchpad/default.nix
 
             {

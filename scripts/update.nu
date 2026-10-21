@@ -27,6 +27,7 @@ let choices = if ($groups | is-empty) {
     $"core    \(nixpkgs · mattware · nix-darwin · home-manager · llm-agents · nixvim\)"
     "herdr   (latest stable release)"
     "neovim    (neovim-nightly-overlay)"
+    "rex     (preview channel)"
   ) | lines
 } else {
   $groups
@@ -50,6 +51,11 @@ if ($choices | any { str starts-with "herdr" }) {
 if ($choices | any { str starts-with "neovim" }) {
   print "Updating neovim-nightly-overlay..."
   nix flake update neovim-nightly-overlay
+}
+
+if ($choices | any { str starts-with "rex" }) {
+  print "Updating Rex (preview channel)..."
+  nix flake update rex
 }
 
 print "Done. Run 'just apply' when ready."

@@ -114,7 +114,7 @@ fix:
     statix fix --ignore .direnv --ignore '**/hardware-configuration.nix' .
     fd --extension nix --exclude hardware-configuration.nix --exclude .direnv --exec-batch deadnix --edit
 
-[doc("Update flake inputs. Groups: core herdr neovim (omit for interactive picker)")]
+[doc("Update flake inputs. Groups: core herdr neovim rex (omit for interactive picker)")]
 [group("scripts")]
 update *groups:
     @nu scripts/update.nu {{ groups }}

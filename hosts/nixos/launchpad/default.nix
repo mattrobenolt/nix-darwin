@@ -2,12 +2,33 @@
   pkgs,
   lib,
   config,
+  inputs,
   ...
 }:
 
 let
   nixSettings = import ../../../common/nix-settings.nix;
   sshKeys = import ../../../common/ssh-keys.nix { inherit lib; };
+
+  # Build the prebuilt Rex binary against the host nixpkgs so its glibc and
+  # libpam match the modules NixOS writes to /etc/pam.d/rex-login-server.
+  # autoPatchelfHook's RPATH rewrite corrupts the arm64 binary (SIGSEGV before
+  # main), so patch only the interpreter and put host PAM on LD_LIBRARY_PATH.
+  rexPackage = inputs.rex.packages.${pkgs.stdenv.hostPlatform.system}.rex.overrideAttrs (old: {
+    nativeBuildInputs = (builtins.filter (p: p != pkgs.autoPatchelfHook) old.nativeBuildInputs) ++ [
+      pkgs.patchelf
+    ];
+    postFixup = ''
+      patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} $out/bin/rex
+      mv $out/bin/rex $out/bin/rex-real
+      cat > $out/bin/rex <<'EOF'
+      #!/bin/sh
+      export LD_LIBRARY_PATH="${lib.makeLibraryPath [ pkgs.pam ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      exec "${placeholder "out"}/bin/rex-real" "$@"
+      EOF
+      chmod +x $out/bin/rex
+    '';
+  });
 
   # matt's daily key (canonical source: https://mattrobenolt.com/id_ed25519.pub).
   # Also the EC2 keypair, so a fresh AMI birth injects this same key for
@@ -152,6 +173,17 @@ in
       file = ../../../secrets/tailscaled-state.age;
       mode = "0400";
     };
+    # Rex's private package-repository token, in netrc format. Nix reads it
+    # from its default /etc/nix/netrc when it fetches the Rex flake. Both root
+    # (the daemon) and matt (remote builds run as root, local CLI as matt) must
+    # read it; 0400 owned by matt covers both.
+    rex-package-token = {
+      file = ../../../secrets/rex-package-token.age;
+      path = "/etc/nix/netrc";
+      owner = "matt";
+      group = "users";
+      mode = "0400";
+    };
   };
 
   # Tailscale daemon. The box is on the tailnet (manual `tailscale up`
@@ -164,6 +196,19 @@ in
     # z53 already forwards ts.net. queries to Tailscale.
     # Keep tailscaled from replacing the local resolver.
     extraUpFlags = [ "--accept-dns=false" ];
+  };
+
+  # Rex login server. Sessions run as the caller's own account, not the
+  # shared `rex` account, so agents keep matt's home, keys, and permissions.
+  # Tailscale Serve gives the client an identity over HTTPS; the account
+  # policy maps that identity to matt.
+  services.rex = {
+    package = rexPackage;
+    loginServer = {
+      enable = true;
+      accounts.matt.principals = [ "tailscale:matt@planetscale.com" ];
+      tailscaleServe.enable = true;
+    };
   };
 
   systemd = {

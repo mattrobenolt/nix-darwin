@@ -370,6 +370,11 @@ in
       extra-trusted-substituters = ${lib.concatStringsSep " " nixSettings.substituters}
       extra-trusted-public-keys = ${lib.concatStringsSep " " nixSettings.trustedPublicKeys}
       trusted-users = ${lib.concatStringsSep " " nixSettings.trustedUsers}
+
+      # Determinate's merged netrc is empty; point Nix straight at Rex's
+      # 0600 package-repository netrc so `just check` and `just update` can
+      # fetch the private preview flake. Path only, never the token.
+      netrc-file = /Users/matt/.config/rex/packages.netrc
     '';
 
     # NOTE: do not manage /etc/pam.d/sudo here. The macOS 26.6.2 update blocks

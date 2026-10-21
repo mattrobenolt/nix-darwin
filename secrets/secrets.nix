@@ -31,4 +31,10 @@ in
     matt
     launchpad
   ];
+  # Rex package-repository token, in netrc format, for the private preview
+  # flake. The Mac keeps a plain 0600 copy; launchpad gets this via agenix.
+  "rex-package-token.age".publicKeys = [
+    matt
+    launchpad
+  ];
 }
