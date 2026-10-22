@@ -85,7 +85,7 @@ this repo — evaluation happens locally and the build runs on the box.
 - Nix packages: CLI tools and development utilities.
 - Homebrew casks (Mac only): GUI apps that need macOS integration. Defined in `hosts/darwin/work.nix`.
 - Homebrew brews: services and tools that brew maintains better than nixpkgs.
-- Per-host overlays live in `flake.nix`: `llm-agents.overlays.shared-nixpkgs` on all hosts, `mattware` on Linux, `luvus` on the Mac and launchpad. Read `flake.nix` for the exact set per host.
+- Per-host overlays live in `flake.nix`: `llm-agents.overlays.shared-nixpkgs` on all hosts, `mattware` on Linux. Read `flake.nix` for the exact set per host.
 - Fix a broken package with `nixpkgs.overlays` in the host config. Read existing host configs for examples.
 
 ### Secrets (agenix)

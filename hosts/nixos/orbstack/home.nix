@@ -11,7 +11,7 @@ let
   mkSymlink = path: {
     source = config.lib.file.mkOutOfStoreSymlink path;
   };
-  piBaseWrapper = pkgs.writeShellScriptBin "pi-base" ''
+  piWrapper = pkgs.writeShellScriptBin "pi" ''
     set -euo pipefail
 
     PI_HOME="$HOME/.pi/agent"
@@ -24,29 +24,6 @@ let
     fi
 
     exec "$PI_BIN" "$@"
-  '';
-  piProfileWrapper = pkgs.writeShellScriptBin "pi-profile" ''
-    set -euo pipefail
-
-    PI_HOME="$HOME/.pi/agent"
-    PI_PROFILE_BIN="$PI_HOME/node_modules/.bin/pi-profile"
-
-    if [ ! -x "$PI_PROFILE_BIN" ]; then
-      echo "pi-profile is not installed in $PI_HOME" >&2
-      echo "Run: cd $PI_HOME && npm install" >&2
-      exit 1
-    fi
-
-    exec "$PI_PROFILE_BIN" "$@"
-  '';
-  piWrapper = pkgs.writeShellScriptBin "pi" ''
-    exec ${piProfileWrapper}/bin/pi-profile run default -- "$@"
-  '';
-  piWorkWrapper = pkgs.writeShellScriptBin "pi-work" ''
-    exec ${piProfileWrapper}/bin/pi-profile run work -- "$@"
-  '';
-  piPersonalWrapper = pkgs.writeShellScriptBin "pi-personal" ''
-    exec ${piProfileWrapper}/bin/pi-profile run personal -- "$@"
   '';
   claudeShared = [
     "CLAUDE.md"
@@ -118,11 +95,7 @@ in
     # herdr binary (config/plugins come from the common/herdr*.nix imports
     # above — per-host, not in the shared NixOS layer).
     packages = [
-      piBaseWrapper
       piWrapper
-      piWorkWrapper
-      piPersonalWrapper
-      piProfileWrapper
       inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };

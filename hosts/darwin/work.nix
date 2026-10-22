@@ -10,7 +10,7 @@ let
   herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   z53 = inputs.z53.packages.${pkgs.stdenv.hostPlatform.system}.default;
   nixSettings = import ../../common/nix-settings.nix;
-  piBaseWrapper = pkgs.writeShellScriptBin "pi-base" ''
+  piWrapper = pkgs.writeShellScriptBin "pi" ''
     set -euo pipefail
 
     PI_HOME="$HOME/.pi/agent"
@@ -23,29 +23,6 @@ let
     fi
 
     exec "$PI_BIN" "$@"
-  '';
-  piProfileWrapper = pkgs.writeShellScriptBin "pi-profile" ''
-    set -euo pipefail
-
-    PI_HOME="$HOME/.pi/agent"
-    PI_PROFILE_BIN="$PI_HOME/node_modules/.bin/pi-profile"
-
-    if [ ! -x "$PI_PROFILE_BIN" ]; then
-      echo "pi-profile is not installed in $PI_HOME" >&2
-      echo "Run: cd $PI_HOME && pnpm install" >&2
-      exit 1
-    fi
-
-    exec "$PI_PROFILE_BIN" "$@"
-  '';
-  piWrapper = pkgs.writeShellScriptBin "pi" ''
-    exec ${piProfileWrapper}/bin/pi-profile run default -- "$@"
-  '';
-  piWorkWrapper = pkgs.writeShellScriptBin "pi-work" ''
-    exec ${piProfileWrapper}/bin/pi-profile run work -- "$@"
-  '';
-  piPersonalWrapper = pkgs.writeShellScriptBin "pi-personal" ''
-    exec ${piProfileWrapper}/bin/pi-profile run personal -- "$@"
   '';
 
   # mosh bundles nixpkgs' vanilla OpenSSH to bootstrap the session, which
@@ -125,10 +102,6 @@ in
     nixfmt
     nixfmt-tree
     nodejs
-    piBaseWrapper
-    piPersonalWrapper
-    piProfileWrapper
-    piWorkWrapper
     piWrapper
     pinact
     postgresql_18
@@ -370,11 +343,6 @@ in
       extra-trusted-substituters = ${lib.concatStringsSep " " nixSettings.substituters}
       extra-trusted-public-keys = ${lib.concatStringsSep " " nixSettings.trustedPublicKeys}
       trusted-users = ${lib.concatStringsSep " " nixSettings.trustedUsers}
-
-      # Determinate's merged netrc is empty; point Nix straight at Rex's
-      # 0600 package-repository netrc so `just check` and `just update` can
-      # fetch the private preview flake. Path only, never the token.
-      netrc-file = /Users/matt/.config/rex/packages.netrc
     '';
 
     # NOTE: do not manage /etc/pam.d/sudo here. The macOS 26.6.2 update blocks

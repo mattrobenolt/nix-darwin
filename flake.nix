@@ -21,13 +21,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    herdr.url = "github:herdrdev/herdr/v0.9.3";
-    # Agent mission-control terminal (luvus.dev). Tracks upstream main;
-    # `just update` bumps it. Upstream's darwin sqlite fix landed
-    # (RizRiyz/luvus#196), so their flake package builds on both hosts.
-    # `luvus update` never overwrites a nix-installed binary — it reports
-    # the package-manager action instead.
-    luvus.url = "github:RizRiyz/luvus/v0.13.4";
+    herdr.url = "github:herdrdev/herdr/v0.9.5";
 
     agenix = {
       url = "github:ryantm/agenix";
@@ -45,7 +39,7 @@
     # agenix at /etc/nix/netrc on launchpad. The launchpad package follows the
     # host nixpkgs so its glibc and PAM match /etc/pam.d.
     rex = {
-      url = "https://pkgs.superlogical.com/rex/nix/preview.tar.gz";
+      url = "https://pkgs.superlogical.com/rex/nix/snapshot.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -68,12 +62,6 @@
       ];
       llmAgentsRtkOverlay = final: _prev: {
         inherit (final.llm-agents) rtk;
-      };
-      # luvus (luvus.dev) from the upstream flake input (tracks main).
-      # Their packaging wraps git/gh/ssh/procps into the binary's PATH —
-      # matters on NixOS hosts with no global PATH.
-      luvusOverlay = _final: prev: {
-        luvus = inputs.luvus.packages.${prev.stdenv.hostPlatform.system}.default;
       };
     in
     {
@@ -119,7 +107,6 @@
               nixpkgs.overlays = [
                 llm-agents.overlays.shared-nixpkgs
                 llmAgentsRtkOverlay
-                luvusOverlay
               ];
             }
 
@@ -172,7 +159,6 @@
                 llm-agents.overlays.shared-nixpkgs
                 mattware.overlays.default
                 llmAgentsRtkOverlay
-                luvusOverlay
               ];
             }
 

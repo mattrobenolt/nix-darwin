@@ -6,8 +6,7 @@
 }:
 
 let
-  # On the Mac, `pi` goes through pi-profile (default/work/personal). The
-  # box has exactly one agent home, so pi here is the raw binary.
+  # `pi` runs the raw binary from the single agent home at ~/.pi/agent.
   piWrapper = pkgs.writeShellScriptBin "pi" ''
     set -euo pipefail
 
@@ -31,7 +30,6 @@ in
   # hosts/nixos/home.nix.
   imports = [
     ../home.nix
-    ../../../common/luvus.nix
     # herdr — per-host, not in home-common: the nixos desktop runs no herdr.
     ../../../common/herdr.nix
     ../../../common/herdr-plugins.nix
@@ -118,6 +116,12 @@ in
     # porthole client: xdg-open/$BROWSER/open route URLs to the daemon on
     # the Mac (hosts/darwin/home/porthole.nix) over the ssh RemoteForward.
     porthole.enable = true;
+
+    # The (launchpad) prompt is starship's hostname module, which normally
+    # shows only under ssh (SSH_CONNECTION set). Rex sessions here are not
+    # ssh: rex-login-server spawns the shell, so the variable never exists.
+    # This box is only ever viewed remotely, so always show the hostname.
+    starship.settings.hostname.ssh_only = lib.mkForce false;
 
     # aws-login: headless SSO login flags (see infra/launchpad/README.md).
     # Usage: aws-login --profile <name>

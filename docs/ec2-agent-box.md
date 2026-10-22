@@ -153,7 +153,7 @@ Phase 4 — state: (partially done 2026-08-16)
 3. ~~Configure the Syncthing folder per the scoped rules above~~ — done;
    canonical ignore file in hosts/nixos/launchpad/files/.
 4. ~~`pnpm install` in the agent repo; verify `pi` runs~~ — done. `pi` is a
-   home-manager wrapper (no pi-profile on the box); install with
+   home-manager wrapper over the `~/.pi/agent` binary; install with
    `pnpm install --frozen-lockfile` (never mutate the synced lockfile).
 5. ~~`qmd embed` on the box~~ — done; index built, search verified.
    (node-llama-cpp has no linux-aarch64 CPU prebuilt; it falls back to a
