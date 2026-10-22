@@ -83,6 +83,13 @@
           export PATH="$REX_BIN_DIR:$PATH"
         fi
 
+        # Pi refuses OSC 52 when DISPLAY is set (the host console), but over
+        # rex the real clipboard lives in the client app. Force OSC 52 so
+        # copies inside rex panes reach the Mac's clipboard.
+        if [[ -n "$REX_SESSION" ]]; then
+          export PI_CLIPBOARD_OSC52=1
+        fi
+
         # Use terminfo for portable key bindings, with hardcoded fallbacks
         # for terminals that don't set terminfo correctly
         typeset -A key
