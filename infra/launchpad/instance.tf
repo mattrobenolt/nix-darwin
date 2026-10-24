@@ -31,14 +31,6 @@ resource "aws_security_group" "main" {
   description = "launchpad: SSH during bootstrap, egress-only otherwise"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    description = "SSH (temporary - the tailscale iteration removes this)"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_ssh_cidrs
-  }
-
   # syncthing: designed for untrusted networks (mutual TLS, the device ID is
   # the cert fingerprint — unknown peers get nothing). Exposed on purpose.
   ingress {

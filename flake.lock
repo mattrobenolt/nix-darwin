@@ -196,11 +196,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1792668857,
-        "narHash": "sha256-chUrnAqBhBLvXBUsLFxFYBIl8c0GWp06wdjmAMS8l+U=",
+        "lastModified": 1792773325,
+        "narHash": "sha256-bvba9Lts8r8d15MdIDMwJGDxLtJiTlasKtAZyhTDzXk=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cb7de2c7e589afe7531d4832c71ad4df144624ea",
+        "rev": "6d9655f76459099b0db2f57b13563729c7022aa7",
         "type": "github"
       },
       "original": {
@@ -218,11 +218,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1792687927,
-        "narHash": "sha256-O8JsXXPl26uxJ2nITotVnq7FAubqzsK4pWhZuh78bDA=",
+        "lastModified": 1792814418,
+        "narHash": "sha256-5WlGvpFbW/eFM3WHn2LvZ9b2auTt7Ga1LZCULY5hb8k=",
         "owner": "numtide",
         "repo": "llm-agents.nix",
-        "rev": "24cf271f40105749bb82ad318013c372183ef28e",
+        "rev": "92dd5ad61244fab0c4cf0006be8d4169a461ad18",
         "type": "github"
       },
       "original": {
@@ -237,11 +237,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1792638980,
-        "narHash": "sha256-j1x5iQxRrR779OjWEYRV4Eb7nM3lWeopJIM40U3DJiY=",
+        "lastModified": 1792811707,
+        "narHash": "sha256-g4d8ZyJp1muXG6Tr6PXN16jFLKdMX0fNxLEVcgJf7K0=",
         "owner": "mattrobenolt",
         "repo": "nixpkgs",
-        "rev": "c0f9c9afae9037385dba9f707ec27bef36f54b93",
+        "rev": "6e2cc253af4cbcda8ce6eb950f1da6e7a5688d31",
         "type": "github"
       },
       "original": {
@@ -315,11 +315,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792667976,
-        "narHash": "sha256-qlW9xfM0TFDIU6wGTXfTZ2xSgvgOlV89YHdvfjQ+e0Q=",
+        "lastModified": 1792737899,
+        "narHash": "sha256-P0/GhewcEQmAbzq3QunNWY2jLJaYH9F6c/5dEM/jQ4M=",
         "owner": "nix-darwin",
         "repo": "nix-darwin",
-        "rev": "38cf0abb072c30fff68da0e3f516fc8a7cfb8fc0",
+        "rev": "bb0b90dbd54e207100de72b5dcbe3188c98a4b69",
         "type": "github"
       },
       "original": {
@@ -569,11 +569,11 @@
         "rust-overlay": "rust-overlay_2"
       },
       "locked": {
-        "lastModified": 1792221311,
-        "narHash": "sha256-FmeXiGt9mpDcuYwCA+oy7W7+SsFXTDqTOmvIJZWvPkQ=",
+        "lastModified": 1792800245,
+        "narHash": "sha256-ZQDV1uNwDyRgXfZZNVodGSEquMuVaJLgc3kXF02g+Jo=",
         "owner": "mattrobenolt",
         "repo": "porthole",
-        "rev": "bb8a7dd70d738bfd94642ac9b23de4dbfb986f76",
+        "rev": "fdd3960162922945f9361888f9e0d7191acceb76",
         "type": "github"
       },
       "original": {
