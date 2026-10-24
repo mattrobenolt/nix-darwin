@@ -59,18 +59,6 @@ resource "aws_security_group" "main" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # mosh: roaming shell over the public EIP (the break-glass path when not
-  # on the tailnet). SSH authenticates the bootstrap and negotiates the
-  # session key; only a holder of that key can do anything with the UDP
-  # port, so the range is safe to expose like syncthing/tailscale above.
-  ingress {
-    description = "mosh"
-    from_port   = 60000
-    to_port     = 61000
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
