@@ -6,6 +6,8 @@ default:
 # the bootstrap/break-glass path (a fresh box is not on the tailnet until
 # the first apply restores its pinned tailscale identity).
 launchpad_eip := "52.25.100.5"
+# Normal path: MagicDNS over the tailnet. The SG no longer opens 22/tcp.
+launchpad_host := "launchpad.tail45c3.ts.net"
 aws_profile := "playground"
 aws_region := "us-west-2"
 # Desktop PC on the LAN. mDNS name published by avahi on the box (see
@@ -43,13 +45,13 @@ remote-check flake=".":
     # Short temporary paths keep SSH control sockets below the macOS path limit.
     # The target host keeps the Linux closure off the Mac.
     TMPDIR=/tmp nixos-rebuild build --flake "{{ flake }}#launchpad" --target-host root@{{
-    launchpad_eip }} --build-host root@{{ launchpad_eip }}
+    launchpad_host }} --build-host root@{{ launchpad_host }}
 
 [doc("Rebuild and switch launchpad. Pass a flake reference to exclude uncommitted changes.")]
 [group("remote")]
 remote-apply flake=".":
     TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#launchpad" --target-host root@{{
-    launchpad_eip }} --build-host root@{{ launchpad_eip }}
+    launchpad_host }} --build-host root@{{ launchpad_host }}
 
 [doc("Start the launchpad instance and wait for SSH")]
 [group("remote")]
@@ -64,9 +66,9 @@ remote-up:
       "${aws[@]}" ec2 start-instances --instance-ids "$id" --output text > /dev/null
       "${aws[@]}" ec2 wait instance-running --instance-ids "$id"
       echo "instance running; waiting for sshd..."
-      until ssh -o BatchMode=yes -o ConnectTimeout=5 matt@{{ launchpad_eip }} true 2>/dev/null; do sleep 3; done
+      until ssh -o BatchMode=yes -o ConnectTimeout=5 matt@{{ launchpad_host }} true 2>/dev/null; do sleep 3; done
     fi
-    echo "up: ssh matt@{{ launchpad_eip }}"
+    echo "up: ssh matt@{{ launchpad_host }}"
 
 [doc("Stop the launchpad instance (EBS + config persist; EIP keeps the IP)")]
 [group("remote")]
@@ -96,6 +98,11 @@ desktop-check flake=".":
 desktop-apply flake=".":
     TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#nixos" --target-host {{
     desktop_host }} --build-host {{ desktop_host }} --elevate=sudo
+
+[doc("Test whether a nixpkgs rev builds this Mac's system, without activating")]
+[group("nix")]
+canary *args:
+    ./scripts/nixpkgs-canary {{args}}
 
 [doc("Format all nix files")]
 [group("nix")]

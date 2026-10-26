@@ -52,6 +52,14 @@ _:
       };
 
       "launchpad" = {
+        # MagicDNS over the tailnet; the security group no longer opens 22/tcp.
+        HostName = "launchpad.tail45c3.ts.net";
+        User = "matt";
+      };
+
+      # Break-glass: public IP still assigned (EIP), but 22/tcp is closed at the
+      # SG. Needs an SG change or SSM before it connects.
+      "launchpad-eip" = {
         HostName = "52.25.100.5";
         User = "matt";
       };

@@ -167,12 +167,6 @@ in
       mode = "0600";
       symlink = false;
     };
-    # The box's tailnet node identity, restored into place at activation
-    # (see system.activationScripts). Rebirths rejoin as the same node.
-    tailscaled-state = {
-      file = ../../../secrets/tailscaled-state.age;
-      mode = "0400";
-    };
     # Rex's private package-repository token, in netrc format. Nix reads it
     # from its default /etc/nix/netrc when it fetches the Rex flake. Both root
     # (the daemon) and matt (remote builds run as root, local CLI as matt) must
@@ -186,10 +180,11 @@ in
     };
   };
 
-  # Tailscale daemon. The box is on the tailnet (manual `tailscale up`
-  # once). Once the corp-tailnet tagged-device auth key exists, it becomes
-  # an agenix secret + services.tailscale.authKeyFile and the manual step
-  # goes away.
+  # Tailscale daemon. Node state lives on the root EBS volume, so ordinary
+  # stop/start keeps the same identity and 100.x address. A rebirth (fresh
+  # disk) starts logged out: `tailscale up` once over SSM, then it's back.
+  # Deliberately no pinned state in agenix — restoring a stale copy on every
+  # boot is how the box got logged out of its own tailnet on 2026-10-24.
   services.tailscale = {
     enable = true;
     openFirewall = true;
@@ -290,17 +285,6 @@ in
     };
     # Merged with the agenix module's own deps (specialfs): our dirs first.
     agenix.deps = [ "launchpad-dirs" ];
-
-    # Restore the pinned tailscale node identity after agenix decrypts it,
-    # before tailscaled starts. Rebirths rejoin the tailnet as the same
-    # node (launchpad, same 100.x IP) with no auth key ceremony.
-    launchpad-tailscale-state = {
-      deps = [ "agenix" ];
-      text = ''
-        install -d -m 700 /var/lib/tailscale
-        install -m 600 /run/agenix/tailscaled-state /var/lib/tailscale/tailscaled.state
-      '';
-    };
   };
 
   # Containers: Docker proper. The podman docker-compat drop-in
@@ -358,14 +342,6 @@ in
   nixpkgs.config.allowUnfree = true;
 
   programs = {
-    # mosh: roaming shell that survives the laptop sleeping or switching
-    # networks. Reached over the tailnet (launchpad.tail45c3.ts.net), so the
-    # UDP 60000-61000 flow rides inside the existing WireGuard tunnel (SG
-    # 41641) — no security-group change needed. programs.mosh also opens
-    # that range in the NixOS firewall for the decapsulated packets arriving
-    # on tailscale0. The mosh *client* lives on the Mac, not on this box.
-    mosh.enable = true;
-
     nix-ld = {
       enable = true;
       libraries = with pkgs; [

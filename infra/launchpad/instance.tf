@@ -31,24 +31,6 @@ resource "aws_security_group" "main" {
   description = "launchpad: SSH during bootstrap, egress-only otherwise"
   vpc_id      = aws_vpc.main.id
 
-  # syncthing: designed for untrusted networks (mutual TLS, the device ID is
-  # the cert fingerprint — unknown peers get nothing). Exposed on purpose.
-  ingress {
-    description = "syncthing TCP"
-    from_port   = 22000
-    to_port     = 22000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "syncthing QUIC"
-    from_port   = 22000
-    to_port     = 22000
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   # WireGuard/tailscale: direct connections instead of DERP relays.
   # Mutual-auth protocol; fine to expose.
   ingress {

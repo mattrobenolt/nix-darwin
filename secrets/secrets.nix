@@ -24,13 +24,6 @@ in
     matt
     launchpad
   ];
-  # The box's tailnet node identity (machine key + registration).
-  # Restoring this at activation = rebirths rejoin as the SAME node,
-  # no auth key needed.
-  "tailscaled-state.age".publicKeys = [
-    matt
-    launchpad
-  ];
   # Rex package-repository token, in netrc format, for the private preview
   # flake. The Mac keeps a plain 0600 copy; launchpad gets this via agenix.
   "rex-package-token.age".publicKeys = [
