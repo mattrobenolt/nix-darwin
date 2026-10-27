@@ -30,4 +30,11 @@ in
     matt
     launchpad
   ];
+  # Token for the rex-launchpad Cloudflare Tunnel (private access for Rex on
+  # iOS). Held by launchpad only; the token is issued from the Zero Trust
+  # dashboard and authenticates the outbound connector.
+  "cloudflared-rex.age".publicKeys = [
+    matt
+    launchpad
+  ];
 }

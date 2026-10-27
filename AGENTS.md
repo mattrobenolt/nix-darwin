@@ -90,8 +90,8 @@ this repo — evaluation happens locally and the build runs on the box.
 
 ### Secrets (agenix)
 
-- Edit a secret with `agenix -e secrets/<name>.age`. The private key must be present locally.
-- After you add a secret or change recipients, rekey with `agenix -r` and commit the updated `.age` files.
+- Edit a secret with `just secret <name>`, which runs agenix from `secrets/` and stages the result. A raw invocation must also run from `secrets/`: agenix looks for `secrets.nix` in the current directory or a parent, and it looks the file argument up verbatim, so `agenix -e secrets/<name>.age` from the repo root never resolves. The private key must be present locally.
+- After you add a secret or change recipients, rekey with `cd secrets && agenix -r` and commit the updated `.age` files. A new `.age` file must be tracked by git: the flake is a git flake, so an untracked secret fails evaluation.
 - Never commit plaintext secret material.
 - Recipients: matt's daily key plus the launchpad host key. The launchpad key is pinned on purpose, because rebirths restore it. Do not rotate it casually, because everything rekeys.
 

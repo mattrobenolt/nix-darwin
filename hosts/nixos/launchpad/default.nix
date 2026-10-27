@@ -2,33 +2,12 @@
   pkgs,
   lib,
   config,
-  inputs,
   ...
 }:
 
 let
   nixSettings = import ../../../common/nix-settings.nix;
   sshKeys = import ../../../common/ssh-keys.nix { inherit lib; };
-
-  # Build the prebuilt Rex binary against the host nixpkgs so its glibc and
-  # libpam match the modules NixOS writes to /etc/pam.d/rex-login-server.
-  # autoPatchelfHook's RPATH rewrite corrupts the arm64 binary (SIGSEGV before
-  # main), so patch only the interpreter and put host PAM on LD_LIBRARY_PATH.
-  rexPackage = inputs.rex.packages.${pkgs.stdenv.hostPlatform.system}.rex.overrideAttrs (old: {
-    nativeBuildInputs = (builtins.filter (p: p != pkgs.autoPatchelfHook) old.nativeBuildInputs) ++ [
-      pkgs.patchelf
-    ];
-    postFixup = ''
-      patchelf --set-interpreter ${pkgs.stdenv.cc.bintools.dynamicLinker} $out/bin/rex
-      mv $out/bin/rex $out/bin/rex-real
-      cat > $out/bin/rex <<'EOF'
-      #!/bin/sh
-      export LD_LIBRARY_PATH="${lib.makeLibraryPath [ pkgs.pam ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-      exec "${placeholder "out"}/bin/rex-real" "$@"
-      EOF
-      chmod +x $out/bin/rex
-    '';
-  });
 
   # matt's daily key (canonical source: https://mattrobenolt.com/id_ed25519.pub).
   # Also the EC2 keypair, so a fresh AMI birth injects this same key for
@@ -178,6 +157,12 @@ in
       group = "users";
       mode = "0400";
     };
+    # Cloudflare Tunnel token for the rex-launchpad tunnel. Read by the
+    # cloudflared unit through LoadCredential, so 0400 root is enough.
+    cloudflared-rex = {
+      file = ../../../secrets/cloudflared-rex.age;
+      mode = "0400";
+    };
   };
 
   # Tailscale daemon. Node state lives on the root EBS volume, so ordinary
@@ -198,16 +183,47 @@ in
   # Tailscale Serve gives the client an identity over HTTPS; the account
   # policy maps that identity to matt.
   services.rex = {
-    package = rexPackage;
+    # The module defaults to the flake's package, which follows this flake's
+    # nixpkgs. That pins the interpreter and the PAM rpath to the same glibc
+    # and pam the system uses, so no local override is needed.
     loginServer = {
       enable = true;
-      accounts.matt.principals = [ "tailscale:matt@planetscale.com" ];
+      # `anonymous` is the Cloudflare Tunnel listener below. Rex cannot identify
+      # callers that arrive through the tunnel, so that path is gated at
+      # Cloudflare's edge (WARP enrollment plus the Access policy) instead of by
+      # Rex. The address is the box's own VPC IP, never the public one.
+      accounts.matt.principals = [
+        "tailscale:matt@planetscale.com"
+        "anonymous"
+      ];
       tailscaleServe.enable = true;
+      extraListen = [ "10.42.1.49:7297" ];
+      allowAnonymous = true;
     };
   };
 
   systemd = {
     services = {
+      # Cloudflare Tunnel for the iPhone path to Rex. Outbound only: the
+      # connector dials Cloudflare's edge, so the security group stays
+      # egress-only and no port is published. The account-level CIDR route
+      # (10.42.1.49/32) and the WARP device profile live in the cloudflare
+      # repo; this half only needs the token. Traffic that arrives lands on
+      # 10.42.1.49:7297, the anonymous listener under services.rex.
+      cloudflared-rex = {
+        description = "Cloudflare Tunnel for Rex (launchpad)";
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          LoadCredential = [ "tunnel-token:${config.age.secrets.cloudflared-rex.path}" ];
+          ExecStart = "${pkgs.cloudflared}/bin/cloudflared --no-autoupdate tunnel run --token-file %d/tunnel-token";
+          Restart = "on-failure";
+          RestartSec = 5;
+          DynamicUser = true;
+        };
+      };
+
       # Syncthing is the background tenant on this box: agents, qmd, and
       # shells win CPU under contention. Nice only — no IOSchedulingClass,
       # EBS/nvme runs mq-deadline/none and ignores ioprio classes. Merges

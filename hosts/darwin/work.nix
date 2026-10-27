@@ -337,6 +337,15 @@ in
 
   # Environment configuration
   environment.etc = {
+    # sshd reads this through the AuthorizedKeysCommand drop-in nix-darwin
+    # installs (101-authorized-keys.conf). Same daily key as the desktop box.
+    "ssh/nix_authorized_keys.d/matt".text = builtins.readFile (
+      builtins.fetchurl {
+        url = "https://mattrobenolt.com/id_ed25519.pub";
+        sha256 = "sha256-seWKBEqvkd+YNtWUJjLkuR69SNDQ+3H1JayfbzTrB2M=";
+      }
+    );
+
     # Nix daemon custom configuration
     "nix/nix.custom.conf".text = ''
       download-buffer-size = ${nixSettings.downloadBufferSize}
@@ -357,6 +366,23 @@ in
 
   # LaunchD services
   launchd = {
+    # Apple's Remote Login job is socket-activated and resolves its port
+    # through /etc/services ("ssh" => 22), so sshd_config cannot move it.
+    # Run a separate sshd under launchd instead; it still reads the system
+    # sshd_config, so host keys, PAM, and authorized keys are unchanged.
+    daemons.sshd-2222.serviceConfig = {
+      Label = "org.nixos.sshd-2222";
+      ProgramArguments = [
+        "/usr/sbin/sshd"
+        "-D"
+        "-p"
+        "2222"
+      ];
+      RunAtLoad = true;
+      KeepAlive = true;
+      StandardErrorPath = "/var/log/sshd-2222.log";
+    };
+
     # Keep DNS on 127.0.0.1 when DHCP or Tailscale changes network settings.
     # z53 already forwards ts.net. queries to Tailscale.
     daemons.enforce-dns = {

@@ -8,8 +8,11 @@
   # (reported 2026-10-17). The affected intermediates chain to these roots.
   # Blacklisting the roots blocks those chains on clients that do not process
   # revocation data. https://emudhra.we-have-a-problem.com/
+  #
+  # The eMudhra roots are gone from certdata as of NSS 3.131.1, so naming them
+  # here fails the build: buildcatrust rejects a blocklist entry that matches
+  # no certificate.
   security.pki.caCertificateBlacklist = [
     "Comodo AAA Services root"
-    "emSign ECC Root CA - G3"
   ];
 }

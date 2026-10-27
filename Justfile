@@ -125,3 +125,18 @@ fix:
 [group("scripts")]
 update *groups:
     @nu scripts/update.nu {{ groups }}
+
+[doc("Edit an agenix secret and stage it, e.g. `just secret cloudflared-rex`")]
+[group("scripts")]
+secret name:
+    #!/usr/bin/env bash
+    # agenix finds the rules file by looking for secrets.nix in the current
+    # directory or a parent, and it looks the file argument up verbatim. Run
+    # from secrets/ so `cloudflared-rex.age` matches the key in secrets.nix.
+    set -euo pipefail
+    cd secrets
+    agenix -e "{{ name }}.age"
+    if [ -f "{{ name }}.age" ]; then
+      git add "{{ name }}.age"
+      echo "staged secrets/{{ name }}.age"
+    fi

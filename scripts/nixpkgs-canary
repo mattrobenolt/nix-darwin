@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# nixpkgs-canary — find the newest nixpkgs rev this Mac's system still builds.
+#
+# Why this exists: `nix flake update` moves every input at once, and a broken
+# bump costs a long build before you find out. This tests nixpkgs alone, in
+# two stages:
+#
+#   1. evaluate  (~20s)  — catches renamed/removed options in nix-darwin,
+#                          home-manager, or anything else that reads nixpkgs.
+#   2. build     (slow)  — the real answer. Only run for a candidate that
+#                          already evaluated.
+#
+# It never touches flake.lock and never activates. Everything goes to the
+# store via --override-input, so a failed candidate costs disk, not state.
+#
+# Usage:
+#   nixpkgs-canary                 # test current nixos-unstable head
+#   nixpkgs-canary <rev|date>      # test one candidate (sha or YYYY-MM-DD)
+#   nixpkgs-canary --scan [N]      # newest of the last N days that builds
+#   nixpkgs-canary --eval-only ... # stage 1 only, for a fast signal
+#
+# Env: HOST (default Matts-MacBook-Pro), FLAKE (default: this repo)
+set -euo pipefail
+
+REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+HOST=${HOST:-"Matts-MacBook-Pro"}
+FLAKE=${FLAKE:-"."}
+cd "$REPO"
+ATTR="darwinConfigurations.\"$HOST\".system"
+NIXPKGS=${NIXPKGS:-github:NixOS/nixpkgs}
+GIT_URL=${GIT_URL:-https://github.com/NixOS/nixpkgs}
+
+die() { echo "error: $*" >&2; exit 1; }
+
+head_rev() {
+  git ls-remote "$GIT_URL" nixos-unstable 2>/dev/null | cut -f1 | head -1
+}
+
+# revs_by_day N — newest first, one commit per calendar day, from nixos-unstable.
+revs_by_day() {
+  local n=${1:-7} i day sha
+  for ((i=0; i<n; i++)); do
+    day=$(python3 -c 'import datetime,sys; print((datetime.datetime.now(datetime.UTC)-datetime.timedelta(days=int(sys.argv[1]))).strftime("%Y-%m-%d"))' "$i")
+    sha=$(curl -fsS "https://api.github.com/repos/NixOS/nixpkgs/commits?sha=nixos-unstable&until=${day}T23:59:59Z&per_page=1" 2>/dev/null \
+      | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0]["sha"] if d else "")' 2>/dev/null || true)
+    [[ -n $sha ]] && echo "$sha"
+  done
+}
+
+eval_only() {
+  local rev=$1
+  nix eval --raw "$FLAKE#$ATTR" --override-input nixpkgs "$NIXPKGS/$rev" >/dev/null 2>&1
+}
+
+build_it() {
+  local rev=$1
+  nix build --no-link "$FLAKE#$ATTR" --override-input nixpkgs "$NIXPKGS/$rev" 2>&1 | tail -40
+}
+
+report() {
+  local rev=$1
+  echo "--- $rev"
+  nix build --dry-run "$FLAKE#$ATTR" --override-input nixpkgs "$NIXPKGS/$rev" 2>&1 \
+    | grep -E 'will be (fetched|built)' || true
+}
+
+resolve() {
+  local arg=$1
+  if [[ $arg =~ ^[0-9a-f]{7,40}$ ]]; then echo "$arg"; return; fi
+  if [[ $arg =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    curl -fsS "https://api.github.com/repos/NixOS/nixpkgs/commits?sha=nixos-unstable&until=${arg}T23:59:59Z&per_page=1" \
+      | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["sha"])'
+    return
+  fi
+  die "not a sha or YYYY-MM-DD: $arg"
+}
+
+scan() {
+  local days=${1:-7} rev
+  while read -r rev; do
+    [[ -z $rev ]] && continue
+    printf '%-12s ' "${rev:0:10}"
+    if ! eval_only "$rev"; then echo "eval FAIL"; continue; fi
+    echo "eval ok; building..."
+    if build_it "$rev"; then
+      echo
+      echo "GOOD: $rev"
+      echo "  pin with: nix flake lock --override-input nixpkgs $NIXPKGS/$rev"
+      return 0
+    fi
+    echo "build FAIL"
+  done < <(revs_by_day "$days")
+  echo "no candidate built in the last $days days" >&2
+  return 1
+}
+
+cmd=${1:-}
+case $cmd in
+  --scan)
+    shift || true
+    scan "${1:-7}"
+    ;;
+  --eval-only)
+    shift
+    rev=$(resolve "${1:-$(head_rev)}")
+    eval_only "$rev" && { echo "eval ok: $rev"; report "$rev"; } || die "eval failed: $rev"
+    ;;
+  "" )
+    rev=$(head_rev); [[ -n $rev ]] || die "could not resolve nixos-unstable head"
+    echo "candidate: $rev"
+    eval_only "$rev" || die "eval failed at head ($rev); try --scan"
+    echo "eval ok"
+    report "$rev"
+    echo
+    echo "building (this is the real test)..."
+    build_it "$rev" && echo "GOOD: $rev"
+    ;;
+  -h|--help)
+    sed -n '2,26p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    ;;
+  *)
+    rev=$(resolve "$cmd")
+    echo "candidate: $rev"
+    eval_only "$rev" || die "eval failed: $rev"
+    echo "eval ok"
+    report "$rev"
+    echo
+    build_it "$rev" && echo "GOOD: $rev"
+    ;;
+esac
