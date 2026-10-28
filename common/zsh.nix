@@ -61,15 +61,9 @@
       '';
 
       initContent = ''
-        # Herdr sets HERDR_ENV; advertise ourselves as ghostty so terminal
-        # detection (e.g. truecolor, clipboard) works inside the multiplexer.
-        if [ -n "$HERDR_ENV" ]; then
-          export TERM_PROGRAM=ghostty
-        fi
-
         # Rex sets TERM_PROGRAM=rex but embeds Ghostty's terminal
-        # (GhosttyRender/GhosttyVT in the app bundle), so the same
-        # advertisement applies.
+        # (GhosttyRender/GhosttyVT in the app bundle), so advertise as
+        # ghostty so terminal detection (e.g. truecolor, clipboard) works.
         if [ "$TERM_PROGRAM" = "rex" ]; then
           export TERM_PROGRAM=ghostty
         fi

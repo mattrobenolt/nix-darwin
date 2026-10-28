@@ -30,10 +30,6 @@ in
   # hosts/nixos/home.nix.
   imports = [
     ../home.nix
-    # herdr — per-host, not in home-common: the nixos desktop runs no herdr.
-    ../../../common/herdr.nix
-    ../../../common/herdr-plugins.nix
-    ../../../common/herdr-plugin-tab-smart-rename.nix
     inputs.porthole.homeModules.porthole-remote
   ];
 
@@ -49,9 +45,6 @@ in
 
     packages = [
       piWrapper
-      # herdr (the binary; config and plugins come from common/herdr*.nix
-      # imports above — per-host, not in the shared NixOS layer).
-      inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
       # Secrets get seeded from 1Password. (awscli2 comes from the shared
       # NixOS layer.)
       pkgs._1password-cli

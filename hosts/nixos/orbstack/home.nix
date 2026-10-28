@@ -2,7 +2,6 @@
   config,
   pkgs,
   osConfig,
-  inputs,
   ...
 }:
 
@@ -58,10 +57,6 @@ in
   # hosts/nixos/home.nix.
   imports = [
     ../home.nix
-    # herdr — per-host, not in home-common: the nixos desktop runs no herdr.
-    ../../../common/herdr.nix
-    ../../../common/herdr-plugins.nix
-    ../../../common/herdr-plugin-tab-smart-rename.nix
   ];
 
   home = {
@@ -92,11 +87,8 @@ in
     );
 
     # orbstack-specific: pi runs from the Mac's ~/.pi/agent via symlink.
-    # herdr binary (config/plugins come from the common/herdr*.nix imports
-    # above — per-host, not in the shared NixOS layer).
     packages = [
       piWrapper
-      inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 

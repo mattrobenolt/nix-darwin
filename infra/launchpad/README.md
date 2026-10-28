@@ -177,12 +177,12 @@ expired-token error, recoverable by logging in and re-running.
 - Tailscale: box joins the tailnet as a tagged device; then delete the SG
   inbound-22 rule and switch `Host launchpad` to the tailnet hostname.
 - (Decided against SSM Session Manager as the access path: session brokerage
-  adds latency herdr would feel, and it needs an instance profile, which the
+  adds latency Rex would feel, and it needs an instance profile, which the
   posture doc reserves. Revisit only as break-glass.)
 - S3 state backend: follow the comments in `backend.tf`.
 - Secrets seeding via `op`, box SSH + signing keys, GitHub registration.
 - Syncthing folder for `~/.pi` (scoped), bulk `~/code` re-clone.
-- herdr server config, curate-memory systemd timer (delete the Mac's
+- Rex login server config, curate-memory systemd timer (delete the Mac's
   launchd job at the same time; exactly one curation writer).
 - DLM snapshots, budget alert, `scripts/box-scale` wrapper.
 

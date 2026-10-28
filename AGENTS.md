@@ -69,7 +69,7 @@ this repo — evaluation happens locally and the build runs on the box.
 | Path | Contents |
 |---|---|
 | `common.nix` | Shared system packages and settings. Sets `nix.enable = false`. NixOS hosts override it. |
-| `common/` | Shared home-manager program modules (herdr, neovim, zsh, ...). |
+| `common/` | Shared home-manager program modules (neovim, zsh, ...). |
 | `home.nix`, `home-common.nix` | Home-manager entry points. |
 | `hosts/darwin/` | Mac: system config, Homebrew, launchd daemons (syncthing), z53 DNS. |
 | `hosts/nixos/launchpad/` | EC2 box: syncthing, tailscale, z53, agenix identity restore. |

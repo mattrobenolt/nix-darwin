@@ -90,7 +90,7 @@ resource "aws_instance" "main" {
 }
 
 # Stable public IP across stop/retype/start resize cycles. Cheap while
-# attached; keeps known_hosts and future herdr/SSH config from churning.
+# attached; keeps known_hosts and future Rex/SSH config from churning.
 resource "aws_eip" "main" {
   instance = aws_instance.main.id
   domain   = "vpc"

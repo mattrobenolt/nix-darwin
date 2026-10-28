@@ -21,8 +21,7 @@
     '';
 
     # rex.on only works under `rex do`, never in init.lua, so tab labels
-    # need this kept running in a spare block (cwd half of herdr
-    # tab-smart-rename): rex do labels.lua --all
+    # need this kept running in a spare block: rex do labels.lua --all
     "rex/labels.lua".text = ''
       -- Label each terminal with its working directory.
       rex.on("terminal.pwd_changed", function(ctx, ev)
@@ -237,8 +236,8 @@
   # exposes (terminalCellHeightPercent). Managed keys revert UI changes
   # on the next `just apply`.
   home.activation.rexDefaults = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
-    # Activation runs without /usr/bin on PATH (the herdr-plugins module
-    # hit this first), so the macOS tools get absolute paths.
+    # Activation runs without /usr/bin on PATH, so the macOS tools get
+    # absolute paths.
     _rex() { /usr/bin/defaults write com.superlogical.rex "$@"; }
     _rex_hex() { /usr/bin/od -An -v -tx1 < "$1" | /usr/bin/tr -d ' \n'; }
 

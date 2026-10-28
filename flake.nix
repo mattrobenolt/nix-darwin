@@ -21,7 +21,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
-    herdr.url = "github:herdrdev/herdr/v0.9.5";
 
     agenix = {
       url = "github:ryantm/agenix";
@@ -168,7 +167,7 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 # Agent tools write their own config files into HM-managed
-                # paths (herdr did); back up rather than fail activation.
+                # paths; back up rather than fail activation.
                 backupFileExtension = "backup";
                 users.matt = import ./hosts/nixos/launchpad/home.nix;
                 extraSpecialArgs = { inherit inputs; };

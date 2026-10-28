@@ -7,7 +7,6 @@
 }:
 
 let
-  herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
   z53 = inputs.z53.packages.${pkgs.stdenv.hostPlatform.system}.default;
   nixSettings = import ../../common/nix-settings.nix;
   piWrapper = pkgs.writeShellScriptBin "pi" ''
@@ -84,7 +83,6 @@ in
     go-bin_1_26
     google-cloud-sdk
     graphviz
-    herdr
     hexyl
     hwatch
     hyperfine

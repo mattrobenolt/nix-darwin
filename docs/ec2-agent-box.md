@@ -23,9 +23,10 @@ cutover (one-writer).
 
 ## Decisions already made
 
-- **Multiplexer: herdr.** Already pinned in the flake (v0.8.0) with the pi
-  integration installed. `herdr --remote agentbox` from the laptop is a thin
-  client over SSH. Agents keep running when the laptop disconnects or sleeps.
+- **Multiplexer: Rex.** The launchpad host runs the Rex login server behind
+  Tailscale Serve, with a Cloudflare Tunnel for the iPhone path. The Mac app
+  connects over that identity, so agents keep running when the laptop
+  disconnects or sleeps.
 - **AWS SSO on the box: device-code flow.**
   `aws sso login --profile X --use-device-code --no-browser` prints a URL +
   code; approve in the laptop browser; token caches on the box.
@@ -69,7 +70,7 @@ cutover (one-writer).
   m-family equivalent for 4GB/vCPU), watch load during real compile weeks for
   a month, then pick: Compute Savings Plan (~33% off, floats across families),
   resize-at-phase-boundaries (`box-scale` script; stop/retype/start ≈ 1 min,
-  herdr `resume_agents_on_restore` brings the session back), or Hetzner
+  Rex brings the persistent session back), or Hetzner
   dedicated (~€65/mo for 16C Ryzen) if the workload turns out always-big.
 
 ## Repo layout
@@ -127,7 +128,7 @@ Phase 2 — NixOS:
 1. `nixos-rebuild switch --flake .#launchpad --target-host root@<ip>
    --build-host root@<ip>` (boots the official NixOS AMI; no nixos-anywhere).
 2. Verify tailscaled up and the node appears in the tailnet with its tag.
-3. Verify `herdr --remote launchpad` attaches from the laptop.
+3. Verify the Rex client connects to launchpad from the laptop.
 4. Remove the SG inbound-22 rule.
 
 Phase 3 — auth: (done 2026-08-16, except 5)
@@ -164,7 +165,7 @@ Phase 5 — cutover:
 2. Delete the launchd `pi-memory-curate` job on the Mac. (One writer.)
 3. Fix `/Users/matt` → `/home/matt` papercuts: `trust.json`, extension
    paths in `notify.ts`, `system-prompt*.ts`, slack/notion packages.
-4. Daily-drive via `herdr --remote agentbox` for a week. Keep SSH agent
+4. Daily-drive through Rex for a week. Keep SSH agent
    forwarding available as the fallback.
 
 Phase 6 — after a month of measurement:
