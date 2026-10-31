@@ -43,6 +43,7 @@
       nixd
       nixfmt
       nodejs
+      oxfmt
       psmisc
       python3
       ripgrep
@@ -52,7 +53,9 @@
       statix
       strace
       uv
+      vim.xxd # xxd only; these hosts do not install vim
       wget
+      whois
       yq
       zoxide
     ];

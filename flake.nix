@@ -77,6 +77,9 @@
               just
               lua5_4
               nixfmt
+              # nixos-rebuild-ng propagates nixpkgs' default nix
+              # (nixVersions.stable, which lags). Track the newest release.
+              nixVersions.latest
               nixos-rebuild
               nushell
               opentofu

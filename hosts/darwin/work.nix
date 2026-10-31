@@ -46,6 +46,10 @@ in
     config = builtins.readFile ./files/z53.zon;
   };
 
+  # Tailscale daemon. State stays in /Library/Tailscale, so the node keeps
+  # its identity and 100.x address when the Homebrew service goes away.
+  services.tailscale.enable = true;
+
   # 1Password GUI - installs to /Applications
   # programs._1password-gui.enable = true;
 
@@ -165,7 +169,6 @@ in
     brews = [
       "jundot/omlx/omlx"
       "mole"
-      "tailscale"
       "tracy"
     ];
 
@@ -381,6 +384,10 @@ in
       StandardErrorPath = "/var/log/sshd-2222.log";
     };
 
+    # The nix-darwin tailscale module sets RunAtLoad only; keep the daemon
+    # alive the way the Homebrew service did.
+    daemons.tailscaled.serviceConfig.KeepAlive = true;
+
     # Keep DNS on 127.0.0.1 when DHCP or Tailscale changes network settings.
     # z53 already forwards ts.net. queries to Tailscale.
     daemons.enforce-dns = {
@@ -389,7 +396,7 @@ in
           /usr/sbin/networksetup -setdnsservers "Wi-Fi" 127.0.0.1 2>/dev/null || true
         fi
         # Keep Tailscale from re-injecting its MagicDNS resolver.
-        /opt/homebrew/bin/tailscale set --accept-dns=false 2>/dev/null || true
+        ${pkgs.tailscale}/bin/tailscale set --accept-dns=false 2>/dev/null || true
       '';
       serviceConfig = {
         RunAtLoad = true;

@@ -1,10 +1,9 @@
 { pkgs, lib, ... }:
 
 {
-  # Shared configuration across all machines (macOS and Linux)
-
-  # Common packages across all machines
-  # Currently empty - move packages here from host configs as you identify what's truly shared
+  # macOS system configuration. This file is imported only by the Darwin host
+  # config (flake.nix). NixOS hosts import hosts/nixos/common.nix instead, and
+  # get their shared tools from hosts/nixos/home.nix.
   environment.systemPackages = with pkgs; [
     bat
     curl
@@ -16,6 +15,7 @@
     htop
     jq
     nix-direnv
+    oxfmt
     pkg-config
     ripgrep
     rtk
@@ -23,6 +23,7 @@
     tmux
     vim
     wget
+    whois
     zellij
     zsh
   ];

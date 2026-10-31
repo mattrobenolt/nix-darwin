@@ -25,6 +25,48 @@ in
     ./hardware.nix
   ];
 
+  # The data volume. The root ext4 volume holds the OS and /var only.
+  # /nix is in pathsNeededForBoot, so the initrd mounts it before
+  # activation; the other two are mounted by local-fs.
+  fileSystems = {
+    "/nix" = {
+      device = "/dev/disk/by-label/launchpad-data";
+      fsType = "btrfs";
+      options = [ "subvol=nix" "compress=zstd:1" "noatime" ];
+      neededForBoot = true;
+    };
+    "/Users/matt" = {
+      device = "/dev/disk/by-label/launchpad-data";
+      fsType = "btrfs";
+      options = [ "subvol=home" "compress=zstd:1" "noatime" ];
+      neededForBoot = true;
+    };
+    "/tmp" = {
+      device = "/dev/disk/by-label/launchpad-data";
+      fsType = "btrfs";
+      options = [ "subvol=tmp" "compress=zstd:1" "noatime" ];
+      neededForBoot = true;
+    };
+  };
+
+  # btrfs qgroup caps. They persist on the filesystem; this oneshot only
+  # reapplies them if the volume is recreated. Limits apply after compression
+  # (btrfs -c is the default), so these are physical ceilings and compression
+  # increases the logical data that fits. Set before the final copy.
+  systemd.services.launchpad-quotas = {
+    description = "Apply btrfs qgroup limits";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "local-fs.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      ${pkgs.btrfs-progs}/bin/btrfs qgroup limit 100g /Users/matt
+      ${pkgs.btrfs-progs}/bin/btrfs qgroup limit 40g /tmp
+    '';
+  };
+
   time.timeZone = "America/Los_Angeles";
   system.stateVersion = "26.05";
 
@@ -40,6 +82,9 @@ in
     # there's no point offering 5 boot entries that point to collected
     # store paths.
     loader.grub.configurationLimit = 2;
+    # amazon-image.nix sets 1s without mkDefault. Give the serial console a
+    # window to pick the previous generation during storage changes.
+    loader.timeout = lib.mkForce 10;
   };
 
   networking = {
@@ -262,6 +307,92 @@ in
           ExecStart = "${pkgs.qmd}/bin/qmd embed";
         };
       };
+
+      # Zig caches and cargo target dirs are box-local; stignore keeps them
+      # out of syncthing. Delete ones whose directory mtime is 14 days old.
+      # The next build recreates them, and nothing on the Mac sees the delete.
+      launchpad-cache-prune = {
+        description = "Prune idle Zig caches and CACHEDIR.TAG build dirs";
+        path = [
+          pkgs.coreutils
+          pkgs.fd
+        ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = "matt";
+          Group = "users";
+        };
+        script = ''
+          set -u
+          home="/Users/matt"
+          idle=$((14 * 24 * 60 * 60))
+          now=$(date +%s)
+          cutoff=$((now - idle))
+
+          prune() {
+            local d="$1" newest age
+            newest=$(stat -c %Y "$d" 2>/dev/null) || return 0
+            if (( newest < cutoff )); then
+              age=$(( (now - newest) / 86400 ))
+              echo "prune $d (idle ''${age}d)"
+              rm -rf "$d"
+            fi
+          }
+
+          fd --hidden --no-ignore --type d --exclude .git --exclude node_modules \
+            '^(\.)?zig-cache$' "$home/code" -0 \
+            | while IFS= read -r -d "" d; do prune "$d"; done
+          [ -d "$home/.cache/zig" ] && prune "$home/.cache/zig"
+
+          # Cargo marks its target dirs with CACHEDIR.TAG. The check keeps a
+          # nested git repo that happens to be named target.
+          fd --hidden --no-ignore --type d --exclude .git --exclude node_modules \
+            '^target$' "$home/code" -0 \
+            | while IFS= read -r -d "" d; do
+                if [ -e "$d/CACHEDIR.TAG" ]; then prune "$d"; fi
+              done
+        '';
+      };
+
+      # nix.gc collects garbage but never deletes profile generations, so
+      # each rebuild pins its whole closure. Keep the newest three; the
+      # nightly GC reclaims the rest.
+      launchpad-generation-prune = {
+        description = "Delete old NixOS and home-manager generations";
+        serviceConfig.Type = "oneshot";
+        script = ''
+          set -u
+          ${config.nix.package}/bin/nix-env --delete-generations +3 \
+            -p /nix/var/nix/profiles/system || true
+          profile=/nix/var/nix/profiles/per-user/matt/home-manager
+          if [ -e "$profile" ]; then
+            ${config.nix.package}/bin/nix-env --delete-generations +3 \
+              -p "$profile" || true
+          fi
+        '';
+      };
+
+      # The box has no pager. Warn in the journal and on any open TTY.
+      launchpad-disk-check = {
+        description = "Warn when a filesystem passes 85 percent";
+        path = [
+          pkgs.coreutils
+          pkgs.systemd
+          pkgs.util-linux
+        ];
+        serviceConfig.Type = "oneshot";
+        script = ''
+          set -u
+          for mp in / /nix; do
+            use=$(df --output=pcent "$mp" | tail -1 | tr -dc "0-9")
+            if [ "''${use:-0}" -ge 85 ]; then
+              msg="launchpad: $mp is ''${use}% full"
+              systemd-cat -t launchpad-disk -p warning echo "$msg"
+              wall -n "$msg" 2>/dev/null || true
+            fi
+          done
+        '';
+      };
     };
 
     # The syncthing module only creates its state dir for the default
@@ -280,6 +411,32 @@ in
         # Box stops and starts; run missed embeds at boot.
         Persistent = true;
       };
+    };
+
+    timers.launchpad-cache-prune = {
+      description = "Prune idle build caches daily";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*-*-* 22:30:00";
+        Persistent = true;
+      };
+    };
+
+    # Runs after direnv-prune and before nix-gc, so the freed closures are
+    # collected the same night.
+    timers.launchpad-generation-prune = {
+      description = "Delete old generations before the nightly GC";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "*-*-* 23:30:00";
+        Persistent = true;
+      };
+    };
+
+    timers.launchpad-disk-check = {
+      description = "Check filesystem usage hourly";
+      wantedBy = [ "timers.target" ];
+      timerConfig.OnCalendar = "hourly";
     };
   };
 
@@ -330,6 +487,8 @@ in
 
   environment.systemPackages = with pkgs; [
     config.services.z53.package
+    btrfs-progs
+    compsize
     curl
     # Compose binary; demo tooling shells out to `docker-compose`, not
     # `docker compose`.
@@ -451,6 +610,11 @@ in
       # this is conservative but harmless — everything SHOULD substitute
       # from cache; when it doesn't, build gently rather than die.
       max-jobs = 2;
+      # Self-protection on the data volume. During a build, free space below
+      # 20 GiB triggers a store GC; it stops once 60 GiB is free. The GC only
+      # touches unreferenced store paths, never home or /tmp.
+      min-free = 21474836480; # 20 GiB
+      max-free = 64424509440; # 60 GiB
     };
     # Aggressive GC: this is an ephemeral agent box, not a workstation.
     # We only need current + previous for a rollback window; anything older

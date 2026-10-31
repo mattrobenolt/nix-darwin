@@ -25,19 +25,37 @@ variable "instance_type" {
 variable "root_volume_size" {
   description = "Root EBS volume size in GiB (encrypted gp3)."
   type        = number
-  default     = 250
+  default     = 50
 }
 
 variable "root_volume_iops" {
   description = "Provisioned IOPS for the root gp3 volume."
   type        = number
-  default     = 6000
+  default     = 3000
 }
 
 variable "root_volume_throughput" {
   description = "Provisioned throughput for the root gp3 volume in MiB/s."
   type        = number
+  default     = 125
+}
+
+variable "data_volume_iops" {
+  description = "Provisioned IOPS for the data gp3 volume."
+  type        = number
+  default     = 6000
+}
+
+variable "data_volume_throughput" {
+  description = "Provisioned throughput for the data gp3 volume in MiB/s."
+  type        = number
   default     = 250
+}
+
+variable "data_volume_size" {
+  description = "Data EBS volume in GiB (btrfs: /nix, /Users/matt, /tmp). EBS cannot shrink this volume."
+  type        = number
+  default     = 200
 }
 
 variable "arch" {

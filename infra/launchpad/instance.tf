@@ -70,6 +70,10 @@ resource "aws_instance" "main" {
     throughput            = var.root_volume_throughput
     encrypted             = true
     delete_on_termination = true
+
+    tags = {
+      Name = "${var.name}-root"
+    }
   }
 
   metadata_options {
@@ -87,6 +91,34 @@ resource "aws_instance" "main" {
   tags = {
     Name = var.name
   }
+}
+
+# Data volume for the trees that grow: /nix, /Users/matt, /tmp. Btrfs with
+# zstd compression and subvolume quotas. It survives instance replacement, so
+# a rebuild does not re-sync the home directory. Format and mount are NixOS's
+# job; tofu owns the volume and the attachment.
+resource "aws_ebs_volume" "data" {
+  availability_zone = aws_instance.main.availability_zone
+  size              = var.data_volume_size
+  type              = "gp3"
+  iops              = var.data_volume_iops
+  throughput        = var.data_volume_throughput
+  encrypted         = true
+
+  tags = {
+    Name = "${var.name}-data"
+  }
+
+  lifecycle {
+    # Holds the home directory. Removing this line is a deliberate act.
+    prevent_destroy = true
+  }
+}
+
+resource "aws_volume_attachment" "data" {
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.data.id
+  instance_id = aws_instance.main.id
 }
 
 # Stable public IP across stop/retype/start resize cycles. Cheap while

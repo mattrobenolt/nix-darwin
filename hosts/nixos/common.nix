@@ -1,6 +1,14 @@
 # Shared system settings for every NixOS host. The macOS host does not import
 # this file.
 {
+  pkgs,
+  ...
+}:
+{
+  # nixpkgs' default `nix` is nixVersions.stable, which lags upstream
+  # support. Track the newest release instead.
+  nix.package = pkgs.nixVersions.latest;
+
   # Remove these CAs from /etc/ssl/certs/ca-certificates.crt. Each name must
   # match the certificate's label in the NSS trust store, not its subject CN.
   #
