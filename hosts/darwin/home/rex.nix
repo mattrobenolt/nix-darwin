@@ -18,6 +18,10 @@
         rex.block.call("com.superlogical.terminal", "write", { data = "\n" })
         return true
       end)
+
+      -- Hunk review bridge: cmd+shift+r opens a live review beside the agent
+      -- pane and wires its notes back to that pane. See rex/hunk.lua.
+      dofile((os.getenv("XDG_CONFIG_HOME") or (os.getenv("HOME") .. "/.config")) .. "/rex/hunk.lua")
     '';
 
     # rex.on only works under `rex do`, never in init.lua, so tab labels
@@ -215,6 +219,16 @@
         }
       ]
     '';
+
+    # cmd+shift+r opens Hunk beside the focused agent pane. Placement lives
+    # in the action; link the file so tuning it needs only `rex config reload`.
+    "rex/hunk.lua".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nix-darwin/hosts/darwin/home/hunk.lua";
+
+    # Linked from the checkout, not copied, so tweaking the handoff prompt
+    # needs only a Hunk restart. Inert unless launched with REX_AGENT_BLOCK.
+    "hunk/extensions/rex-handoff.ts".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/nix-darwin/hosts/darwin/home/hunk-rex-handoff.ts";
   };
 
   # Rex's Ghostty migration only searches ~/Library/Application
