@@ -99,7 +99,7 @@ desktop-apply flake=".":
     TMPDIR=/tmp nixos-rebuild switch --flake "{{ flake }}#nixos" --target-host {{
     desktop_host }} --build-host {{ desktop_host }} --elevate=sudo
 
-[doc("Test whether a nixpkgs rev builds this Mac's system, without activating")]
+[doc("Update nixpkgs to the newest rev that builds this Mac's system, without activating")]
 [group("nix")]
 canary *args:
     ./scripts/nixpkgs-canary {{args}}

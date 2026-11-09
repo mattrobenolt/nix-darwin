@@ -32,19 +32,31 @@ in
     "/nix" = {
       device = "/dev/disk/by-label/launchpad-data";
       fsType = "btrfs";
-      options = [ "subvol=nix" "compress=zstd:1" "noatime" ];
+      options = [
+        "subvol=nix"
+        "compress=zstd:1"
+        "noatime"
+      ];
       neededForBoot = true;
     };
     "/Users/matt" = {
       device = "/dev/disk/by-label/launchpad-data";
       fsType = "btrfs";
-      options = [ "subvol=home" "compress=zstd:1" "noatime" ];
+      options = [
+        "subvol=home"
+        "compress=zstd:1"
+        "noatime"
+      ];
       neededForBoot = true;
     };
     "/tmp" = {
       device = "/dev/disk/by-label/launchpad-data";
       fsType = "btrfs";
-      options = [ "subvol=tmp" "compress=zstd:1" "noatime" ];
+      options = [
+        "subvol=tmp"
+        "compress=zstd:1"
+        "noatime"
+      ];
       neededForBoot = true;
     };
   };

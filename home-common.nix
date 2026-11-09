@@ -23,6 +23,7 @@
     ./common/zoxide.nix
     ./common/qmd.nix
     ./common/npm.nix
+    ./common/rtk.nix
   ];
 
   # command-not-found (flake-native): comma intercepts missing commands and
