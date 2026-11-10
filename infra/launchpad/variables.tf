@@ -17,9 +17,9 @@ variable "profile" {
 }
 
 variable "instance_type" {
-  description = "Instance type."
+  description = "Instance type. c9g.2xlarge: 8 vCPU / 16 GiB. Same memory as m9g.xlarge, twice the cores."
   type        = string
-  default     = "m9g.xlarge"
+  default     = "c9g.2xlarge"
 }
 
 variable "root_volume_size" {
@@ -80,8 +80,3 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "allowed_ssh_cidrs" {
-  description = "CIDRs allowed to reach port 22. Open until the tailscale iteration closes inbound access."
-  type        = list(string)
-  default     = ["0.0.0.0/0"]
-}

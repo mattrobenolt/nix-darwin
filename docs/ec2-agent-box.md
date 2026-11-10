@@ -109,7 +109,8 @@ if a corp tool needs it.
 ## Security posture
 
 - Security group: egress-only. No inbound 22 after bootstrap; all access over
-  tailscale. (Optionally keep 22 open to a home CIDR as break-glass.)
+  tailscale. Decided against a home-CIDR break-glass rule: the tailnet is the
+  only path in.
 - The box holds prod-adjacent access 24/7 unattended. Tailnet ACLs should
   scope the tagged device to only what agents need.
 - No instance role by default. AWS API access goes through matt's SSO creds

@@ -8,7 +8,8 @@ Directional choices for this scaffolding:
 - Local state first. `backend.tf` documents the S3 migration for later.
 - Boot the official NixOS AMI (https://nixos.github.io/amis/), then
   `nixos-rebuild` the flake onto it. No nixos-anywhere, no disko.
-- No tailscale yet. Port 22 stays open until that iteration lands.
+- SSH only over the tailnet. The security group opens no TCP ports. WireGuard
+  uses 41641/udp, which stays open for direct connections.
 - No IAM instance profile. No DLM snapshots yet. No budget alert yet.
 
 Boundary rule: tofu owns everything outside the guest. NixOS owns everything
@@ -24,12 +25,13 @@ inside it.
   daily-drives it.
 
 Variable files: `terraform.tfvars` is tracked (pubkey only — safe to
-commit). `local.auto.tfvars` is gitignored and machine-local — this repo
-is PUBLIC, so the home-IP SSH restriction lives there, not in git. On a
-fresh clone, copy `allowed_ssh_cidrs` back in or port 22 defaults to open
-during bring-up.
+commit). There is no gitignored tfvars: every variable in `variables.tf` is
+safe to publish.
 
 ## Bring up the box
+
+Run steps 1 to 4 and 6 and 7 from `infra/launchpad/`. Run step 5 from the repo
+root.
 
 1. Log in to AWS SSO:
 
@@ -44,7 +46,18 @@ during bring-up.
    tofu apply
    ```
 
-3. Note the `public_ip` output. Verify the stock AMI works:
+3. Add a temporary SSH rule. The security group opens no TCP ports, and the
+   stock AMI has no tailscale yet, so a fresh box has no way in. Add 22/tcp
+   from your current address:
+
+   ```
+   sg=$(tofu output -raw security_group_id)
+   aws ec2 authorize-security-group-ingress --group-id "$sg" \
+     --protocol tcp --port 22 --cidr $(curl -s https://checkip.amazonaws.com)/32 \
+     --region us-west-2 --profile playground
+   ```
+
+4. Note the `public_ip` output. Verify the stock AMI works:
 
    ```
    ssh root@<ip>
@@ -53,25 +66,30 @@ during bring-up.
    The AMI injects the EC2 keypair for root at boot only. If the instance
    was already running before the key existed, reboot it.
 
-4. Rebuild the box from this flake. Run from the repo root. Evaluation
+5. Rebuild the box from this flake. Run from the repo root. Evaluation
    happens on the Mac, the build happens on the box (no linux builder
-   needed). With the ssh `Host launchpad` entry active on the Mac, this is:
-
-   ```
-   just remote-apply
-   ```
-
-   which wraps:
+   needed). This first build is what joins the box to the tailnet, so the
+   `launchpad.tail45c3.ts.net` hostname that `just remote-apply` targets does
+   not resolve yet. Use the IP for this one build:
 
    ```
    nixos-rebuild switch --flake .#launchpad \
      --target-host root@<ip> --build-host root@<ip>
    ```
 
-5. Verify user access:
+6. Verify user access:
 
    ```
    ssh matt@<ip>
+   ```
+
+7. Delete the temporary SSH rule. Confirm the box answers on the tailnet
+   (`ssh launchpad`) before you close the public path.
+
+   ```
+   aws ec2 revoke-security-group-ingress --group-id "$sg" \
+     --protocol tcp --port 22 --cidr <same-cidr> \
+     --region us-west-2 --profile playground
    ```
 
 From then on, day-2 changes are edits to `hosts/nixos/launchpad/` plus
@@ -79,17 +97,29 @@ From then on, day-2 changes are edits to `hosts/nixos/launchpad/` plus
 
 ## SSH access (Mac)
 
-`hosts/darwin/home/ssh.nix` defines `Host launchpad` pointing at the EIP.
-The 1Password agent serves matt's daily key for it.
+`hosts/darwin/home/ssh.nix` defines `Host launchpad`, pointing at the
+tailnet hostname `launchpad.tail45c3.ts.net`. MagicDNS resolves it, and the
+1Password agent serves matt's daily key.
+
+No SSH port is open on the security group, and there is no instance profile,
+so SSM Session Manager cannot reach the box either. The tailnet is the only
+way in. `Host launchpad-eip` in the same file holds the public IP for the
+case where the tailnet is broken; it needs an SG change before it connects.
 
 ## Resize the box
 
 ```
-tofu apply -var instance_type=m8g.xlarge
+tofu apply -var instance_type=c9g.2xlarge
 ```
 
-Tofu stops the instance, changes the type, and starts it again. The EIP
-keeps the public IP stable across resizes.
+Or change the default in `variables.tf` and run a plain `tofu apply`. Change
+the default for a lasting resize: a bare `-var` override reverts on the next
+apply that omits it.
+
+The current size is c9g.2xlarge: 8 vCPU and 16 GiB, twice the cores of the
+m9g.xlarge it replaced at the same memory. Tofu stops the instance, changes
+the type, and starts it again. The EIP keeps the public IP stable across
+resizes.
 
 ## Secrets: 1Password service account
 
@@ -174,8 +204,8 @@ expired-token error, recoverable by logging in and re-running.
 
 ## Later iterations
 
-- Tailscale: box joins the tailnet as a tagged device; then delete the SG
-  inbound-22 rule and switch `Host launchpad` to the tailnet hostname.
+- Tailscale: done. The box joins the tailnet as a tagged device, the SG has
+  no inbound-22 rule, and `Host launchpad` uses the tailnet hostname.
 - (Decided against SSM Session Manager as the access path: session brokerage
   adds latency Rex would feel, and it needs an instance profile, which the
   posture doc reserves. Revisit only as break-glass.)
